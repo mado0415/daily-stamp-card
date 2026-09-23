@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#4ea8de">
+  <title>表題曲 DAILY STAMP</title>
+  <style>
+    :root {
+      --theme: #4ea8de;
+      --theme-rgb: 78, 168, 222;
+      --theme-text: #ffffff;
+      --ink: #24364a;
+      --muted: #718096;
+      --line: #dce7f0;
+      --paper: #ffffff;
+      --wash: #f2f7fb;
+      --shadow: 0 18px 48px rgba(48, 83, 112, .13);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: #eaf2f8; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(var(--theme-rgb), .16), transparent 36%),
+        radial-gradient(circle at 95% 15%, rgba(var(--theme-rgb), .10), transparent 30%),
+        #eaf2f8;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    .shell {
+      width: min(100%, 690px);
+      margin: 0 auto;
+      padding: max(18px, env(safe-area-inset-top)) 14px max(30px, env(safe-area-inset-bottom));
+    }
+
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 4px 12px;
+      color: #5e7690;
+      font-size: 12px;
+      letter-spacing: .08em;
+      font-weight: 700;
+    }
+
+    .mode-link {
+      border: 0;
+      padding: 5px 0;
+      color: inherit;
+      background: transparent;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      background: var(--paper);
+      border: 1px solid rgba(var(--theme-rgb), .22);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 7px;
+      background: var(--theme);
+    }
+
+    .hero {
+      padding: 31px 24px 18px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--theme);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .16em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 6vw, 34px);
+      line-height: 1.3;
+      letter-spacing: .02em;
+      word-break: break-word;
+    }
+
+    .release-line {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .release-line strong { color: var(--ink); }
+
+    .progress-area {
+      padding: 0 24px 20px;
+    }
+
+    .progress-copy {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .progress-copy strong {
+      font-size: 24px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress-copy span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .progress-track {
+      height: 10px;
+      overflow: hidden;
+      background: #eaf0f5;
+      border-radius: 999px;
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      background: var(--theme);
+      border-radius: inherit;
+      transition: width .35s ease;
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 24px 22px;
+    }
+
+    .btn {
+      min-height: 48px;
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 800;
+      text-align: center;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: transform .15s ease, opacity .15s ease;
+    }
+
+    .btn:active { transform: scale(.98); }
+    .btn-primary { color: var(--theme-text); background: var(--theme); }
+    .btn-soft { color: var(--ink); background: rgba(var(--theme-rgb), .12); }
+    .btn-plain { color: #4e6479; background: #edf3f7; }
+    .btn[disabled] { opacity: .46; transform: none; }
+    .btn-full { width: 100%; }
+
+    .card-divider {
+      height: 1px;
+      margin: 0 24px;
+      background: var(--line);
+    }
+
+    .stamp-section { padding: 22px 18px 25px; }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin: 0 5px 13px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .section-head span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stamp-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .day {
+      position: relative;
+      aspect-ratio: 1 / 1.13;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      color: #52677b;
+      background: #f9fbfd;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 5px 2px;
+    }
+
+    button.day { cursor: pointer; }
+    .day.today {
+      border: 2px solid var(--theme);
+      background: rgba(var(--theme-rgb), .07);
+    }
+
+    .day.stamped {
+      border-color: transparent;
+      color: var(--theme-text);
+      background: var(--theme);
+      box-shadow: 0 7px 14px rgba(var(--theme-rgb), .22);
+    }
+
+    .day.future { opacity: .55; }
+    .day-date { font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .day-week { font-size: 10px; font-weight: 700; }
+    .day-stamp {
+      height: 29px;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      line-height: 1;
+      filter: grayscale(1);
+      opacity: .10;
+      transform: rotate(-8deg) scale(.8);
+    }
+
+    .stamped .day-stamp {
+      filter: none;
+      opacity: 1;
+      transform: rotate(-8deg) scale(1);
+    }
+
+    .today-tag {
+      position: absolute;
+      top: 3px;
+      right: 4px;
+      font-size: 8px;
+      font-weight: 900;
+      color: var(--theme);
+    }
+
+    .stamped .today-tag { color: var(--theme-text); }
+
+    .helper {
+      margin: 14px 5px 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .share-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 24px 25px;
+    }
+
+    .completion {
+      display: none;
+      margin: 0 24px 22px;
+      padding: 15px;
+      color: var(--ink);
+      background: rgba(var(--theme-rgb), .12);
+      border-radius: 16px;
+      text-align: center;
+      font-weight: 800;
+      line-height: 1.6;
+    }
+
+    .completion.show { display: block; }
+
+    .admin-card { padding: 29px 22px 24px; }
+    .admin-card h1 { font-size: 27px; }
+    .admin-lead {
+      margin: 9px 0 22px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px 12px;
+    }
+
+    .field { min-width: 0; }
+    .field.wide { grid-column: 1 / -1; }
+    .field label {
+      display: block;
+      margin: 0 0 6px;
+      color: #52677b;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid #cddae5;
+      border-radius: 12px;
+      padding: 10px 11px;
+      color: var(--ink);
+      background: #ffffff;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .field input:focus, .field select:focus {
+      border-color: var(--theme);
+      box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .15);
+    }
+
+    .color-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      padding-top: 2px;
+    }
+
+    .color-choice {
+      width: 36px;
+      height: 36px;
+      border: 3px solid transparent;
+      border-radius: 50%;
+      background: var(--dot);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.10);
+    }
+
+    .color-choice.selected {
+      border-color: #ffffff;
+      outline: 3px solid var(--dot);
+    }
+
+    .admin-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .url-box {
+      display: none;
+      margin-top: 18px;
+      padding: 15px;
+      background: var(--wash);
+      border-radius: 16px;
+    }
+
+    .url-box.show { display: block; }
+    .url-box label { display: block; margin-bottom: 7px; font-size: 12px; font-weight: 800; }
+    .url-copy-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    .url-copy-row input {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid #cddae5;
+      border-radius: 10px;
+      padding: 10px;
+      color: #52677b;
+      background: #fff;
+      font-size: 13px;
+    }
+
+    .notice, .error {
+      margin: 12px 0 0;
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .notice { color: var(--muted); }
+    .error { display: none; color: #c0392b; font-weight: 800; }
+    .error.show { display: block; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(25, 42, 57, .55);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal.show { display: grid; }
+    .modal-box {
+      width: min(100%, 480px);
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      padding: 18px;
+      background: #fff;
+      border-radius: 22px;
+      box-shadow: 0 22px 60px rgba(0,0,0,.25);
+    }
+
+    .modal-box h2 { margin: 2px 0 13px; font-size: 18px; }
+    .modal-box img { display: block; width: 100%; border-radius: 15px; background: #eef4f8; }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 13px; }
+
+    .toast {
+      position: fixed;
+      z-index: 30;
+      left: 50%;
+      bottom: max(22px, env(safe-area-inset-bottom));
+      transform: translate(-50%, 20px);
+      padding: 10px 15px;
+      color: #fff;
+      background: rgba(29, 47, 63, .92);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transition: .25s ease;
+      white-space: nowrap;
+    }
+
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .confetti-piece {
+      position: fixed;
+      z-index: 40;
+      top: -18px;
+      width: 9px;
+      height: 15px;
+      background: var(--c);
+      animation: fall var(--d) linear forwards;
+      transform: rotate(var(--r));
+      pointer-events: none;
+    }
+
+    @keyframes fall {
+      to { transform: translate3d(var(--x), 110vh, 0) rotate(700deg); }
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 500px) {
+      .shell { padding-left: 10px; padding-right: 10px; }
+      .card { border-radius: 22px; }
+      .hero { padding-left: 17px; padding-right: 17px; }
+      .progress-area, .action-row, .share-row { padding-left: 17px; padding-right: 17px; }
+      .card-divider { margin-left: 17px; margin-right: 17px; }
+      .stamp-section { padding-left: 12px; padding-right: 12px; }
+      .stamp-grid { gap: 6px; }
+      .day { border-radius: 12px; }
+      .day-date { font-size: 12px; }
+      .day-stamp { font-size: 22px; height: 26px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.wide { grid-column: auto; }
+      .admin-card { padding-left: 17px; padding-right: 17px; }
+    }
+
+    @media (max-width: 355px) {
+      .stamp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .action-row, .share-row, .admin-actions, .modal-actions { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="topline">
+      <span>SNOW MAN SUPPORT TOOL</span>
+      <button id="modeLink" class="mode-link" type="button"></button>
+    </div>
+
+    <section id="participantView" class="card hidden" aria-label="表題曲デイリースタンプカード">
+      <header class="hero">
+        <p class="eyebrow">DAILY LISTENING STAMP</p>
+        <h1 id="campaignTitle"></h1>
+        <p class="release-line"><strong id="releaseDateText"></strong> CD RELEASE</p>
+      </header>
+
+      <div class="progress-area">
+        <div class="progress-copy">
+          <strong id="progressCount">0 / 0</strong>
+          <span id="progressPercent">0% complete</span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-label="スタンプ達成率" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <a id="listenButton" class="btn btn-primary" target="_blank" rel="noopener">▶ 曲を聴く</a>
+        <button id="todayButton" class="btn btn-soft" type="button">スタンプを押す</button>
+      </div>
+
+      <div id="completion" class="completion">全日達成しました！<br>発売日まで毎日ありがとう ⛄️✨</div>
+      <div class="card-divider"></div>
+
+      <section class="stamp-section">
+        <div class="section-head">
+          <h2>LISTENING CARD</h2>
+          <span id="periodText"></span>
+        </div>
+        <div id="stampGrid" class="stamp-grid"></div>
+        <p id="helperText" class="helper"></p>
+      </section>
+
+      <div class="share-row">
+        <button id="imageButton" class="btn btn-plain" type="button">画像を作る</button>
+        <button id="xButton" class="btn btn-plain" type="button">Xで報告する</button>
+      </div>
+    </section>
+
+    <section id="adminView" class="card admin-card hidden" aria-label="スタンプカード管理設定">
+      <p class="eyebrow">CARD SETUP</p>
+      <h1>スタンプカードを作る</h1>
+      <p class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のマスも自動で含まれます。</p>
+
+      <div class="form-grid">
+        <div class="field wide">
+          <label for="adminTitle">表題曲名／カードタイトル</label>
+          <input id="adminTitle" type="text" maxlength="60" placeholder="例：○○○ DAILY STAMP">
+        </div>
+        <div class="field">
+          <label for="adminStart">開始日</label>
+          <input id="adminStart" type="date">
+        </div>
+        <div class="field">
+          <label for="adminRelease">CD発売日（この日を含む）</label>
+          <input id="adminRelease" type="date">
+        </div>
+        <div class="field wide">
+          <label for="adminLink">「曲を聴く」ボタンのURL</label>
+          <input id="adminLink" type="url" inputmode="url" placeholder="https://...">
+        </div>
+        <div class="field">
+          <label for="adminStamp">スタンプの絵柄</label>
+          <select id="adminStamp">
+            <option value="⛄️">⛄️ 雪だるま</option>
+            <option value="🎵">🎵 音符</option>
+            <option value="💿">💿 CD</option>
+            <option value="⭐️">⭐️ 星</option>
+            <option value="💙">💙 ハート</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>カードカラー</label>
+          <div id="colorList" class="color-list" role="group" aria-label="カードカラー"></div>
+        </div>
+      </div>
+
+      <p id="adminError" class="error" role="alert"></p>
+      <div class="admin-actions">
+        <button id="previewButton" class="btn btn-soft" type="button">この設定で確認</button>
+        <button id="generateButton" class="btn btn-primary" type="button">参加者用URLを作る</button>
+      </div>
+
+      <div id="urlBox" class="url-box">
+        <label for="generatedUrl">参加者へ共有するURL</label>
+        <div class="url-copy-row">
+          <input id="generatedUrl" type="text" readonly>
+          <button id="copyButton" class="btn btn-primary" type="button">コピー</button>
+        </div>
+        <p class="notice">同じURLを開いた人には、同じ期間・曲名・スタンプ柄のカードが表示されます。記録そのものは各自の端末にだけ保存されます。</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="shareModal" class="modal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+      <h2 id="shareTitle">スタンプカード画像</h2>
+      <img id="shareImage" alt="スタンプカードの共有画像">
+      <div class="modal-actions">
+        <button id="nativeShareButton" class="btn btn-primary" type="button">画像を共有</button>
+        <button id="saveImageButton" class="btn btn-soft" type="button">画像を保存</button>
+        <button id="closeModalButton" class="btn btn-plain btn-full" type="button">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const COLORS = [
+        '#ffcc33', '#7b2cbf', '#f8f9fa', '#4ea8de', '#f97316',
+        '#2a9d8f', '#283044', '#e63946', '#ff69b4'
+      ];
+      const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
+      const params = new URLSearchParams(location.search);
+      let selectedColor = '#4ea8de';
+      let currentConfig = null;
+      let shareBlob = null;
+      let toastTimer = null;
+
+      const $ = (id) => document.getElementById(id);
+
+      function parseLocalDate(value) {
+        const [y, m, d] = value.split('-').map(Number);
+        return new Date(y, m - 1, d, 12, 0, 0, 0);
+      }
+
+      function isoLocal(date = new Date()) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
+      function addDays(value, amount) {
+        const date = parseLocalDate(value);
+        date.setDate(date.getDate() + amount);
+        return isoLocal(date);
+      }
+
+      function dateRange(start, end) {
+        const days = [];
+        let cursor = start;
+        let guard = 0;
+        while (cursor <= end && guard < 370) {
+          days.push(cursor);
+          cursor = addDays(cursor, 1);
+          guard += 1;
+        }
+        return days;
+      }
+
+      function formatDate(value, withYear = true) {
+        const date = parseLocalDate(value);
+        return withYear
+          ? `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`
+          : `${date.getMonth() + 1}/${date.getDate()}`;
+      }
+
+      function colorRgb(hex) {
+        const value = hex.replace('#', '');
+        return [0, 2, 4].map((i) => parseInt(value.slice(i, i + 2), 16));
+      }
+
+      function contrastText(hex) {
+        const [r, g, b] = colorRgb(hex);
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+        return luminance > 178 ? '#24364a' : '#ffffff';
+      }
+
+      function applyTheme(hex) {
+        if (!/^#[0-9a-f]{6}$/i.test(hex)) hex = '#4ea8de';
+        const [r, g, b] = colorRgb(hex);
+        document.documentElement.style.setProperty('--theme', hex);
+        document.documentElement.style.setProperty('--theme-rgb', `${r}, ${g}, ${b}`);
+        document.documentElement.style.setProperty('--theme-text', contrastText(hex));
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', hex);
+      }
+
+      function hashText(text) {
+        let hash = 2166136261;
+        for (let i = 0; i < text.length; i += 1) {
+          hash ^= text.charCodeAt(i);
+          hash = Math.imul(hash, 16777619);
+        }
+        return (hash >>> 0).toString(36);
+      }
+
+      function safeUrl(value) {
+        if (!value) return '';
+        try {
+          const url = new URL(value);
+          return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+        } catch (_) {
+          return '';
+        }
+      }
+
+      function configFromParams(source = params) {
+        const title = (source.get('title') || '').trim();
+        const start = source.get('start') || '';
+        const release = source.get('release') || '';
+        const stamp = source.get('stamp') || '⛄️';
+        const color = /^#[0-9a-f]{6}$/i.test(source.get('color') || '') ? source.get('color') : '#4ea8de';
+        const link = safeUrl(source.get('link') || '');
+        const seed = `${title}|${start}|${release}|${stamp}|${color}`;
+        const id = (source.get('cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
+        if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(release) || release < start) return null;
+        return { title, start, release, stamp, color, link, id };
+      }
+
+      function configFromForm() {
+        const title = $('adminTitle').value.trim();
+        const start = $('adminStart').value;
+        const release = $('adminRelease').value;
+        const rawLink = $('adminLink').value.trim();
+        const link = safeUrl(rawLink);
+        const stamp = $('adminStamp').value;
+        const color = selectedColor;
+        let error = '';
+        if (!title) error = '表題曲名／カードタイトルを入力してください。';
+        else if (!start || !release) error = '開始日とCD発売日を入力してください。';
+        else if (release < start) error = 'CD発売日は開始日以降にしてください。';
+        else if (dateRange(start, release).length > 366) error = '期間は366日以内にしてください。';
+        else if (rawLink && !link) error = '再生先は http:// または https:// で始まるURLにしてください。';
+        showError(error);
+        if (error) return null;
+        const id = hashText(`${title}|${start}|${release}|${stamp}|${color}`);
+        return { title, start, release, stamp, color, link, id };
+      }
+
+      function configUrl(config) {
+        const url = new URL(location.href);
+        url.search = '';
+        url.hash = '';
+        url.searchParams.set('title', config.title);
+        url.searchParams.set('start', config.start);
+        url.searchParams.set('release', config.release);
+        if (config.link) url.searchParams.set('link', config.link);
+        url.searchParams.set('stamp', config.stamp);
+        url.searchParams.set('color', config.color);
+        url.searchParams.set('cid', config.id);
+        return url.href;
+      }
+
+      function storageKey(config) {
+        return `daily_stamp_${config.id}`;
+      }
+
+      function loadStamps(config) {
+        try {
+          const saved = JSON.parse(localStorage.getItem(storageKey(config)) || '[]');
+          return Array.isArray(saved) ? new Set(saved.filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))) : new Set();
+        } catch (_) {
+          return new Set();
+        }
+      }
+
+      function saveStamps(config, stamps) {
+        localStorage.setItem(storageKey(config), JSON.stringify([...stamps].sort()));
+      }
+
+      function showError(message) {
+        $('adminError').textContent = message;
+        $('adminError').classList.toggle('show', Boolean(message));
+      }
+
+      function toast(message) {
+        clearTimeout(toastTimer);
+        $('toast').textContent = message;
+        $('toast').classList.add('show');
+        toastTimer = setTimeout(() => $('toast').classList.remove('show'), 1900);
+      }
+
+      function renderColorChoices() {
+        const list = $('colorList');
+        list.innerHTML = '';
+        COLORS.forEach((color) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'color-choice';
+          button.style.setProperty('--dot', color);
+          button.setAttribute('aria-label', `カラー ${color}`);
+          button.addEventListener('click', () => {
+            selectedColor = color;
+            applyTheme(color);
+            [...list.children].forEach((item) => item.classList.toggle('selected', item === button));
+          });
+          list.appendChild(button);
+        });
+        list.children[3].classList.add('selected');
+      }
+
+      function initAdminDefaults() {
+        const today = isoLocal();
+        $('adminStart').value = params.get('start') || today;
+        $('adminRelease').value = params.get('release') || addDays(today, 13);
+        $('adminTitle').value = params.get('title') || '';
+        $('adminLink').value = params.get('link') || '';
+        $('adminStamp').value = params.get('stamp') || '⛄️';
+        const incoming = params.get('color');
+        if (incoming && COLORS.includes(incoming)) {
+          selectedColor = incoming;
+          [...$('colorList').children].forEach((item, index) => item.classList.toggle('selected', COLORS[index] === incoming));
+          applyTheme(incoming);
+        }
+      }
+
+      function showAdmin() {
+        $('participantView').classList.add('hidden');
+        $('adminView').classList.remove('hidden');
+        $('modeLink').textContent = currentConfig ? 'カードに戻る' : '';
+        $('modeLink').onclick = currentConfig ? () => showParticipant(currentConfig) : null;
+      }
+
+      function showParticipant(config) {
+        currentConfig = config;
+        applyTheme(config.color);
+        $('adminView').classList.add('hidden');
+        $('participantView').classList.remove('hidden');
+        $('modeLink').textContent = '管理用設定';
+        $('modeLink').onclick = () => {
+          fillForm(config);
+          showAdmin();
+        };
+        renderParticipant();
+      }
+
+      function fillForm(config) {
+        $('adminTitle').value = config.title;
+        $('adminStart').value = config.start;
+        $('adminRelease').value = config.release;
+        $('adminLink').value = config.link;
+        $('adminStamp').value = config.stamp;
+        selectedColor = config.color;
+        [...$('colorList').children].forEach((item, index) => item.classList.toggle('selected', COLORS[index] === config.color));
+      }
+
+      function renderParticipant() {
+        const config = currentConfig;
+        const days = dateRange(config.start, config.release);
+        const today = isoLocal();
+        const stamps = loadStamps(config);
+        const validStamps = new Set([...stamps].filter((day) => days.includes(day)));
+        if (validStamps.size !== stamps.size) saveStamps(config, validStamps);
+
+        $('campaignTitle').textContent = config.title;
+        $('releaseDateText').textContent = formatDate(config.release);
+        $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.release, false)}`;
+        $('listenButton').href = config.link || '#';
+        $('listenButton').classList.toggle('hidden', !config.link);
+
+        const count = validStamps.size;
+        const percent = days.length ? Math.round((count / days.length) * 100) : 0;
+        $('progressCount').textContent = `${count} / ${days.length}`;
+        $('progressPercent').textContent = `${percent}% complete`;
+        $('progressBar').style.width = `${percent}%`;
+        const progressTrack = document.querySelector('.progress-track');
+        progressTrack.setAttribute('aria-valuenow', String(percent));
+        $('completion').classList.toggle('show', count === days.length && days.length > 0);
+
+        const canStampToday = days.includes(today);
+        const todayStamped = validStamps.has(today);
+        $('todayButton').disabled = !canStampToday;
+        $('todayButton').textContent = todayStamped ? '今日のスタンプを外す' : 'スタンプを押す';
+        $('todayButton').onclick = () => toggleToday(config);
+
+        if (today < config.start) $('helperText').textContent = `${formatDate(config.start)}からスタートします。未来の日付にはまだスタンプを押せません。`;
+        else if (today > config.release) $('helperText').textContent = 'このカードの期間は終了しました。記録はこの端末に残ります。';
+        else $('helperText').textContent = '曲を聴いたら、今日のマスをタップ。過去の日付へ後から押すことはできません。';
+
+        const grid = $('stampGrid');
+        grid.innerHTML = '';
+        days.forEach((day) => {
+          const date = parseLocalDate(day);
+          const isToday = day === today;
+          const isStamped = validStamps.has(day);
+          const isFuture = day > today;
+          const element = document.createElement(isToday ? 'button' : 'div');
+          if (isToday) element.type = 'button';
+          element.className = `day${isToday ? ' today' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}`;
+          element.setAttribute('aria-label', `${formatDate(day)} ${isStamped ? 'スタンプ済み' : '未スタンプ'}${isToday ? ' 今日' : ''}`);
+          if (isToday) element.addEventListener('click', () => toggleToday(config));
+          element.innerHTML = `
+            ${isToday ? '<span class="today-tag">TODAY</span>' : ''}
+            <span class="day-date">${date.getMonth() + 1}/${date.getDate()}</span>
+            <span class="day-week">${WEEKDAYS[date.getDay()]}</span>
+            <span class="day-stamp" aria-hidden="true">${config.stamp}</span>
+          `;
+          grid.appendChild(element);
+        });
+
+        $('xButton').onclick = () => shareToX(config, count, days.length);
+        $('imageButton').onclick = openShareImage;
+      }
+
+      function toggleToday(config) {
+        const today = isoLocal();
+        if (today < config.start || today > config.release) return;
+        const stamps = loadStamps(config);
+        const wasStamped = stamps.has(today);
+        if (wasStamped) stamps.delete(today);
+        else stamps.add(today);
+        saveStamps(config, stamps);
+        renderParticipant();
+        if (!wasStamped) {
+          toast(`${config.stamp} 今日のスタンプを押しました`);
+          if (stamps.size === dateRange(config.start, config.release).length) launchConfetti();
+        } else {
+          toast('今日のスタンプを取り消しました');
+        }
+      }
+
+      function launchConfetti() {
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const colors = COLORS;
+        for (let i = 0; i < 70; i += 1) {
+          const piece = document.createElement('i');
+          piece.className = 'confetti-piece';
+          piece.style.left = `${Math.random() * 100}vw`;
+          piece.style.setProperty('--c', colors[i % colors.length]);
+          piece.style.setProperty('--d', `${2.1 + Math.random() * 2.2}s`);
+          piece.style.setProperty('--r', `${Math.random() * 180}deg`);
+          piece.style.setProperty('--x', `${-80 + Math.random() * 160}px`);
+          document.body.appendChild(piece);
+          setTimeout(() => piece.remove(), 4500);
+        }
+      }
+
+      function buildCanvas(config) {
+        const days = dateRange(config.start, config.release);
+        const stamps = loadStamps(config);
+        const cols = 5;
+        const rows = Math.ceil(days.length / cols);
+        const width = 1080;
+        const margin = 74;
+        const gap = 16;
+        const cell = Math.floor((width - margin * 2 - gap * (cols - 1)) / cols);
+        const gridHeight = rows * cell + Math.max(0, rows - 1) * gap;
+        const height = 470 + gridHeight + 94;
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        const [r, g, b] = colorRgb(config.color);
+        const themeText = contrastText(config.color);
+
+        ctx.fillStyle = '#eef5f9';
+        ctx.fillRect(0, 0, width, height);
+        roundRect(ctx, 38, 38, width - 76, height - 76, 36);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.fillStyle = config.color;
+        roundRect(ctx, 38, 38, width - 76, 16, 8);
+        ctx.fill();
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = config.color;
+        ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText('DAILY LISTENING STAMP', width / 2, 120);
+        ctx.fillStyle = '#24364a';
+        ctx.font = '700 50px -apple-system, BlinkMacSystemFont, sans-serif';
+        drawCenteredText(ctx, config.title, width / 2, 185, width - 190, 56);
+        ctx.fillStyle = '#718096';
+        ctx.font = '500 26px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 240);
+
+        const count = [...stamps].filter((day) => days.includes(day)).length;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#24364a';
+        ctx.font = '700 39px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText(`${count} / ${days.length}`, margin, 330);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#718096';
+        ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText(`${Math.round(count / days.length * 100)}% complete`, width - margin, 330);
+        roundRect(ctx, margin, 354, width - margin * 2, 18, 9);
+        ctx.fillStyle = '#e8eef3';
+        ctx.fill();
+        if (count) {
+          roundRect(ctx, margin, 354, (width - margin * 2) * count / days.length, 18, 9);
+          ctx.fillStyle = config.color;
+          ctx.fill();
+        }
+
+        const top = 420;
+        days.forEach((day, index) => {
+          const col = index % cols;
+          const row = Math.floor(index / cols);
+          const x = margin + col * (cell + gap);
+          const y = top + row * (cell + gap);
+          const stamped = stamps.has(day);
+          roundRect(ctx, x, y, cell, cell, 23);
+          ctx.fillStyle = stamped ? config.color : '#f5f8fa';
+          ctx.fill();
+          ctx.strokeStyle = stamped ? config.color : '#dce7f0';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          const date = parseLocalDate(day);
+          ctx.textAlign = 'center';
+          ctx.fillStyle = stamped ? themeText : '#52677b';
+          ctx.font = '700 24px -apple-system, BlinkMacSystemFont, sans-serif';
+          ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}（${WEEKDAYS[date.getDay()]}）`, x + cell / 2, y + 48);
+          if (stamped) {
+            ctx.font = '58px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+            ctx.fillText(config.stamp, x + cell / 2, y + 124);
+          }
+        });
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, .85)`;
+        ctx.font = '700 22px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText('ONE LISTEN A DAY, ALL THE WAY TO RELEASE DAY', width / 2, height - 68);
+        return canvas;
+      }
+
+      function roundRect(ctx, x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + width, y, x + width, y + height, r);
+        ctx.arcTo(x + width, y + height, x, y + height, r);
+        ctx.arcTo(x, y + height, x, y, r);
+        ctx.arcTo(x, y, x + width, y, r);
+        ctx.closePath();
+      }
+
+      function drawCenteredText(ctx, text, x, y, maxWidth, lineHeight) {
+        if (ctx.measureText(text).width <= maxWidth) {
+          ctx.fillText(text, x, y);
+          return;
+        }
+        const chars = [...text];
+        let line = '';
+        const lines = [];
+        chars.forEach((char) => {
+          const test = line + char;
+          if (ctx.measureText(test).width > maxWidth && line) {
+            lines.push(line);
+            line = char;
+          } else line = test;
+        });
+        if (line) lines.push(line);
+        const startY = y - ((lines.length - 1) * lineHeight) / 2;
+        lines.slice(0, 2).forEach((value, index) => ctx.fillText(value, x, startY + index * lineHeight));
+      }
+
+      function canvasBlob(canvas) {
+        return new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.95));
+      }
+
+      async function openShareImage() {
+        const canvas = buildCanvas(currentConfig);
+        shareBlob = await canvasBlob(canvas);
+        $('shareImage').src = URL.createObjectURL(shareBlob);
+        $('shareModal').classList.add('show');
+        $('shareModal').setAttribute('aria-hidden', 'false');
+      }
+
+      async function nativeShareImage() {
+        if (!shareBlob) return;
+        const file = new File([shareBlob], `daily-stamp-${currentConfig.id}.png`, { type: 'image/png' });
+        const text = shareText(currentConfig);
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try { await navigator.share({ files: [file], text }); } catch (error) { if (error.name !== 'AbortError') toast('共有できませんでした'); }
+        } else {
+          saveImage();
+          toast('画像を保存しました');
+        }
+      }
+
+      function saveImage() {
+        if (!shareBlob) return;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(shareBlob);
+        a.download = `daily-stamp-${currentConfig.id}.png`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+
+      function closeModal() {
+        $('shareModal').classList.remove('show');
+        $('shareModal').setAttribute('aria-hidden', 'true');
+      }
+
+      function shareText(config) {
+        const days = dateRange(config.start, config.release);
+        const count = [...loadStamps(config)].filter((day) => days.includes(day)).length;
+        return `${config.stamp} ${config.title}\n発売日まで1日1回聴いています！\n【${count}/${days.length}日】\n#SnowMan`;
+      }
+
+      function shareToX(config) {
+        const text = shareText(config);
+        const url = configUrl(config);
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'noopener');
+      }
+
+      function generate(showOnly = false) {
+        const config = configFromForm();
+        if (!config) return;
+        const url = configUrl(config);
+        if (showOnly) {
+          history.replaceState(null, '', url);
+          showParticipant(config);
+          return;
+        }
+        $('generatedUrl').value = url;
+        $('urlBox').classList.add('show');
+        $('generatedUrl').select();
+      }
+
+      async function copyGeneratedUrl() {
+        const value = $('generatedUrl').value;
+        try {
+          await navigator.clipboard.writeText(value);
+        } catch (_) {
+          $('generatedUrl').select();
+          document.execCommand('copy');
+        }
+        toast('参加者用URLをコピーしました');
+      }
+
+      function init() {
+        renderColorChoices();
+        initAdminDefaults();
+        const config = configFromParams();
+        currentConfig = config;
+        const forceAdmin = params.get('admin') === '1';
+        if (config && !forceAdmin) showParticipant(config);
+        else showAdmin();
+
+        $('previewButton').addEventListener('click', () => generate(true));
+        $('generateButton').addEventListener('click', () => generate(false));
+        $('copyButton').addEventListener('click', copyGeneratedUrl);
+        $('nativeShareButton').addEventListener('click', nativeShareImage);
+        $('saveImageButton').addEventListener('click', saveImage);
+        $('closeModalButton').addEventListener('click', closeModal);
+        $('shareModal').addEventListener('click', (event) => { if (event.target === $('shareModal')) closeModal(); });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeModal(); });
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
