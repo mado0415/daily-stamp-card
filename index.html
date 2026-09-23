@@ -893,6 +893,12 @@
       color: var(--muted);
       font-size: 12px;
     }
+    #adminStampListInput {
+      min-height: 86px;
+      resize: vertical;
+      font-size: 24px;
+      line-height: 1.5;
+    }
 
     .share-help {
       margin: 10px 2px 0;
@@ -1374,16 +1380,12 @@
             <p id="stampSetMode" class="stamp-set-mode">「AMENITY」を編集中</p>
             <p class="stamp-set-step">① セット名</p>
             <input id="adminStampSetName" type="text" maxlength="40" placeholder="セット名" aria-label="絵文字セット名">
-            <p class="stamp-set-step">② 参加者が選べる絵文字</p>
-            <p class="admin-stamp-help">使う絵文字をタップすると色が付きます。もう一度タップすると外れます。</p>
-            <div id="adminStampChoices" class="admin-stamp-choices" role="group" aria-label="参加者が選べる絵文字"></div>
+            <p class="stamp-set-step">② セットに入れる絵文字</p>
+            <textarea id="adminStampListInput" rows="3" maxlength="240" spellcheck="false" placeholder="例：⛄️❄️🎵" aria-label="セットに入れる絵文字"></textarea>
+            <p class="admin-stamp-help">絵文字を直接入力・削除してください。絵文字の間にスペースを入れなくても使えます。</p>
             <div class="stamp-set-preview-wrap">
               <p id="stampSetPreviewLabel" class="stamp-set-preview-label">現在のセット内容</p>
               <div id="adminStampSetPreview" class="stamp-set-preview" aria-live="polite"></div>
-            </div>
-            <div class="stamp-set-row">
-              <input id="adminCustomStamp" type="text" inputmode="text" maxlength="80" placeholder="一覧にない絵文字を追加（例：🎂 🐶）" aria-label="追加する絵文字">
-              <button id="addCustomStampButton" class="btn btn-soft" type="button">追加</button>
             </div>
             <p class="stamp-set-step">③ セットを保存</p>
             <div class="stamp-set-row actions">
@@ -1638,6 +1640,24 @@
         catch (_) { return ''; }
       }
 
+      function workspaceKeyStorageName(apiUrl) {
+        return `daily_stamp_workspace_edit_key_v1_${hashText(apiUrl || '')}`;
+      }
+
+      function saveWorkspaceEditKey(apiUrl, editKey) {
+        if (!apiUrl || !/^[a-zA-Z0-9_-]{32,160}$/.test(editKey || '')) return;
+        try { localStorage.setItem(workspaceKeyStorageName(apiUrl), editKey); } catch (_) {}
+      }
+
+      function loadWorkspaceEditKey(apiUrl) {
+        try {
+          const saved = localStorage.getItem(workspaceKeyStorageName(apiUrl)) || '';
+          return /^[a-zA-Z0-9_-]{32,160}$/.test(saved) ? saved : '';
+        } catch (_) {
+          return '';
+        }
+      }
+
       function randomToken(bytes = 24) {
         const values = new Uint8Array(bytes);
         crypto.getRandomValues(values);
@@ -1794,6 +1814,7 @@
         const cardId = sameSharedCard ? currentConfig.sharedCardId : randomToken(12);
         const editKey = sameSharedCard ? currentConfig.sharedEditKey : (workspaceEditKey || randomToken(32));
         workspaceEditKey = editKey;
+        saveWorkspaceEditKey(apiUrl, editKey);
         const expectedRevision = sameSharedCard ? Number(currentConfig.sharedRevision || 0) : 0;
         const storedConfig = sharedConfigPayload(config);
         try {
@@ -1906,15 +1927,6 @@
         select.value = nextName;
       }
 
-      function addCustomStamps() {
-        const additions = splitEmojiInput($('adminCustomStamp').value);
-        if (!additions.length) return toast('追加する絵文字を入力してください');
-        adminSelectedStamps = [...new Set([...adminSelectedStamps, ...additions])].slice(0, 40);
-        $('adminCustomStamp').value = '';
-        renderAdminStampChoices($('adminTemplate').value, adminSelectedStamps, $('adminStamp').value);
-        toast('スタンプを追加しました');
-      }
-
       function setStampSetEditorMode(isNew, name = '') {
         $('stampSetMode').textContent = isNew ? '新しいセットを作成中' : `「${name}」を編集中`;
         $('saveStampSetButton').textContent = isNew ? 'このセットを保存' : '変更を保存';
@@ -2002,28 +2014,12 @@
       function renderAdminStampChoices(template, selected = null, preferred = '') {
         const defaults = stampsForTemplate(template);
         adminSelectedStamps = normalizeStampSet(Array.isArray(selected) ? selected : defaults, '');
-        const list = $('adminStampChoices');
-        list.innerHTML = '';
-        const catalog = [...new Set([...adminSelectedStamps.filter((stamp) => !STAMPS.includes(stamp)), ...STAMPS])];
-        catalog.forEach((stamp) => {
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.className = `admin-stamp-choice${adminSelectedStamps.includes(stamp) ? ' selected' : ''}`;
-          button.textContent = stamp;
-          button.title = STAMP_NAMES[stamp] || stamp;
-          button.setAttribute('aria-pressed', adminSelectedStamps.includes(stamp) ? 'true' : 'false');
-          button.addEventListener('click', () => {
-            const removing = adminSelectedStamps.includes(stamp);
-            if (removing) {
-              adminSelectedStamps = adminSelectedStamps.filter((item) => item !== stamp);
-            } else {
-              adminSelectedStamps.push(stamp);
-            }
-            const nextPreferred = adminSelectedStamps.includes($('adminStamp').value) ? $('adminStamp').value : adminSelectedStamps[0];
-            renderAdminStampChoices(template, adminSelectedStamps, nextPreferred);
-            toast(removing ? `${stamp}をセットから外しました` : `${stamp}をセットに追加しました`);
-          });
-        });
+        $('adminStampListInput').value = adminSelectedStamps.join('');
+        renderAdminStampSetPreview();
+        syncAdminStampOptions(template, preferred, adminSelectedStamps);
+      }
+
+      function renderAdminStampSetPreview() {
         const preview = $('adminStampSetPreview');
         preview.innerHTML = '';
         $('stampSetPreviewLabel').textContent = `現在のセット内容（${adminSelectedStamps.length}個）`;
@@ -2039,7 +2035,6 @@
           item.title = STAMP_NAMES[stamp] || stamp;
           preview.appendChild(item);
         });
-        syncAdminStampOptions(template, preferred, adminSelectedStamps);
       }
 
       function syncAdminStampOptions(template, preferred = '⛄️', selected = adminSelectedStamps) {
@@ -3442,6 +3437,7 @@
         }
         if (!testMode && apiUrl && !workspaceEditKey) {
           workspaceEditKey = randomToken(32);
+          saveWorkspaceEditKey(apiUrl, workspaceEditKey);
           generatedWorkspaceUrl = sharedAdminUrl(apiUrl, workspaceEditKey);
           try { localStorage.setItem(SAVED_SHARED_API_URL_KEY, apiUrl); } catch (_) {}
           showGeneratedAdminUrl(generatedWorkspaceUrl);
@@ -3524,6 +3520,16 @@
         let sharedLoadError = '';
         const requestedAdmin = params.get('admin') === '1';
         const sharedApi = safeSharedApiUrl(incomingSharedApiUrl);
+        if (requestedAdmin && sharedApi && !workspaceEditKey) {
+          workspaceEditKey = loadWorkspaceEditKey(sharedApi) || randomToken(32);
+          saveWorkspaceEditKey(sharedApi, workspaceEditKey);
+        }
+        if (requestedAdmin && sharedApi && workspaceEditKey) {
+          saveWorkspaceEditKey(sharedApi, workspaceEditKey);
+          if (params.get('edit') !== workspaceEditKey) {
+            history.replaceState(null, '', sharedAdminUrl(sharedApi, workspaceEditKey));
+          }
+        }
         if (incomingSharedCardId) {
           try {
             const result = await loadSharedConfig(sharedApi, incomingSharedCardId, incomingSharedEditKey);
@@ -3614,12 +3620,10 @@
         $('sharedReloadButton').addEventListener('click', () => location.reload());
         $('saveShareTemplateButton').addEventListener('click', saveShareTemplate);
         $('resetShareTemplateButton').addEventListener('click', resetShareTemplate);
-        $('addCustomStampButton').addEventListener('click', addCustomStamps);
-        $('adminCustomStamp').addEventListener('keydown', (event) => {
-          if (event.key === 'Enter') {
-            event.preventDefault();
-            addCustomStamps();
-          }
+        $('adminStampListInput').addEventListener('input', () => {
+          adminSelectedStamps = normalizeStampSet(splitEmojiInput($('adminStampListInput').value), '');
+          renderAdminStampSetPreview();
+          syncAdminStampOptions($('adminTemplate').value, adminSelectedStamps[0] || '', adminSelectedStamps);
         });
         $('saveStampSetButton').addEventListener('click', saveStampSet);
         $('deleteStampSetButton').addEventListener('click', deleteStampSet);
