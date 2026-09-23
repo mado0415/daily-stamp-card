@@ -228,8 +228,18 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2px;
-      padding: 5px 2px;
+      gap: 1px;
+      padding: 4px 2px;
+    }
+
+    .day-tag-slot {
+      width: 100%;
+      height: 11px;
+      flex: 0 0 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
     }
 
     button.day {
@@ -371,11 +381,11 @@
       right: auto;
       transform: none;
       flex: 0 0 auto;
-      margin: 0 auto 1px;
+      margin: 0;
       min-width: 38px;
       border: 1px solid rgba(89, 26, 43, .18);
       border-radius: 999px;
-      padding: 2px 5px;
+      padding: 1px 5px;
       color: #5a1728;
       background: #fff4d5;
       box-shadow: 0 1px 4px rgba(55, 13, 25, .16);
@@ -391,16 +401,16 @@
       z-index: 3;
       transform: none;
       flex: 0 0 auto;
-      margin: 0 auto 1px;
+      margin: 0;
       width: max-content;
-      max-width: calc(100% - 8px);
+      max-width: calc(100% - 12px);
       border: 1px solid #b68d36;
       border-radius: 999px;
-      padding: 2px 5px;
+      padding: 1px 4px;
       color: #5a1728;
       background: #fff1ad;
       box-shadow: 0 0 10px rgba(255, 217, 111, .65);
-      font-size: 6.5px;
+      font-size: 6px;
       font-weight: 950;
       line-height: 1;
       letter-spacing: .04em;
@@ -439,14 +449,15 @@
 
     .completion {
       display: none;
-      margin: 0 24px 22px;
-      padding: 15px;
+      margin: 0 24px 14px;
+      padding: 9px 12px;
       color: var(--ink);
       background: rgba(var(--theme-rgb), .12);
       border-radius: 16px;
       text-align: center;
+      font-size: 12px;
       font-weight: 800;
-      line-height: 1.6;
+      line-height: 1.35;
     }
 
     .completion.show { display: block; }
@@ -477,12 +488,13 @@
       --line: #d2ad5d;
       --wash: #f1d9bb;
       border: 1px solid rgba(201, 164, 82, .72);
-      box-shadow: 0 20px 55px rgba(92, 5, 28, .17);
+      box-shadow: 0 20px 55px rgba(92, 5, 28, .17), 0 0 0 3px rgba(var(--theme-rgb), .12);
     }
 
     .template-hotel .hero {
       color: #fff4d5;
       background:
+        radial-gradient(circle at 82% 12%, rgba(var(--theme-rgb), .34), transparent 28%),
         radial-gradient(circle at 9px 9px, rgba(255, 227, 158, .18) 0 2px, transparent 2.5px) 0 0 / 18px 18px,
         linear-gradient(135deg, rgba(183, 12, 53, .98), rgba(111, 4, 31, .98));
       border-bottom: 3px solid #d2ad5d;
@@ -507,7 +519,7 @@
     }
     .template-hotel .progress-bar {
       position: relative;
-      background: linear-gradient(90deg, #8f0c31, #d0aa54);
+      background: linear-gradient(90deg, #8f0c31 0%, var(--theme) 62%, #d0aa54 100%);
     }
     .template-hotel .progress-bar::after {
       content: "";
@@ -563,20 +575,21 @@
     }
     .template-hotel .day > * { position: relative; z-index: 1; }
     .template-hotel .day.today {
-      border-color: #fff1bd;
-      box-shadow: 0 0 0 3px rgba(203, 169, 87, .42), inset 0 0 0 5px rgba(255, 232, 177, .11);
+      border-color: var(--theme);
+      box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .42), 0 0 18px rgba(var(--theme-rgb), .22), inset 0 0 0 5px rgba(255, 232, 177, .11);
     }
     .template-hotel .day.stamped {
       color: #571127;
       background: linear-gradient(180deg, #fff4c9, #e8c46f);
       border-color: #b68d36;
-      box-shadow: 0 0 22px rgba(255, 213, 111, .55), inset 0 0 0 5px rgba(255,255,255,.24);
+      box-shadow: 0 0 22px rgba(255, 213, 111, .55), 0 0 0 2px rgba(var(--theme-rgb), .34), inset 0 0 0 5px rgba(255,255,255,.24);
     }
     .template-hotel .day.prejoin { color: #a88579; background: #ead6bf; border-color: #cdb78e; }
     .template-hotel .day.future { opacity: .62; }
     .template-hotel .stamp-section {
       color: #fff0c8;
       background:
+        radial-gradient(circle at 50% 0, rgba(var(--theme-rgb), .22), transparent 24%),
         linear-gradient(45deg, rgba(244, 216, 151, .055) 25%, transparent 25%, transparent 75%, rgba(244, 216, 151, .055) 75%) 0 0 / 24px 24px,
         linear-gradient(-45deg, rgba(244, 216, 151, .055) 25%, transparent 25%, transparent 75%, rgba(244, 216, 151, .055) 75%) 0 0 / 24px 24px,
         #7a0826;
@@ -759,6 +772,12 @@
       background: rgba(var(--theme-rgb), .12);
       box-shadow: 0 0 0 2px rgba(var(--theme-rgb), .18);
       opacity: 1;
+    }
+    .admin-stamp-help {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.55;
     }
 
     .share-help {
@@ -1029,7 +1048,6 @@
     <section id="participantView" class="card hidden" aria-label="表題曲デイリースタンプカード">
       <header class="hero">
         <p id="testBadge" class="test-badge hidden">🧪 動作テスト｜仮の今日 <span id="testTodayText"></span></p>
-        <p id="templateLabel" class="eyebrow">DAILY LISTENING STAMP</p>
         <h1 id="campaignTitle"></h1>
         <p class="release-line"><strong id="releaseDateText"></strong> CD RELEASE</p>
       </header>
@@ -1098,7 +1116,7 @@
           <input id="adminStart" type="date">
         </div>
         <div class="field">
-          <label for="adminRelease">CD発売日（この日を含む）</label>
+          <label for="adminRelease">CD発売日</label>
           <input id="adminRelease" type="date">
         </div>
         <div class="field">
@@ -1128,6 +1146,11 @@
             <option value="classic">◯ STAMP｜ポイントカード</option>
             <option value="journey">🚏 JOURNEY｜発売日への道</option>
           </select>
+        </div>
+        <div class="field wide">
+          <label>参加者が選べるスタンプ（タップで登録・解除）</label>
+          <div id="adminStampChoices" class="admin-stamp-choices" role="group" aria-label="参加者が選べるスタンプ"></div>
+          <p class="admin-stamp-help">テンプレートを選ぶとおすすめセットが入ります。色が付いた絵柄だけが参加者に表示されます。</p>
         </div>
         <div class="field">
           <label for="adminStamp">最初に選ばれているスタンプ</label>
@@ -1238,6 +1261,7 @@
       const incomingTestDay = params.get('d') || params.get('today') || '';
       let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(incomingTestDay) ? incomingTestDay : '';
       let currentConfig = null;
+      let adminSelectedStamps = [];
       let shareBlob = null;
       let toastTimer = null;
 
@@ -1348,11 +1372,64 @@
         return set;
       }
 
-      function syncAdminStampOptions(template, preferred = '⛄️') {
-        const available = stampsForTemplate(template, preferred);
-        const selected = available.includes(preferred) ? preferred : available[0];
+      function encodeStampSet(stamps) {
+        let mask = 0n;
+        stamps.forEach((stamp) => {
+          const index = STAMPS.indexOf(stamp);
+          if (index >= 0) mask |= 1n << BigInt(index);
+        });
+        return mask.toString(36);
+      }
+
+      function decodeBase36(value) {
+        let result = 0n;
+        for (const char of String(value || '').toLowerCase()) {
+          const digit = parseInt(char, 36);
+          if (!Number.isFinite(digit)) return 0n;
+          result = result * 36n + BigInt(digit);
+        }
+        return result;
+      }
+
+      function decodeStampSet(value, fallback) {
+        if (!value) return [...fallback];
+        const mask = decodeBase36(value);
+        const selected = STAMPS.filter((_, index) => (mask & (1n << BigInt(index))) !== 0n);
+        return selected.length ? selected : [...fallback];
+      }
+
+      function renderAdminStampChoices(template, selected = null, preferred = '') {
+        const defaults = stampsForTemplate(template);
+        adminSelectedStamps = normalizeStampSet(selected && selected.length ? selected : defaults, preferred || defaults[0]);
+        const list = $('adminStampChoices');
+        list.innerHTML = '';
+        STAMPS.forEach((stamp) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = `admin-stamp-choice${adminSelectedStamps.includes(stamp) ? ' selected' : ''}`;
+          button.textContent = stamp;
+          button.title = STAMP_NAMES[stamp] || stamp;
+          button.setAttribute('aria-pressed', adminSelectedStamps.includes(stamp) ? 'true' : 'false');
+          button.addEventListener('click', () => {
+            if (adminSelectedStamps.includes(stamp)) {
+              if (adminSelectedStamps.length === 1) return toast('スタンプは1つ以上登録してください');
+              adminSelectedStamps = adminSelectedStamps.filter((item) => item !== stamp);
+            } else {
+              adminSelectedStamps.push(stamp);
+            }
+            button.classList.toggle('selected', adminSelectedStamps.includes(stamp));
+            button.setAttribute('aria-pressed', adminSelectedStamps.includes(stamp) ? 'true' : 'false');
+            syncAdminStampOptions(template, $('adminStamp').value, adminSelectedStamps);
+          });
+        });
+        syncAdminStampOptions(template, preferred, adminSelectedStamps);
+      }
+
+      function syncAdminStampOptions(template, preferred = '⛄️', selected = adminSelectedStamps) {
+        const available = selected && selected.length ? selected : stampsForTemplate(template, preferred);
+        const selectedStamp = available.includes(preferred) ? preferred : available[0];
         $('adminStamp').innerHTML = available.map((stamp) => `<option value="${stamp}">${stamp} ${STAMP_NAMES[stamp] || ''}</option>`).join('');
-        $('adminStamp').value = selected;
+        $('adminStamp').value = selectedStamp;
       }
 
       function firstParam(source, ...keys) {
@@ -1372,7 +1449,7 @@
         const template = ['classic', 'hotel', 'journey'].includes(templateAlias) ? templateAlias : 'hotel';
         const incomingStampRaw = firstParam(source, 'e', 'stamp') || '⛄️';
         const incomingStamp = incomingStampRaw === '🩵' ? '💙' : incomingStampRaw;
-        const availableStamps = stampsForTemplate(template);
+        const availableStamps = decodeStampSet(firstParam(source, 'x', 'stamps'), stampsForTemplate(template));
         const stamp = availableStamps.includes(incomingStamp) ? incomingStamp : availableStamps[0];
         const stamps = availableStamps;
         const colorRaw = firstParam(source, 'c', 'color');
@@ -1405,7 +1482,7 @@
         const line = safeUrl(rawLine);
         const youtube = safeUrl(rawYoutube);
         const template = $('adminTemplate').value;
-        const availableStamps = stampsForTemplate(template);
+        const availableStamps = adminSelectedStamps.length ? [...adminSelectedStamps] : stampsForTemplate(template);
         const stamp = availableStamps.includes($('adminStamp').value) ? $('adminStamp').value : availableStamps[0];
         const stamps = availableStamps;
         const color = '#4ea8de';
@@ -1439,6 +1516,7 @@
         if (config.line) url.searchParams.set('n', config.line);
         if (config.youtube) url.searchParams.set('y', config.youtube);
         url.searchParams.set('e', config.stamp);
+        url.searchParams.set('x', encodeStampSet(config.stamps));
         url.searchParams.set('v', { hotel: 'h', classic: 'c', journey: 'j' }[config.template] || 'h');
         url.searchParams.set('i', config.id);
         if (testMode) {
@@ -1603,7 +1681,8 @@
         const template = { h: 'hotel', c: 'classic', j: 'journey' }[templateRaw] || templateRaw;
         $('adminTemplate').value = ['classic', 'hotel', 'journey'].includes(template) ? template : 'hotel';
         const incomingStamp = firstParam(params, 'e', 'stamp') || '⛄️';
-        syncAdminStampOptions($('adminTemplate').value, incomingStamp === '🩵' ? '💙' : incomingStamp);
+        const incomingStamps = decodeStampSet(firstParam(params, 'x', 'stamps'), stampsForTemplate($('adminTemplate').value));
+        renderAdminStampChoices($('adminTemplate').value, incomingStamps, incomingStamp === '🩵' ? '💙' : incomingStamp);
         const colorRaw = firstParam(params, 'c', 'color');
         const incoming = /^[0-9a-f]{6}$/i.test(colorRaw) ? `#${colorRaw}` : colorRaw;
         if (incoming && COLORS.includes(incoming)) {
@@ -1616,13 +1695,14 @@
         $('participantView').classList.add('hidden');
         $('adminView').classList.remove('hidden');
         $('modeLink').textContent = currentConfig ? 'カードに戻る' : '';
+        $('modeLink').classList.toggle('hidden', !currentConfig);
         $('modeLink').onclick = currentConfig ? () => showParticipant(currentConfig) : null;
       }
 
       function showParticipant(config) {
-        const templateStamps = stampsForTemplate(config.template);
-        const templateStamp = templateStamps.includes(config.stamp) ? config.stamp : templateStamps[0];
-        config = { ...config, stamp: templateStamp, stamps: templateStamps };
+        const participantStamps = normalizeStampSet(config.stamps && config.stamps.length ? config.stamps : stampsForTemplate(config.template), config.stamp);
+        const participantStamp = participantStamps.includes(config.stamp) ? config.stamp : participantStamps[0];
+        config = { ...config, stamp: participantStamp, stamps: participantStamps };
         const participantColor = loadParticipantColor(config);
         currentConfig = { ...config, color: participantColor };
         config = currentConfig;
@@ -1632,11 +1712,12 @@
         $('adminView').classList.add('hidden');
         $('participantView').classList.remove('hidden');
         setupTestPanel(config);
-        $('modeLink').textContent = '管理用設定';
-        $('modeLink').onclick = () => {
+        $('modeLink').textContent = isTestMode ? '管理用設定' : '';
+        $('modeLink').classList.toggle('hidden', !isTestMode);
+        $('modeLink').onclick = isTestMode ? () => {
           fillForm(config);
           showAdmin();
-        };
+        } : null;
         renderParticipant();
       }
 
@@ -1651,7 +1732,7 @@
         $('adminLine').value = config.line || '';
         $('adminYoutube').value = config.youtube || '';
         $('adminTemplate').value = config.template || 'hotel';
-        syncAdminStampOptions($('adminTemplate').value, config.stamp);
+        renderAdminStampChoices($('adminTemplate').value, config.stamps, config.stamp);
       }
 
       function setupTestPanel(config) {
@@ -1791,12 +1872,6 @@
         const validStamps = new Set([...stamps].filter((day) => days.includes(day)));
         if (validStamps.size !== stamps.size) saveStamps(config, validStamps);
 
-        const templateLabels = {
-          hotel: 'HOTEL ALL SUITE',
-          classic: 'DAILY LISTENING STAMP',
-          journey: 'RELEASE DAY JOURNEY'
-        };
-        $('templateLabel').textContent = templateLabels[config.template] || templateLabels.classic;
         $('campaignTitle').textContent = config.title;
         $('releaseDateText').textContent = formatDate(config.release);
         $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.end, false)}`;
@@ -1832,7 +1907,7 @@
         $('completion').classList.toggle('show', perfect || eventFinished);
         $('completion').innerHTML = perfect
           ? `PERFECT！<br>期間中毎日ありがとう ${config.stamp}✨`
-          : eventFinished ? `FINISH！<br>${count}日間の参加、ありがとう ${config.stamp}` : '';
+          : eventFinished ? `FINISH！<br>${count ? `${count}日間の参加、` : ''}ありがとう ${config.stamp}` : '';
 
         const canStampToday = days.includes(today);
         const todayStamped = validStamps.has(today);
@@ -1876,7 +1951,7 @@
             ? `<span class="day-inline-action${listenReady ? ' stamp-ready' : ''}" data-stamp="${activeStamp}">${listenReady ? `${activeStamp} スタンプ` : '▶ 曲を聴く'}</span>${listenReady && getListenLinks(config).length ? '<button class="listen-reset" type="button">↩ まだ聴いていない</button>' : ''}`
             : `<span class="day-stamp" aria-hidden="true">${dayStamp}</span>`;
           element.innerHTML = `
-            ${isRelease ? `<span class="release-tag">${isToday ? 'TODAY · RELEASE' : 'RELEASE DAY'}</span>` : isToday ? '<span class="today-tag">TODAY</span>' : ''}
+            <span class="day-tag-slot">${isRelease ? '<span class="release-tag">RELEASE</span>' : isToday ? '<span class="today-tag">TODAY</span>' : ''}</span>
             <span class="day-date">${date.getMonth() + 1}/${date.getDate()}</span>
             <span class="day-week">${WEEKDAYS[date.getDay()]}</span>
             ${isPrejoin ? '<span class="day-state">開催済み</span>' : dayAction}
@@ -2136,15 +2211,12 @@
         }
 
         ctx.textAlign = 'center';
-        ctx.fillStyle = isHotel ? '#f3d58d' : config.color;
-        ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(isHotel ? 'HOTEL ALL SUITE' : isJourney ? 'RELEASE DAY JOURNEY' : 'DAILY LISTENING STAMP', width / 2, 105);
         ctx.fillStyle = isHotel ? '#fff4d5' : ink;
         ctx.font = '700 50px -apple-system, BlinkMacSystemFont, sans-serif';
-        drawCenteredText(ctx, config.title, width / 2, 170, width - 190, 56);
+        drawCenteredText(ctx, config.title, width / 2, 145, width - 190, 56);
         ctx.fillStyle = isHotel ? '#f3d58d' : muted;
         ctx.font = '500 26px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 235);
+        ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 210);
         const participantName = loadParticipantName(config);
         if (participantName) {
           ctx.textAlign = 'right';
@@ -2172,6 +2244,7 @@
           if (isHotel) {
             const progressGradient = ctx.createLinearGradient(margin, 0, width - margin, 0);
             progressGradient.addColorStop(0, '#8f0c31');
+            progressGradient.addColorStop(.62, config.color);
             progressGradient.addColorStop(1, '#d0aa54');
             ctx.fillStyle = progressGradient;
           } else ctx.fillStyle = config.color;
@@ -2263,7 +2336,7 @@
           }
           if (isJourney && !stamped) ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, .3)`;
           else if (isRelease) ctx.strokeStyle = '#e4b743';
-          else if (isToday) ctx.strokeStyle = isHotel ? '#f1d681' : config.color;
+          else if (isToday) ctx.strokeStyle = config.color;
           else if (isHotel) ctx.strokeStyle = prejoin ? '#cdb78e' : '#cba957';
           else ctx.strokeStyle = stamped ? config.color : '#dce7f0';
           ctx.lineWidth = isToday || isRelease ? 9 : 5;
@@ -2282,23 +2355,22 @@
           const date = parseLocalDate(day);
           ctx.textAlign = 'center';
           if (isToday || isRelease) {
-            const tagText = isRelease ? (isToday ? 'TODAY · RELEASE' : 'RELEASE DAY') : 'TODAY';
-            const tagWidth = isRelease ? Math.min(cell - 20, 154) : 92;
-            roundRect(ctx, x + cell / 2 - tagWidth / 2, y + 13, tagWidth, 29, 15);
+            const tagText = isRelease ? 'RELEASE' : 'TODAY';
+            const tagWidth = Math.min(cell - 28, isRelease ? 94 : 82);
+            roundRect(ctx, x + cell / 2 - tagWidth / 2, y + 14, tagWidth, 25, 13);
             ctx.fillStyle = '#fff4d5';
             ctx.fill();
             ctx.strokeStyle = '#cba957';
             ctx.lineWidth = 2;
             ctx.stroke();
             ctx.fillStyle = '#5a1728';
-            ctx.font = '800 16px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.font = `${isRelease ? '800 13px' : '800 16px'} -apple-system, BlinkMacSystemFont, sans-serif`;
-            ctx.fillText(tagText, x + cell / 2, y + 34);
+            ctx.font = `${isRelease ? '800 12px' : '800 14px'} -apple-system, BlinkMacSystemFont, sans-serif`;
+            ctx.fillText(tagText, x + cell / 2, y + 31);
             ctx.fillStyle = textColor;
             ctx.font = '800 34px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x + cell / 2, y + 82);
+            ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x + cell / 2, y + 72);
             ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText(WEEKDAYS[date.getDay()], x + cell / 2, y + 118);
+            ctx.fillText(WEEKDAYS[date.getDay()], x + cell / 2, y + 106);
           } else {
             ctx.font = '700 33px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x + cell / 2, y + 80);
@@ -2513,7 +2585,11 @@
 
         $('generateButton').addEventListener('click', () => generate('participant'));
         $('testGenerateButton').addEventListener('click', () => generate('test'));
-        $('adminTemplate').addEventListener('change', () => syncAdminStampOptions($('adminTemplate').value, $('adminStamp').value));
+        $('adminTemplate').addEventListener('change', () => {
+          const template = $('adminTemplate').value;
+          const defaults = stampsForTemplate(template);
+          renderAdminStampChoices(template, defaults, defaults[0]);
+        });
         const syncDateLimits = () => {
           $('adminRelease').min = $('adminStart').value;
           $('adminEnd').min = $('adminRelease').value;
