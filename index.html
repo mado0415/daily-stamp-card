@@ -446,6 +446,7 @@
       gap: 10px;
       padding: 0 24px 25px;
     }
+    .share-row.single { grid-template-columns: 1fr; }
 
     .completion {
       display: none;
@@ -966,6 +967,10 @@
     .modal-box h2 { margin: 2px 0 13px; font-size: 18px; }
     .modal-box img { display: block; width: 100%; border-radius: 15px; background: #eef4f8; }
     .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 13px; }
+    .share-modal-actions {
+      grid-template-columns: 1fr 1fr !important;
+      margin: 0 0 13px;
+    }
 
     .toast {
       position: fixed;
@@ -1113,9 +1118,8 @@
         <div id="stampGrid" class="stamp-grid"></div>
       </section>
 
-      <div class="share-row">
+      <div class="share-row single">
         <button id="imageButton" class="btn btn-plain" type="button">画像を作る</button>
-        <button id="xButton" class="btn btn-plain" type="button">Xで報告する</button>
       </div>
     </section>
 
@@ -1238,13 +1242,13 @@
   <div id="shareModal" class="modal" aria-hidden="true">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
       <h2 id="shareTitle">スタンプカード画像</h2>
-      <img id="shareImage" alt="スタンプカードの共有画像">
-      <p id="shareHelp" class="share-help">「SNS・写真アプリへ共有」から、投稿先や「画像を保存」を選べます。</p>
-      <div class="modal-actions">
+      <div class="modal-actions share-modal-actions">
         <button id="nativeShareButton" class="btn btn-primary" type="button">SNS・写真アプリへ共有</button>
         <button id="saveImageButton" class="btn btn-soft" type="button">画像ファイルを保存</button>
-        <button id="closeModalButton" class="btn btn-plain btn-full" type="button">閉じる</button>
+        <button id="closeModalButton" class="btn btn-plain" type="button">閉じる</button>
       </div>
+      <img id="shareImage" alt="スタンプカードの共有画像">
+      <p id="shareHelp" class="share-help">「SNS・写真アプリへ共有」から、投稿先や「画像を保存」を選べます。</p>
     </div>
   </div>
 
@@ -2047,7 +2051,6 @@
           grid.appendChild(element);
         });
 
-        $('xButton').onclick = () => shareToX(config);
         $('imageButton').onclick = requestShareImage;
         $('imageButtonTop').onclick = requestShareImage;
       }
@@ -2689,11 +2692,6 @@
         text = text.trim();
         if (!text.includes(participantUrl)) text += `\n${participantUrl}`;
         return text;
-      }
-
-      function shareToX(config) {
-        const text = shareText(config);
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
       }
 
       function generate(mode = 'participant') {
