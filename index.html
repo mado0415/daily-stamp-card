@@ -838,7 +838,7 @@
       font-weight: 800;
     }
 
-    .field input, .field select {
+    .field input, .field select, .field textarea {
       width: 100%;
       min-height: 46px;
       border: 1px solid #cddae5;
@@ -850,7 +850,14 @@
       font-size: 16px;
     }
 
-    .field input:focus, .field select:focus {
+    .field textarea {
+      min-height: 150px;
+      resize: vertical;
+      font-family: inherit;
+      line-height: 1.55;
+    }
+
+    .field input:focus, .field select:focus, .field textarea:focus {
       border-color: var(--theme);
       box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .15);
     }
@@ -1188,6 +1195,11 @@
           </select>
           <p class="field-note">選べる絵柄はテンプレートごとに自動で切り替わります。</p>
         </div>
+        <div class="field wide">
+          <label for="adminShareTemplate">SNS投稿テンプレート</label>
+          <textarea id="adminShareTemplate" maxlength="500" spellcheck="false"></textarea>
+          <p class="field-note">使える項目：{スタンプ} {カードタイトル} {曲名} {スタンプ数} {参加者用URL}<br>ハッシュタグもここで自由に変更できます。参加者用URLを消した場合は文末へ自動追加されます。</p>
+        </div>
       </div>
 
       <p id="adminError" class="error" role="alert"></p>
@@ -1260,6 +1272,7 @@
         '🩷': 'ピンク', '🎈': '風船', '🔫': '水鉄砲', '🤖': 'ロボット', '🕺': 'ダンス'
       };
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
+      const DEFAULT_SHARE_TEMPLATE = '{スタンプ} {カードタイトル}\n「{曲名}」を1日1回聴いています！\n【{スタンプ数} STAMPS】\n{参加者用URL}\n#SnowMan';
       const params = new URLSearchParams(location.search);
       const isTestMode = params.get('z') === '1' || params.get('test') === '1' || params.get('mode') === 'test';
       const incomingTestDay = params.get('d') || params.get('today') || '';
@@ -1465,10 +1478,11 @@
         const spotify = safeUrl(firstParam(source, 'p', 'spotify'));
         const line = safeUrl(firstParam(source, 'n', 'line'));
         const youtube = safeUrl(firstParam(source, 'y', 'youtube'));
+        const shareTemplate = (firstParam(source, 'm', 'message') || DEFAULT_SHARE_TEMPLATE).slice(0, 500);
         const seed = `${title}|${song}|${start}|${release}|${end}`;
         const id = (firstParam(source, 'i', 'cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
         if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(release) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || release < start || end < release) return null;
-        return { title, song, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, template, id };
+        return { title, song, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, shareTemplate, template, id };
       }
 
       function configFromForm() {
@@ -1487,6 +1501,7 @@
         const spotify = safeUrl(rawSpotify);
         const line = safeUrl(rawLine);
         const youtube = safeUrl(rawYoutube);
+        const shareTemplate = $('adminShareTemplate').value.trim() || DEFAULT_SHARE_TEMPLATE;
         const template = $('adminTemplate').value;
         const availableStamps = adminSelectedStamps.length ? [...adminSelectedStamps] : stampsForTemplate(template);
         const stamp = availableStamps.includes($('adminStamp').value) ? $('adminStamp').value : availableStamps[0];
@@ -1506,7 +1521,7 @@
         const id = currentConfig && currentConfig.title === title && currentConfig.song === song && currentConfig.start === start && currentConfig.release === release && currentConfig.end === end
           ? currentConfig.id
           : hashText(`${title}|${song}|${start}|${release}|${end}`);
-        return { title, song, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, template, id };
+        return { title, song, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, shareTemplate, template, id };
       }
 
       function configUrl(config, testMode = false) {
@@ -1523,6 +1538,7 @@
         if (config.spotify) url.searchParams.set('p', config.spotify);
         if (config.line) url.searchParams.set('n', config.line);
         if (config.youtube) url.searchParams.set('y', config.youtube);
+        if (config.shareTemplate && config.shareTemplate !== DEFAULT_SHARE_TEMPLATE) url.searchParams.set('m', config.shareTemplate);
         url.searchParams.set('e', config.stamp);
         url.searchParams.set('x', encodeStampSet(config.stamps));
         url.searchParams.set('v', { hotel: 'h', classic: 'c', journey: 'j' }[config.template] || 'h');
@@ -1686,6 +1702,7 @@
         $('adminSpotify').value = firstParam(params, 'p', 'spotify');
         $('adminLine').value = firstParam(params, 'n', 'line');
         $('adminYoutube').value = firstParam(params, 'y', 'youtube');
+        $('adminShareTemplate').value = firstParam(params, 'm', 'message') || DEFAULT_SHARE_TEMPLATE;
         const templateRaw = firstParam(params, 'v', 'template');
         const template = { h: 'hotel', c: 'classic', j: 'journey' }[templateRaw] || templateRaw;
         $('adminTemplate').value = ['classic', 'hotel', 'journey'].includes(template) ? template : 'hotel';
@@ -1741,6 +1758,7 @@
         $('adminSpotify').value = config.spotify || '';
         $('adminLine').value = config.line || '';
         $('adminYoutube').value = config.youtube || '';
+        $('adminShareTemplate').value = config.shareTemplate || DEFAULT_SHARE_TEMPLATE;
         $('adminTemplate').value = config.template || 'hotel';
         renderAdminStampChoices($('adminTemplate').value, config.stamps, config.stamp);
       }
@@ -2523,7 +2541,18 @@
         const days = dateRange(config.start, config.end);
         const count = [...loadStamps(config)].filter((day) => days.includes(day)).length;
         const participantUrl = configUrl(config);
-        return `${config.stamp} ${config.title}\n「${config.song || config.title}」を1日1回聴いています！\n【${count} STAMPS】\n${participantUrl}\n#SnowMan`;
+        const replacements = {
+          '{スタンプ}': config.stamp,
+          '{カードタイトル}': config.title,
+          '{曲名}': config.song || config.title,
+          '{スタンプ数}': String(count),
+          '{参加者用URL}': participantUrl
+        };
+        let text = config.shareTemplate || DEFAULT_SHARE_TEMPLATE;
+        Object.entries(replacements).forEach(([token, value]) => { text = text.split(token).join(value); });
+        text = text.trim();
+        if (!text.includes(participantUrl)) text += `\n${participantUrl}`;
+        return text;
       }
 
       function shareToX(config) {
@@ -2584,6 +2613,7 @@
             spotify: '',
             line: '',
             youtube: '',
+            shareTemplate: DEFAULT_SHARE_TEMPLATE,
             template: 'hotel',
             id: 'test-demo'
           };
