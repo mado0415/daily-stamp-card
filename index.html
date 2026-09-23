@@ -154,12 +154,12 @@
 
     .action-row {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
       padding: 0 24px 22px;
     }
 
-    .action-row.test-mode { grid-template-columns: 1fr 1fr; }
+    .action-row.test-mode { grid-template-columns: 1fr; }
 
     .btn {
       min-height: 48px;
@@ -180,7 +180,6 @@
     .btn-primary { color: var(--theme-text); background: var(--theme); }
     .btn-soft { color: var(--ink); background: rgba(var(--theme-rgb), .12); }
     .btn-plain { color: #4e6479; background: #edf3f7; }
-    .btn-danger { color: #9b2c2c; background: #fde8e8; }
     .btn[disabled] { opacity: .46; transform: none; }
     .btn-full { width: 100%; }
 
@@ -229,18 +228,8 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1px;
-      padding: 4px 2px;
-    }
-
-    .day-tag-slot {
-      width: 100%;
-      height: 11px;
-      flex: 0 0 11px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: visible;
+      gap: 2px;
+      padding: 5px 2px;
     }
 
     button.day {
@@ -295,143 +284,16 @@
       transform: rotate(-8deg) scale(1);
     }
 
-    .day.today.day-action {
-      justify-content: center;
-      padding-top: 8px;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-    .day-inline-action {
-      position: relative;
-      z-index: 2;
-      width: calc(100% - 6px);
-      min-height: 25px;
-      margin-top: auto;
-      border: 1px solid rgba(90, 23, 40, .28);
-      border-radius: 9px;
-      padding: 4px 2px;
-      color: #5a1728;
-      background: #fff4d5;
-      box-shadow: 0 2px 7px rgba(55, 13, 25, .14);
+    .today-tag {
+      position: absolute;
+      top: 3px;
+      right: 4px;
       font-size: 8px;
       font-weight: 900;
-      line-height: 1.15;
-      pointer-events: none;
-    }
-    .day-inline-action.stamp-ready {
-      color: #fff4d5;
-      background: #79102d;
-      border-color: #f0d48b;
-    }
-    .listen-reset {
-      position: relative;
-      z-index: 3;
-      margin-top: 3px;
-      border: 0;
-      padding: 2px 1px;
-      color: inherit;
-      background: transparent;
-      font: inherit;
-      font-size: 6.5px;
-      font-weight: 800;
-      line-height: 1.1;
-      text-decoration: underline;
-      opacity: .88;
-      cursor: pointer;
+      color: var(--theme);
     }
 
-    .participant-identity {
-      margin: 0 24px 14px;
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      align-items: center;
-      gap: 9px;
-    }
-    .participant-identity label {
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 900;
-      letter-spacing: .05em;
-    }
-    .participant-identity input {
-      min-width: 0;
-      height: 38px;
-      border: 1px solid #d9e4ec;
-      border-radius: 12px;
-      padding: 0 12px;
-      color: var(--ink);
-      background: rgba(255,255,255,.78);
-      font: inherit;
-      font-size: 13px;
-      font-weight: 700;
-    }
-    .participant-name-card {
-      margin: -5px 0 12px;
-      text-align: right;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .03em;
-    }
-    .template-hotel .participant-name-card { color: #dfbd6e; }
-
-    .today-tag {
-      position: relative;
-      top: auto;
-      left: auto;
-      right: auto;
-      transform: none;
-      flex: 0 0 auto;
-      margin: 0;
-      min-width: 38px;
-      border: 1px solid rgba(89, 26, 43, .18);
-      border-radius: 999px;
-      padding: 1px 5px;
-      color: #5a1728;
-      background: #fff4d5;
-      box-shadow: 0 1px 4px rgba(55, 13, 25, .16);
-      font-size: 7px;
-      font-weight: 900;
-      line-height: 1;
-      letter-spacing: .05em;
-    }
-    .release-tag {
-      position: relative;
-      top: auto;
-      left: auto;
-      z-index: 3;
-      transform: none;
-      flex: 0 0 auto;
-      margin: 0;
-      width: max-content;
-      max-width: calc(100% - 12px);
-      border: 1px solid #b68d36;
-      border-radius: 999px;
-      padding: 1px 4px;
-      color: #5a1728;
-      background: #fff1ad;
-      box-shadow: 0 0 10px rgba(255, 217, 111, .65);
-      font-size: 6px;
-      font-weight: 950;
-      line-height: 1;
-      letter-spacing: .04em;
-      white-space: nowrap;
-    }
-    .day.release-day {
-      padding-top: 8px;
-      border-color: #d7aa3d;
-      box-shadow: 0 0 0 3px rgba(230, 181, 58, .25), 0 0 18px rgba(255, 205, 72, .32);
-    }
-    .day.release-day::after {
-      content: "";
-      position: absolute;
-      inset: 3px;
-      border: 1px solid rgba(255, 223, 131, .75);
-      border-radius: inherit;
-      pointer-events: none;
-    }
-
-    .stamped .today-tag { color: #5a1728; }
+    .stamped .today-tag { color: var(--theme-text); }
 
     .helper {
       margin: 14px 5px 0;
@@ -447,19 +309,17 @@
       gap: 10px;
       padding: 0 24px 25px;
     }
-    .share-row.single { grid-template-columns: 1fr; }
 
     .completion {
       display: none;
-      margin: 0 24px 14px;
-      padding: 9px 12px;
+      margin: 0 24px 22px;
+      padding: 15px;
       color: var(--ink);
       background: rgba(var(--theme-rgb), .12);
       border-radius: 16px;
       text-align: center;
-      font-size: 12px;
       font-weight: 800;
-      line-height: 1.35;
+      line-height: 1.6;
     }
 
     .completion.show { display: block; }
@@ -490,13 +350,12 @@
       --line: #d2ad5d;
       --wash: #f1d9bb;
       border: 1px solid rgba(201, 164, 82, .72);
-      box-shadow: 0 20px 55px rgba(92, 5, 28, .17), 0 0 0 3px rgba(var(--theme-rgb), .12);
+      box-shadow: 0 20px 55px rgba(92, 5, 28, .17);
     }
 
     .template-hotel .hero {
       color: #fff4d5;
       background:
-        radial-gradient(circle at 82% 12%, rgba(var(--theme-rgb), .34), transparent 28%),
         radial-gradient(circle at 9px 9px, rgba(255, 227, 158, .18) 0 2px, transparent 2.5px) 0 0 / 18px 18px,
         linear-gradient(135deg, rgba(183, 12, 53, .98), rgba(111, 4, 31, .98));
       border-bottom: 3px solid #d2ad5d;
@@ -505,59 +364,6 @@
     .template-hotel .eyebrow,
     .template-hotel .release-line,
     .template-hotel .release-line strong { color: #f3d58d; }
-    .template-hotel::before {
-      background: linear-gradient(90deg, #cba957 0 45%, var(--theme) 45% 55%, #cba957 55% 100%);
-    }
-    .template-hotel .eyebrow::before {
-      content: "";
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      margin: 0 7px 1px 0;
-      border: 1px solid rgba(255,255,255,.65);
-      border-radius: 50%;
-      background: var(--theme);
-      box-shadow: 0 0 0 2px rgba(243,213,141,.24);
-    }
-    .template-hotel .progress-bar {
-      position: relative;
-      background: linear-gradient(90deg, #8f0c31 0%, var(--theme) 62%, #d0aa54 100%);
-    }
-    .template-hotel .progress-bar::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      right: 0;
-      width: 8px;
-      height: 8px;
-      border: 2px solid #fff3cb;
-      border-radius: 50%;
-      background: var(--theme);
-      transform: translate(50%, -50%);
-    }
-    .template-hotel .btn-primary {
-      color: #fff3d0;
-      background: #8d0b30;
-      border: 1px solid #cba957;
-    }
-    .template-hotel .btn-soft {
-      color: #5a1728;
-      background: #f5dfae;
-      border: 1px solid rgba(203,169,87,.55);
-    }
-    .template-hotel .today-tag,
-    .template-hotel .day.stamped .today-tag {
-      color: #5a1728;
-      background: #fff4d5;
-      border-color: #cba957;
-    }
-    .template-hotel .day.release-day {
-      border-color: #ffe18d;
-      box-shadow: 0 0 0 3px rgba(255, 225, 141, .38), 0 0 24px rgba(255, 213, 111, .48), inset 0 0 0 5px rgba(255, 232, 177, .11);
-    }
-    .template-hotel .day.release-day.stamped {
-      box-shadow: 0 0 0 3px rgba(255, 225, 141, .48), 0 0 30px rgba(255, 213, 111, .72), inset 0 0 0 5px rgba(255,255,255,.28);
-    }
     .template-hotel .stamp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .template-hotel .day {
       aspect-ratio: .86 / 1;
@@ -577,21 +383,20 @@
     }
     .template-hotel .day > * { position: relative; z-index: 1; }
     .template-hotel .day.today {
-      border-color: var(--theme);
-      box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .42), 0 0 18px rgba(var(--theme-rgb), .22), inset 0 0 0 5px rgba(255, 232, 177, .11);
+      border-color: #fff1bd;
+      box-shadow: 0 0 0 3px rgba(203, 169, 87, .42), inset 0 0 0 5px rgba(255, 232, 177, .11);
     }
     .template-hotel .day.stamped {
       color: #571127;
       background: linear-gradient(180deg, #fff4c9, #e8c46f);
       border-color: #b68d36;
-      box-shadow: 0 0 22px rgba(255, 213, 111, .55), 0 0 0 2px rgba(var(--theme-rgb), .34), inset 0 0 0 5px rgba(255,255,255,.24);
+      box-shadow: 0 0 22px rgba(255, 213, 111, .55), inset 0 0 0 5px rgba(255,255,255,.24);
     }
     .template-hotel .day.prejoin { color: #a88579; background: #ead6bf; border-color: #cdb78e; }
     .template-hotel .day.future { opacity: .62; }
     .template-hotel .stamp-section {
       color: #fff0c8;
       background:
-        radial-gradient(circle at 50% 0, rgba(var(--theme-rgb), .22), transparent 24%),
         linear-gradient(45deg, rgba(244, 216, 151, .055) 25%, transparent 25%, transparent 75%, rgba(244, 216, 151, .055) 75%) 0 0 / 24px 24px,
         linear-gradient(-45deg, rgba(244, 216, 151, .055) 25%, transparent 25%, transparent 75%, rgba(244, 216, 151, .055) 75%) 0 0 / 24px 24px,
         #7a0826;
@@ -601,54 +406,19 @@
     .template-hotel .stamp-section .section-head span { color: #dfbd6e; }
     .template-hotel .stage-decoration { color: #c79e45; }
 
-    .test-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin: 0 0 12px;
-      border: 1px solid rgba(255,255,255,.55);
-      border-radius: 999px;
-      padding: 5px 10px;
-      color: #fff7df;
-      background: rgba(48, 14, 24, .35);
-      font-size: 10px;
-      font-weight: 900;
-      letter-spacing: .06em;
-    }
-
     .card.template-journey { --paper: #fffdf8; }
     .template-journey .stamp-grid {
       position: relative;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 16px 11px;
     }
-    .journey-route { display: none; }
-    .template-journey .journey-route {
-      display: grid;
-      grid-template-columns: 9px minmax(0, 1fr) 15px;
-      align-items: center;
-      gap: 7px;
-      height: 15px;
-      margin: -3px 10px 13px;
-      color: var(--theme);
-    }
-    .journey-route-start {
-      width: 8px;
-      height: 8px;
-      border: 2px solid #fffdf8;
-      border-radius: 50%;
-      background: var(--theme);
-      box-shadow: 0 0 0 2px rgba(var(--theme-rgb), .28);
-    }
-    .journey-route-line {
-      height: 2px;
-      background: repeating-linear-gradient(90deg, rgba(var(--theme-rgb), .48) 0 7px, transparent 7px 12px);
-    }
-    .journey-route-goal {
-      font-size: 14px;
-      line-height: 1;
-      text-align: center;
-      transform: rotate(8deg);
+    .template-journey .stamp-grid::before {
+      content: "";
+      position: absolute;
+      inset: 50% 5%;
+      height: 3px;
+      background: repeating-linear-gradient(90deg, rgba(var(--theme-rgb), .28) 0 10px, transparent 10px 17px);
+      transform: translateY(-50%);
     }
     .template-journey .day {
       aspect-ratio: 1;
@@ -657,15 +427,8 @@
       background: #fffdf8;
       border: 2px solid rgba(var(--theme-rgb), .3);
     }
-    .template-journey .day.stamped {
-      color: #24364a;
-      background: rgba(var(--theme-rgb), .13);
-      border-color: var(--theme);
-      box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .10);
-    }
-    .template-journey .day.stamped .day-date,
-    .template-journey .day.stamped .day-week { color: #24364a; }
-    .template-journey .today-tag { top: auto; }
+    .template-journey .day.stamped { border-color: var(--theme); }
+    .template-journey .today-tag { top: -1px; right: 50%; transform: translateX(50%); }
 
     .listen-links {
       display: grid;
@@ -675,239 +438,6 @@
     }
 
     .listen-links .btn { min-height: 43px; font-size: 13px; }
-
-    .stamp-picker {
-      position: relative;
-      margin: 0 24px 16px;
-      padding: 12px 13px;
-      border: 1px solid var(--line);
-      border-radius: 15px;
-      background: rgba(255,255,255,.48);
-    }
-    .stamp-picker-label {
-      margin: 0 0 8px;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-    }
-    .stamp-choices {
-      display: flex;
-      gap: 7px;
-      overflow-x: auto;
-      padding: 3px 25px 6px 2px;
-      scrollbar-width: none;
-    }
-    .stamp-choices::-webkit-scrollbar { display: none; }
-    .stamp-scroll-hint {
-      position: absolute;
-      z-index: 3;
-      right: 5px;
-      bottom: 25px;
-      width: 22px;
-      height: 32px;
-      border-radius: 10px 0 0 10px;
-      color: #5a1728;
-      background: linear-gradient(90deg, rgba(255,244,213,.28), #fff4d5 48%);
-      display: grid;
-      place-items: center;
-      font-size: 18px;
-      font-weight: 900;
-      line-height: 1;
-      pointer-events: none;
-      animation: hintNudge 1.2s ease-in-out infinite;
-    }
-    @keyframes hintNudge {
-      0%, 100% { transform: translateX(0); }
-      50% { transform: translateX(2px); }
-    }
-    .stamp-choice {
-      flex: 0 0 42px;
-      width: 42px;
-      height: 42px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: rgba(255,255,255,.74);
-      font-size: 23px;
-      line-height: 1;
-    }
-    .stamp-choice.selected {
-      border-color: #cba957;
-      background: #fff2c4;
-      box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .28);
-      transform: rotate(-5deg);
-    }
-    .template-hotel .stamp-picker {
-      border-color: rgba(203,169,87,.65);
-      background: #f8e8c7;
-    }
-    .template-hotel .stamp-choice { background: #fff8df; }
-
-    .participant-color-picker {
-      margin: 0 24px 16px;
-      padding: 11px 13px;
-      border: 1px solid var(--line);
-      border-radius: 15px;
-      background: rgba(255,255,255,.48);
-    }
-    .participant-color-picker p {
-      margin: 0 0 9px;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-    }
-    .participant-color-picker .color-choice { width: 31px; height: 31px; }
-    .participant-color-picker .color-list {
-      flex-wrap: nowrap;
-      justify-content: space-between;
-      gap: 4px;
-    }
-    .participant-color-picker .color-choice {
-      flex: 0 0 27px;
-      width: 27px;
-      height: 27px;
-      border-width: 2px;
-    }
-    .template-hotel .participant-color-picker {
-      border-color: rgba(203,169,87,.65);
-      background: #f8e8c7;
-    }
-
-    .admin-stamp-choices {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      padding: 4px 0 2px;
-    }
-    .admin-stamp-choice {
-      position: relative;
-      width: 42px;
-      height: 42px;
-      border: 1px solid #cddae5;
-      border-radius: 12px;
-      color: #24364a;
-      background: #f4f7fa;
-      font-size: 22px;
-      line-height: 1;
-      opacity: .28;
-    }
-    .admin-stamp-choice.selected {
-      border: 2px solid #2779b8;
-      background: #dff1ff;
-      box-shadow: 0 0 0 2px rgba(39,121,184,.18);
-      opacity: 1;
-    }
-    .admin-stamp-choice.selected::after {
-      content: '✓';
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      display: grid;
-      place-items: center;
-      width: 17px;
-      height: 17px;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      color: #fff;
-      background: #2779b8;
-      font-size: 10px;
-      font-weight: 900;
-    }
-    .admin-stamp-help {
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.55;
-    }
-    .stamp-set-editor {
-      display: grid;
-      gap: 8px;
-      margin-bottom: 12px;
-      padding: 12px;
-      border: 1px solid #d9e4ec;
-      border-radius: 14px;
-      background: #f8fbfd;
-    }
-    .stamp-set-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 8px;
-    }
-    .stamp-set-row.triple {
-      grid-template-columns: minmax(0, 1fr) auto auto;
-    }
-    .stamp-set-row.actions {
-      grid-template-columns: minmax(0, 1fr) auto;
-    }
-    .stamp-set-row.actions.new-set { grid-template-columns: 1fr; }
-    .stamp-set-row input,
-    .stamp-set-row select {
-      min-width: 0;
-      min-height: 40px;
-      border: 1px solid #cddae5;
-      border-radius: 11px;
-      padding: 8px 10px;
-      color: var(--ink);
-      background: #fff;
-      font: inherit;
-      font-size: 14px;
-    }
-    .stamp-set-row .btn {
-      min-height: 40px;
-      padding: 8px 11px;
-      font-size: 11px;
-    }
-    .stamp-set-row.actions .btn {
-      padding-inline: 6px;
-    }
-    .stamp-set-mode {
-      margin: 2px 0;
-      color: var(--ink);
-      font-size: 13px;
-      font-weight: 900;
-    }
-    .stamp-set-step {
-      margin: 7px 0 0;
-      color: var(--ink);
-      font-size: 12px;
-      font-weight: 900;
-    }
-    .stamp-set-preview-wrap {
-      padding: 10px 11px;
-      border: 1px solid #d9e4ec;
-      border-radius: 12px;
-      background: #fff;
-    }
-    .stamp-set-preview-label {
-      margin: 0 0 7px;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-    }
-    .stamp-set-preview {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      font-size: 23px;
-      line-height: 1.25;
-    }
-    .stamp-set-preview-empty {
-      color: var(--muted);
-      font-size: 12px;
-    }
-    #adminStampListInput {
-      min-height: 86px;
-      resize: vertical;
-      font-size: 24px;
-      line-height: 1.5;
-    }
-
-    .share-help {
-      margin: 10px 2px 0;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.5;
-      text-align: center;
-    }
 
     .test-panel {
       margin: 0 0 12px;
@@ -943,36 +473,6 @@
       line-height: 1.75;
     }
 
-    .workspace-panel {
-      margin: 0 0 22px;
-      padding: 15px;
-      border: 1px solid rgba(var(--theme-rgb), .30);
-      border-radius: 16px;
-      background: rgba(var(--theme-rgb), .08);
-    }
-    .workspace-panel-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 11px;
-    }
-    .workspace-panel h2 { margin: 0; font-size: 15px; }
-    .workspace-panel .btn { min-height: 38px; padding: 8px 11px; font-size: 12px; }
-    .workspace-card-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; }
-    .workspace-card-row select {
-      width: 100%;
-      min-width: 0;
-      min-height: 43px;
-      border: 1px solid #cddae5;
-      border-radius: 11px;
-      padding: 8px 10px;
-      color: var(--ink);
-      background: #fff;
-      font-size: 14px;
-    }
-    .workspace-note { margin: 9px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
-
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -989,7 +489,7 @@
       font-weight: 800;
     }
 
-    .field input, .field select, .field textarea {
+    .field input, .field select {
       width: 100%;
       min-height: 46px;
       border: 1px solid #cddae5;
@@ -1001,55 +501,7 @@
       font-size: 16px;
     }
 
-    .field textarea {
-      min-height: 150px;
-      resize: vertical;
-      font-family: inherit;
-      line-height: 1.55;
-    }
-
-    .template-save-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 9px;
-    }
-    .template-save-row .btn {
-      min-height: 38px;
-      padding: 8px 12px;
-      font-size: 12px;
-    }
-    .shared-settings {
-      padding: 13px;
-      border: 1px solid #d7e3ec;
-      border-radius: 14px;
-      background: #f7fafc;
-    }
-    .shared-settings .field-note { margin-top: 8px; }
-    .shared-status {
-      display: none;
-      margin: 9px 0 0;
-      padding: 8px 10px;
-      border-radius: 10px;
-      color: #2f5d49;
-      background: #e8f6ef;
-      font-size: 11px;
-      font-weight: 800;
-      line-height: 1.5;
-    }
-    .shared-status.show { display: block; }
-    .url-entry + .url-entry {
-      margin-top: 13px;
-      padding-top: 13px;
-      border-top: 1px solid #dce6ee;
-    }
-    .url-entry-label {
-      margin: 0 0 7px;
-      color: var(--ink);
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .field input:focus, .field select:focus, .field textarea:focus {
+    .field input:focus, .field select:focus {
       border-color: var(--theme);
       box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .15);
     }
@@ -1077,13 +529,9 @@
 
     .admin-actions {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 10px;
       margin-top: 22px;
-    }
-
-    .admin-actions .draft-save {
-      grid-column: 1 / -1;
     }
 
     .url-box {
@@ -1095,9 +543,9 @@
     }
 
     .url-box.show { display: block; }
-    .url-box-label { display: block; margin: 0 0 7px; font-size: 12px; font-weight: 800; }
+    .url-box label { display: block; margin-bottom: 7px; font-size: 12px; font-weight: 800; }
     .url-copy-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-    .generated-url-link {
+    .url-copy-row input {
       width: 100%;
       min-width: 0;
       border: 1px solid #cddae5;
@@ -1106,9 +554,6 @@
       color: #52677b;
       background: #fff;
       font-size: 13px;
-      line-height: 1.45;
-      overflow-wrap: anywhere;
-      text-decoration: underline;
     }
 
     .notice, .error {
@@ -1120,11 +565,6 @@
     .notice { color: var(--muted); }
     .error { display: none; color: #c0392b; font-weight: 800; }
     .error.show { display: block; }
-    .field-note { margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
-
-    .listen-modal-copy { margin: 0 0 13px; color: var(--muted); font-size: 12px; line-height: 1.6; }
-    .listen-modal-links { display: grid; gap: 9px; }
-    .listen-modal-links .btn { width: 100%; }
 
     .modal {
       position: fixed;
@@ -1151,10 +591,6 @@
     .modal-box h2 { margin: 2px 0 13px; font-size: 18px; }
     .modal-box img { display: block; width: 100%; border-radius: 15px; background: #eef4f8; }
     .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 13px; }
-    .share-modal-actions {
-      grid-template-columns: 1fr 1fr !important;
-      margin: 0 0 13px;
-    }
 
     .toast {
       position: fixed;
@@ -1234,7 +670,7 @@
 
     <section id="testPanel" class="test-panel hidden" aria-label="テスト操作">
       <h2>🧪 TEST MODE</h2>
-      <p>本番の記録には影響しません。スタンプを押すか、その日を空欄のまま翌日へ進めます。3・5・10個などの節目も確認できます。</p>
+      <p>本番の記録には影響しません。「今日」を押すたび翌日へ進み、3・5・10個などの節目の演出を順番に確認できます。</p>
       <div class="test-controls">
         <div class="test-field">
           <label for="testCount">スタンプ数</label>
@@ -1243,7 +679,7 @@
         <div class="test-field">
           <label for="testTemplate">テンプレート</label>
           <select id="testTemplate">
-            <option value="hotel">🏨 HOTEL ALL SUITE</option>
+            <option value="hotel">🏨 AMENITY HOTEL</option>
             <option value="classic">◯ STAMP</option>
             <option value="journey">🚏 JOURNEY</option>
           </select>
@@ -1254,7 +690,7 @@
 
     <section id="participantView" class="card hidden" aria-label="表題曲デイリースタンプカード">
       <header class="hero">
-        <p id="testBadge" class="test-badge hidden">🧪 動作テスト｜仮の今日 <span id="testTodayText"></span></p>
+        <p id="templateLabel" class="eyebrow">DAILY LISTENING STAMP</p>
         <h1 id="campaignTitle"></h1>
         <p class="release-line"><strong id="releaseDateText"></strong> CD RELEASE</p>
       </header>
@@ -1267,25 +703,12 @@
         <div class="progress-track" role="progressbar" aria-label="次のマイルストーンまでの進み具合" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div id="progressBar" class="progress-bar"></div>
         </div>
+        <p id="milestoneNote" class="milestone-note"></p>
       </div>
 
-      <div class="participant-identity">
-        <label for="participantName">NAME / @ACCOUNT</label>
-        <input id="participantName" type="text" maxlength="32" autocomplete="nickname" placeholder="@username または名前（任意）">
-      </div>
-
-      <div class="participant-color-picker">
-        <p>カードカラーを選ぶ</p>
-        <div id="participantColorList" class="color-list" role="group" aria-label="カードカラー"></div>
-      </div>
-
-      <div id="stampPicker" class="stamp-picker">
-        <p class="stamp-picker-label">今日押すスタンプを選ぶ（途中で変更できます）</p>
-        <div id="stampChoices" class="stamp-choices" role="group" aria-label="今日押すスタンプ"></div>
-        <span id="stampScrollHint" class="stamp-scroll-hint" aria-hidden="true">›</span>
-      </div>
+      <div id="listenLinks" class="listen-links"></div>
       <div class="action-row">
-        <button id="skipTodayButton" class="btn btn-soft hidden" type="button">今日は押さず次の日へ</button>
+        <button id="todayButton" class="btn btn-soft" type="button">スタンプを押す</button>
         <button id="imageButtonTop" class="btn btn-plain" type="button">記録を画像にする</button>
       </div>
 
@@ -1298,59 +721,33 @@
           <h2>LISTENING CARD</h2>
           <span id="periodText"></span>
         </div>
-        <p id="participantNameCard" class="participant-name-card hidden"></p>
-        <div class="journey-route" aria-hidden="true">
-          <span class="journey-route-start"></span>
-          <span class="journey-route-line"></span>
-          <span class="journey-route-goal">✦</span>
-        </div>
         <div id="stampGrid" class="stamp-grid"></div>
+        <p id="helperText" class="helper"></p>
       </section>
 
-      <div class="share-row single">
+      <div class="share-row">
         <button id="imageButton" class="btn btn-plain" type="button">画像を作る</button>
+        <button id="xButton" class="btn btn-plain" type="button">Xで報告する</button>
       </div>
     </section>
 
     <section id="adminView" class="card admin-card hidden" aria-label="スタンプカード管理設定">
       <p class="eyebrow">CARD SETUP</p>
-      <h1 id="adminHeading">スタンプカードを作る</h1>
-      <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日以降まで続ける場合は、カード終了日を発売日より後に設定できます。</p>
-
-      <section id="workspacePanel" class="workspace-panel hidden" aria-label="共同管理カード一覧">
-        <div class="workspace-panel-head">
-          <h2>共同管理カード</h2>
-          <button id="workspaceNewButton" class="btn btn-primary" type="button">＋ 新しいカード</button>
-        </div>
-        <div class="workspace-card-row">
-          <select id="workspaceCardSelect" aria-label="編集するカード"></select>
-          <button id="workspaceOpenButton" class="btn btn-soft" type="button">編集</button>
-          <button id="workspaceDeleteButton" class="btn btn-danger" type="button">削除</button>
-        </div>
-        <p id="workspaceNote" class="workspace-note"></p>
-        <button id="workspaceCopyAdminButton" class="btn btn-plain btn-full" type="button">共同管理URLをコピー</button>
-      </section>
+      <h1>スタンプカードを作る</h1>
+      <p class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のマスも自動で含まれます。</p>
 
       <div class="form-grid">
         <div class="field wide">
-          <label for="adminTitle">カードタイトル</label>
+          <label for="adminTitle">表題曲名／カードタイトル</label>
           <input id="adminTitle" type="text" maxlength="60" placeholder="例：○○○ DAILY STAMP">
-        </div>
-        <div class="field wide">
-          <label for="adminSong">1日1回聴く曲名</label>
-          <input id="adminSong" type="text" maxlength="80" placeholder="例：ALL SUITE">
         </div>
         <div class="field">
           <label for="adminStart">開始日</label>
           <input id="adminStart" type="date">
         </div>
         <div class="field">
-          <label for="adminRelease">CD発売日</label>
+          <label for="adminRelease">CD発売日（この日を含む）</label>
           <input id="adminRelease" type="date">
-        </div>
-        <div class="field">
-          <label for="adminEnd">カード終了日（発売日以降）</label>
-          <input id="adminEnd" type="date">
         </div>
         <div class="field wide">
           <label for="adminLink">共通の再生ページURL（任意）</label>
@@ -1371,128 +768,59 @@
         <div class="field">
           <label for="adminTemplate">カードテンプレート</label>
           <select id="adminTemplate">
-            <option value="hotel">🏨 HOTEL ALL SUITE｜ホテル</option>
+            <option value="hotel">🏨 AMENITY HOTEL｜ホテル</option>
             <option value="classic">◯ STAMP｜ポイントカード</option>
             <option value="journey">🚏 JOURNEY｜発売日への道</option>
           </select>
         </div>
-        <div class="field wide">
-          <label for="adminSavedStampSet">参加者が選べる絵文字セット</label>
-          <div class="stamp-set-editor">
-            <div class="stamp-set-row">
-              <select id="adminSavedStampSet" aria-label="保存済み絵文字セット"></select>
-              <button id="newStampSetButton" class="btn btn-plain" type="button">新しいセット</button>
-            </div>
-            <p id="stampSetMode" class="stamp-set-mode">「AMENITY」を編集中</p>
-            <p class="stamp-set-step">① セット名</p>
-            <input id="adminStampSetName" type="text" maxlength="40" placeholder="セット名" aria-label="絵文字セット名">
-            <p class="stamp-set-step">② セットに入れる絵文字</p>
-            <textarea id="adminStampListInput" rows="3" maxlength="240" spellcheck="false" placeholder="例：⛄️❄️🎵" aria-label="セットに入れる絵文字"></textarea>
-            <p class="admin-stamp-help">絵文字を直接入力・削除してください。絵文字の間にスペースを入れなくても使えます。</p>
-            <div class="stamp-set-preview-wrap">
-              <p id="stampSetPreviewLabel" class="stamp-set-preview-label">現在のセット内容</p>
-              <div id="adminStampSetPreview" class="stamp-set-preview" aria-live="polite"></div>
-            </div>
-            <p class="stamp-set-step">③ セットを保存</p>
-            <div class="stamp-set-row actions">
-              <button id="saveStampSetButton" class="btn btn-soft" type="button">変更を保存</button>
-              <button id="deleteStampSetButton" class="btn btn-plain" type="button">削除</button>
-            </div>
-            <p class="field-note">保存したセットは、この共同管理ページ内のほかのカードでも選べます。</p>
-          </div>
-          <input id="adminStamp" type="hidden" value="⛄️">
+        <div class="field">
+          <label for="adminStamp">スタンプの絵柄</label>
+          <select id="adminStamp">
+            <option value="⛄️">⛄️ 雪だるま</option>
+            <option value="🎵">🎵 音符</option>
+            <option value="💿">💿 CD</option>
+            <option value="⭐️">⭐️ 星</option>
+            <option value="💙">💙 ハート</option>
+          </select>
         </div>
-        <div class="field wide">
-          <label for="adminShareTemplate">SNS投稿テンプレート</label>
-          <textarea id="adminShareTemplate" maxlength="500" spellcheck="false"></textarea>
-          <p class="field-note">使える項目：{カードタイトル} {曲名} {スタンプ数} {参加者用URL}<br>絵文字とハッシュタグは直接入力できます。参加者用URLを消した場合は文末へ自動追加されます。</p>
-          <div class="template-save-row">
-            <button id="saveShareTemplateButton" class="btn btn-soft" type="button">このカードに反映</button>
-            <button id="resetShareTemplateButton" class="btn btn-plain" type="button">初期文に戻す</button>
-          </div>
-          <p class="field-note">共同編集カードを保存すると、共同管理者にも同じ内容が表示されます。</p>
-        </div>
-        <div class="field wide shared-settings">
-          <label for="adminApiUrl">共同編集サーバーURL（Apps Script）</label>
-          <input id="adminApiUrl" type="url" inputmode="url" placeholder="https://script.google.com/macros/s/.../exec">
-          <p class="field-note">最初に共同管理ページを作るための接続先です。共同管理ページを開いた後は、ここを変更する必要はありません。</p>
-          <p id="sharedStatus" class="shared-status"></p>
+        <div class="field">
+          <label>カードカラー</label>
+          <div id="colorList" class="color-list" role="group" aria-label="カードカラー"></div>
         </div>
       </div>
 
       <p id="adminError" class="error" role="alert"></p>
       <div class="admin-actions">
-        <button id="saveDraftButton" class="btn btn-soft draft-save hidden" type="button">作業内容を一時保存</button>
-        <button id="testGenerateButton" class="btn btn-plain" type="button">日付を進めて動作テスト</button>
+        <button id="previewButton" class="btn btn-soft" type="button">本番表示を確認</button>
         <button id="generateButton" class="btn btn-primary" type="button">参加者用URLを作る</button>
+        <button id="testGenerateButton" class="btn btn-plain" type="button">テストページを開く</button>
       </div>
 
       <div id="urlBox" class="url-box">
-        <p id="generatedUrlLabel" class="url-box-label">参加者へ共有するURL</p>
-        <div id="participantUrlEntry" class="url-entry">
-          <p class="url-entry-label">参加者用URL</p>
-          <div class="url-copy-row">
-            <a id="generatedUrlLink" class="generated-url-link" href="#" target="_blank" rel="noopener"></a>
-            <button id="copyButton" class="btn btn-primary" type="button">コピー</button>
-          </div>
+        <label id="generatedUrlLabel" for="generatedUrl">参加者へ共有するURL</label>
+        <div class="url-copy-row">
+          <input id="generatedUrl" type="text" readonly>
+          <button id="copyButton" class="btn btn-primary" type="button">コピー</button>
         </div>
-        <div id="adminUrlEntry" class="url-entry hidden">
-          <p class="url-entry-label">共同管理URL（編集できる人だけに共有）</p>
-          <div class="url-copy-row">
-            <a id="generatedAdminUrlLink" class="generated-url-link" href="#" target="_blank" rel="noopener"></a>
-            <button id="copyAdminButton" class="btn btn-soft" type="button">コピー</button>
-          </div>
-        </div>
-        <p id="urlBoxNotice" class="notice">URLをタップすると参加者用ページを開けます。確認後、「コピー」から配布できます。</p>
+        <p class="notice">参加者用URLは配布用、テストURLは管理者の確認用です。テスト記録は本番のスタンプと分けて保存されます。</p>
       </div>
-    </section>
-
-    <section id="sharedErrorView" class="card admin-card hidden" aria-label="共有カード読み込みエラー">
-      <p class="eyebrow">SHARED CARD</p>
-      <h1>共有カードを読み込めませんでした</h1>
-      <p id="sharedErrorText" class="admin-lead"></p>
-      <button id="sharedReloadButton" class="btn btn-primary btn-full" type="button">もう一度読み込む</button>
     </section>
   </main>
 
   <div id="shareModal" class="modal" aria-hidden="true">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
       <h2 id="shareTitle">スタンプカード画像</h2>
-      <div class="modal-actions share-modal-actions">
-        <button id="nativeShareButton" class="btn btn-primary" type="button">SNS・写真アプリへ共有</button>
-        <button id="saveImageButton" class="btn btn-soft" type="button">画像ファイルを保存</button>
-        <button id="closeModalButton" class="btn btn-plain" type="button">閉じる</button>
-      </div>
       <img id="shareImage" alt="スタンプカードの共有画像">
-      <p id="shareHelp" class="share-help">「SNS・写真アプリへ共有」から、投稿先や「画像を保存」を選べます。</p>
-    </div>
-  </div>
-
-  <div id="confettiChoiceModal" class="modal" aria-hidden="true">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="confettiChoiceTitle">
-      <h2 id="confettiChoiceTitle">画像に紙吹雪を載せますか？</h2>
-      <p id="confettiChoiceReason" class="listen-modal-copy"></p>
       <div class="modal-actions">
-        <button id="imageWithConfettiButton" class="btn btn-primary" type="button">🎉 紙吹雪あり</button>
-        <button id="imageWithoutConfettiButton" class="btn btn-plain" type="button">紙吹雪なし</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="listenModal" class="modal" aria-hidden="true">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="listenModalTitle">
-      <h2 id="listenModalTitle">曲を聴く</h2>
-      <p class="listen-modal-copy">使うサービスを選んでください。再生ページを開くと、今日の窓からスタンプを押せるようになります。</p>
-      <div id="listenModalLinks" class="listen-modal-links"></div>
-      <div class="modal-actions">
-        <button id="closeListenModalButton" class="btn btn-plain btn-full" type="button">閉じる</button>
+        <button id="nativeShareButton" class="btn btn-primary" type="button">画像を共有</button>
+        <button id="saveImageButton" class="btn btn-soft" type="button">画像を保存</button>
+        <button id="closeModalButton" class="btn btn-plain btn-full" type="button">閉じる</button>
       </div>
     </div>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     (() => {
       'use strict';
@@ -1501,46 +829,15 @@
         '#ffcc33', '#7b2cbf', '#f8f9fa', '#4ea8de', '#f97316',
         '#2a9d8f', '#283044', '#e63946', '#ff69b4'
       ];
-      const STAMPS = [
-        '⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🔑', '🛎️', '🧳', '☕️', '🪥', '🪮', '🏨',
-        '💛', '💜', '🤍', '💙', '🧡', '💚', '🖤', '❤️', '🩷', '🎈', '🔫', '🤖', '🕺'
-      ];
-      const AMENITY_STAMPS = [...STAMPS];
-      const HEART_STAMPS = ['💛', '💜', '🤍', '💙', '🧡', '💚', '🖤', '❤️', '🩷'];
-      const TEMPLATE_STAMPS = {
-        hotel: ['⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🔑', '🛎️', '🧳', '☕️', '🪥', '🪮', '🏨', '🎈', '🔫', '🤖', '🕺', ...HEART_STAMPS],
-        classic: ['⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🎈', '🔫', '🤖', '🕺', ...HEART_STAMPS],
-        journey: ['⛄️', '🎵', '💿', '⭐️', '🧳', '🎈', '🔫', '🤖', '🕺', ...HEART_STAMPS]
-      };
-      const STAMP_NAMES = {
-        '⛄️': '雪だるま', '🎵': '音符', '💿': 'CD', '⭐️': '星', '🍎': 'りんご', '🥖': 'パン',
-        '🔑': 'ホテルキー', '🛎️': 'ベル', '🧳': 'トランク', '☕️': 'カップ', '🪥': '歯ブラシ',
-        '🪮': 'コーム', '🏨': 'ホテル', '💛': 'イエロー', '💜': 'パープル', '🤍': 'ホワイト',
-        '💙': 'ブルー', '🧡': 'オレンジ', '💚': 'グリーン', '🖤': 'ブラック', '❤️': 'レッド',
-        '🩷': 'ピンク', '🎈': '風船', '🔫': '水鉄砲', '🤖': 'ロボット', '🕺': 'ダンス'
-      };
+      const STAMPS = ['⛄️', '🎵', '💿', '⭐️', '💙'];
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
-      const DEFAULT_SHARE_TEMPLATE = '⛄️ {カードタイトル}\n「{曲名}」を1日1回聴いています！\n【{スタンプ数} STAMPS】\n{参加者用URL}\n#SnowMan';
-      const SAVED_SHARED_API_URL_KEY = 'daily_stamp_shared_api_url_v1';
       const params = new URLSearchParams(location.search);
-      const isTestMode = params.get('z') === '1' || params.get('test') === '1' || params.get('mode') === 'test';
-      const incomingTestDay = params.get('d') || params.get('today') || '';
-      const incomingSharedCardId = params.get('card') || '';
-      const incomingSharedEditKey = params.get('edit') || '';
-      const incomingSharedApiUrl = params.get('api') || '';
-      let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(incomingTestDay) ? incomingTestDay : '';
+      const isTestMode = params.get('test') === '1';
+      let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(params.get('today') || '') ? params.get('today') : '';
+      let selectedColor = '#4ea8de';
       let currentConfig = null;
-      let adminSelectedStamps = [];
       let shareBlob = null;
       let toastTimer = null;
-      let sharedSaveBusy = false;
-      let sharedStampSets = { AMENITY: [...AMENITY_STAMPS] };
-      let editingStampSetOriginalName = 'AMENITY';
-      let generatedWorkspaceUrl = '';
-      let workspaceEditKey = /^[a-zA-Z0-9_-]{32,160}$/.test(incomingSharedEditKey) ? incomingSharedEditKey : '';
-      let workspaceCards = [];
-      let workspaceStampSetsRevision = 0;
-      let editingWorkspaceCardId = /^[a-zA-Z0-9_-]{16,80}$/.test(incomingSharedCardId) ? incomingSharedCardId : '';
 
       const $ = (id) => document.getElementById(id);
 
@@ -1564,7 +861,7 @@
         if (!isTestMode) return;
         simulatedToday = day;
         const url = new URL(location.href);
-        url.searchParams.set(url.searchParams.has('z') ? 'd' : 'today', day);
+        url.searchParams.set('today', day);
         history.replaceState(null, '', url);
       }
 
@@ -1632,578 +929,29 @@
         }
       }
 
-      function safeSharedApiUrl(value) {
-        if (!value) return '';
-        try {
-          const url = new URL(value);
-          const validHost = url.hostname === 'script.google.com';
-          const validPath = /^\/macros\/s\/[^/]+\/exec\/?$/.test(url.pathname);
-          return url.protocol === 'https:' && validHost && validPath ? url.href : '';
-        } catch (_) {
-          return '';
-        }
-      }
-
-      function loadSavedSharedApiUrl() {
-        try { return safeSharedApiUrl(localStorage.getItem(SAVED_SHARED_API_URL_KEY) || ''); }
-        catch (_) { return ''; }
-      }
-
-      function workspaceKeyStorageName(apiUrl) {
-        return `daily_stamp_workspace_edit_key_v1_${hashText(apiUrl || '')}`;
-      }
-
-      function workspaceCacheStorageName(apiUrl, editKey) {
-        return `daily_stamp_workspace_cache_v1_${hashText(`${apiUrl || ''}|${editKey || ''}`)}`;
-      }
-
-      function saveWorkspaceCache() {
-        const apiUrl = safeSharedApiUrl($('adminApiUrl').value) || safeSharedApiUrl(incomingSharedApiUrl);
-        if (!apiUrl || !workspaceEditKey) return;
-        try {
-          localStorage.setItem(workspaceCacheStorageName(apiUrl, workspaceEditKey), JSON.stringify({
-            cards: workspaceCards,
-            stampSets: loadSavedStampSets(),
-            settingsRevision: workspaceStampSetsRevision,
-            cachedAt: Date.now()
-          }));
-        } catch (_) {}
-      }
-
-      function loadWorkspaceCache(apiUrl, editKey) {
-        try {
-          const cached = JSON.parse(localStorage.getItem(workspaceCacheStorageName(apiUrl, editKey)) || 'null');
-          if (!cached || !Array.isArray(cached.cards)) return null;
-          return cached;
-        } catch (_) {
-          return null;
-        }
-      }
-
-      function saveWorkspaceEditKey(apiUrl, editKey) {
-        if (!apiUrl || !/^[a-zA-Z0-9_-]{32,160}$/.test(editKey || '')) return;
-        try { localStorage.setItem(workspaceKeyStorageName(apiUrl), editKey); } catch (_) {}
-      }
-
-      function loadWorkspaceEditKey(apiUrl) {
-        try {
-          const saved = localStorage.getItem(workspaceKeyStorageName(apiUrl)) || '';
-          return /^[a-zA-Z0-9_-]{32,160}$/.test(saved) ? saved : '';
-        } catch (_) {
-          return '';
-        }
-      }
-
-      function randomToken(bytes = 24) {
-        const values = new Uint8Array(bytes);
-        crypto.getRandomValues(values);
-        return [...values].map((value) => value.toString(16).padStart(2, '0')).join('');
-      }
-
-      function sharedConfigPayload(config) {
-        return {
-          title: config.title,
-          song: config.song || config.title,
-          start: config.start,
-          release: config.release,
-          end: config.end,
-          stamp: config.stamp,
-          stamps: [...config.stamps],
-          color: config.color || '#4ea8de',
-          link: config.link || '',
-          apple: config.apple || '',
-          spotify: config.spotify || '',
-          line: config.line || '',
-          youtube: config.youtube || '',
-          shareTemplate: config.shareTemplate || DEFAULT_SHARE_TEMPLATE,
-          template: config.template || 'hotel',
-          stampSetName: config.stampSetName || $('adminSavedStampSet').value || editingStampSetOriginalName || 'AMENITY',
-          stampSets: config.stampSets || loadSavedStampSets()
-        };
-      }
-
-      function sharedConfigSignature(config) {
-        return JSON.stringify(sharedConfigPayload(config));
-      }
-
-      function loadSharedRequest(apiUrl, action, values = {}) {
-        return new Promise((resolve, reject) => {
-          const api = safeSharedApiUrl(apiUrl);
-          if (!api) {
-            reject(new Error('共同編集URLが正しくありません。'));
-            return;
-          }
-          const requestId = `shared_${randomToken(8)}`;
-          const callbackName = `dailyStampCallback_${randomToken(8)}`;
-          const script = document.createElement('script');
-          let frame = null;
-          let fallbackStarted = false;
-          let finished = false;
-          const cleanup = () => {
-            if (finished) return;
-            finished = true;
-            clearTimeout(timer);
-            clearTimeout(fallbackTimer);
-            window.removeEventListener('message', receive);
-            if (frame) frame.remove();
-            script.remove();
-            try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
-          };
-          const finish = (result) => {
-            if (finished) return;
-            cleanup();
-            if (!result || !result.ok) {
-              reject(new Error(result && result.error ? result.error : '共有カードを読み込めませんでした。'));
-              return;
-            }
-            resolve(result);
-          };
-          const receive = (event) => {
-            const message = event.data;
-            if (!message || message.type !== 'daily-stamp-shared-card' || message.requestId !== requestId) return;
-            finish(message.result);
-          };
-          window.addEventListener('message', receive);
-
-          const plainUrl = new URL(api);
-          plainUrl.searchParams.set('action', action);
-          Object.entries(values).forEach(([name, value]) => {
-            if (value) plainUrl.searchParams.set(name, value);
-          });
-
-          window[callbackName] = finish;
-          const scriptUrl = new URL(plainUrl.href);
-          scriptUrl.searchParams.set('callback', callbackName);
-          script.src = scriptUrl.href;
-          script.async = true;
-
-          const startFrameFallback = () => {
-            if (finished || fallbackStarted) return;
-            fallbackStarted = true;
-            frame = document.createElement('iframe');
-            frame.hidden = true;
-            frame.setAttribute('aria-hidden', 'true');
-            const frameUrl = new URL(plainUrl.href);
-            frameUrl.searchParams.set('action', `${action}frame`);
-            frameUrl.searchParams.set('requestId', requestId);
-            frame.src = frameUrl.href;
-            document.body.appendChild(frame);
-          };
-          script.onerror = startFrameFallback;
-          const fallbackTimer = setTimeout(startFrameFallback, 8000);
-
-          const timer = setTimeout(() => {
-            cleanup();
-            reject(new Error('共同編集サーバーの応答に時間がかかっています。'));
-          }, 22000);
-
-          document.head.appendChild(script);
-        });
-      }
-
-      function loadSharedConfig(apiUrl, cardId, editKey = '') {
-        if (!/^[a-zA-Z0-9_-]{16,80}$/.test(cardId)) {
-          return Promise.reject(new Error('共同編集URLが正しくありません。'));
-        }
-        return loadSharedRequest(apiUrl, 'load', { id: cardId, edit: editKey });
-      }
-
-      function loadSharedWorkspace(apiUrl, editKey) {
-        if (!/^[a-zA-Z0-9_-]{32,160}$/.test(editKey)) {
-          return Promise.reject(new Error('共同管理URLの編集キーが正しくありません。'));
-        }
-        return loadSharedRequest(apiUrl, 'list', { edit: editKey });
-      }
-
-      function sharedCardUrl(cardId, apiUrl, editKey = '') {
-        const url = new URL(location.href);
-        url.search = '';
-        url.hash = '';
-        url.searchParams.set('card', cardId);
-        url.searchParams.set('api', apiUrl);
-        if (editKey) {
-          url.searchParams.set('edit', editKey);
-          url.searchParams.set('admin', '1');
-        }
-        return url.href;
-      }
-
-      function sharedAdminUrl(apiUrl, editKey) {
-        const url = new URL(location.href);
-        url.search = '';
-        url.hash = '';
-        url.searchParams.set('api', apiUrl);
-        url.searchParams.set('edit', editKey);
-        url.searchParams.set('admin', '1');
-        return url.href;
-      }
-
-      function postSharedRequest(apiUrl, payload) {
-        return new Promise((resolve, reject) => {
-          const api = safeSharedApiUrl(apiUrl);
-          if (!api) return reject(new Error('共同編集URLが正しくありません。'));
-          const requestId = `shared_${randomToken(8)}`;
-          const frameName = `daily_stamp_post_${randomToken(8)}`;
-          const frame = document.createElement('iframe');
-          const form = document.createElement('form');
-          frame.name = frameName;
-          frame.srcdoc = '<!doctype html><html><body></body></html>';
-          frame.hidden = true;
-          frame.setAttribute('aria-hidden', 'true');
-          form.method = 'POST';
-          form.action = api;
-          form.target = frameName;
-          form.hidden = true;
-          [['payload', JSON.stringify(payload)], ['requestId', requestId]].forEach(([name, value]) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = value;
-            form.appendChild(input);
-          });
-          let finished = false;
-          let submitted = false;
-          const cleanup = () => {
-            if (finished) return;
-            finished = true;
-            clearTimeout(timer);
-            window.removeEventListener('message', receive);
-            form.remove();
-            frame.remove();
-          };
-          const receive = (event) => {
-            const message = event.data;
-            if (!message || message.type !== 'daily-stamp-shared-card' || message.requestId !== requestId) return;
-            cleanup();
-            if (!message.result || !message.result.ok) {
-              reject(new Error(message.result && message.result.error ? message.result.error : '保存できませんでした。'));
-              return;
-            }
-            resolve(message.result);
-          };
-          frame.addEventListener('load', () => {
-            if (finished) return;
-            if (!submitted) {
-              submitted = true;
-              form.submit();
-              return;
-            }
-            setTimeout(() => {
-              if (finished) return;
-              cleanup();
-              resolve({
-                ok: true,
-                revision: Number(payload.expectedRevision || 0) + 1,
-                responseFallback: true
-              });
-            }, 350);
-          });
-          window.addEventListener('message', receive);
-          const timer = setTimeout(() => {
-            cleanup();
-            reject(new Error('共同編集サーバーの応答に時間がかかっています。'));
-          }, 22000);
-          document.body.appendChild(form);
-          document.body.appendChild(frame);
-        });
-      }
-
-      async function saveSharedConfig(config, apiUrl) {
-        if (sharedSaveBusy) throw new Error('保存中です。少し待ってからもう一度お試しください。');
-        sharedSaveBusy = true;
-        const activeWorkspaceCard = editingWorkspaceCardId
-          ? workspaceCards.find((card) => card.id === editingWorkspaceCardId)
-          : null;
-        const sameSharedCard = Boolean(editingWorkspaceCardId && (activeWorkspaceCard
-          || (currentConfig && currentConfig.sharedCardId === editingWorkspaceCardId)));
-        const cardId = sameSharedCard ? editingWorkspaceCardId : randomToken(12);
-        const editKey = workspaceEditKey || (currentConfig && currentConfig.sharedEditKey) || randomToken(32);
-        workspaceEditKey = editKey;
-        saveWorkspaceEditKey(apiUrl, editKey);
-        const expectedRevision = sameSharedCard
-          ? Number(activeWorkspaceCard ? activeWorkspaceCard.revision : currentConfig.sharedRevision || 0)
-          : 0;
-        const storedConfig = sharedConfigPayload(config);
-        try {
-          const saved = await postSharedRequest(apiUrl, {
-            action: 'save',
-            id: cardId,
-            editKey,
-            expectedRevision,
-            config: storedConfig
-          });
-          try { localStorage.setItem(SAVED_SHARED_API_URL_KEY, apiUrl); } catch (_) {}
-          editingWorkspaceCardId = cardId;
-          return {
-            ...storedConfig,
-            id: cardId,
-            sharedCardId: cardId,
-            sharedEditKey: editKey,
-            sharedRevision: Number(saved.revision || expectedRevision + 1),
-            apiUrl
-          };
-        } finally {
-          sharedSaveBusy = false;
-        }
-      }
-
-      function loadSavedShareTemplate() {
-        return '';
-      }
-
-      function saveShareTemplate() {
-        const template = $('adminShareTemplate').value.trim() || DEFAULT_SHARE_TEMPLATE;
-        $('adminShareTemplate').value = template;
-        toast('このカードの設定に反映しました。共同編集カードを保存すると共有されます');
-      }
-
-      function resetShareTemplate() {
-        $('adminShareTemplate').value = DEFAULT_SHARE_TEMPLATE;
-        toast('投稿テンプレートを初期文に戻しました');
-      }
-
-      function splitEmojiInput(value) {
-        const chunks = String(value || '').trim().split(/[\s,、]+/).filter(Boolean);
-        const segmenter = typeof Intl !== 'undefined' && Intl.Segmenter
-          ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
-          : null;
-        const pieces = chunks.flatMap((chunk) => segmenter
-          ? [...segmenter.segment(chunk)].map((entry) => entry.segment)
-          : [chunk]);
-        return pieces.filter((piece) => /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(piece));
-      }
-
-      function loadSavedStampSets() {
-        return Object.fromEntries(Object.entries(sharedStampSets)
-          .map(([name, stamps]) => [String(name).slice(0, 40), normalizeStampSet(stamps, '')])
-          .filter(([name, stamps]) => name && stamps.length));
-      }
-
-      async function saveWorkspaceStampSets() {
-        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
-        if (!apiUrl || !workspaceEditKey) return;
-        const result = await postSharedRequest(apiUrl, {
-          action: 'saveWorkspace',
-          editKey: workspaceEditKey,
-          expectedRevision: workspaceStampSetsRevision,
-          stampSets: loadSavedStampSets()
-        });
-        workspaceStampSetsRevision = Number(result.revision || workspaceStampSetsRevision + 1);
-        saveWorkspaceCache();
-      }
-
-      function importSharedStampSets(stampSets) {
-        const imported = {};
-        Object.entries(stampSets && typeof stampSets === 'object' && !Array.isArray(stampSets) ? stampSets : {}).slice(0, 30).forEach(([name, stamps]) => {
-          const cleanName = String(name || '').trim().slice(0, 40);
-          const cleanStamps = normalizeStampSet(stamps, '');
-          if (cleanName && cleanStamps.length) imported[cleanName] = cleanStamps;
-        });
-        sharedStampSets = { AMENITY: [...AMENITY_STAMPS], ...imported };
-        refreshSavedStampSets('AMENITY');
-      }
-
-      function refreshSavedStampSets(selectedName = '') {
-        const select = $('adminSavedStampSet');
-        const saved = loadSavedStampSets();
-        select.innerHTML = '';
-        Object.keys(saved).sort((a, b) => a.localeCompare(b, 'ja')).forEach((name) => {
-          const option = document.createElement('option');
-          option.value = name;
-          option.textContent = `${name}（${saved[name].length}個）`;
-          select.appendChild(option);
-        });
-        const nextName = saved[selectedName] ? selectedName : (saved.AMENITY ? 'AMENITY' : Object.keys(saved)[0] || '');
-        select.value = nextName;
-      }
-
-      function setStampSetEditorMode(isNew, name = '') {
-        $('stampSetMode').textContent = isNew ? '新しいセットを作成中' : `「${name}」を編集中`;
-        $('saveStampSetButton').textContent = isNew ? 'このセットを保存' : '変更を保存';
-        $('deleteStampSetButton').classList.toggle('hidden', isNew);
-        $('saveStampSetButton').parentElement.classList.toggle('new-set', isNew);
-      }
-
-      async function saveStampSet() {
-        const name = $('adminStampSetName').value.trim().slice(0, 40);
-        if (!name) return toast('セット名を入力してください');
-        if (!adminSelectedStamps.length) return toast('使う絵文字を1つ以上選んでください');
-        const previousSets = loadSavedStampSets();
-        const previousOriginalName = editingStampSetOriginalName;
-        if (editingStampSetOriginalName && editingStampSetOriginalName !== name) {
-          delete sharedStampSets[editingStampSetOriginalName];
-        }
-        sharedStampSets[name] = [...adminSelectedStamps];
-        editingStampSetOriginalName = name;
-        refreshSavedStampSets(name);
-        setStampSetEditorMode(false, name);
-        try {
-          await saveWorkspaceStampSets();
-          toast(`「${name}」を共同管理ページに保存しました`);
-        } catch (error) {
-          sharedStampSets = { AMENITY: [...AMENITY_STAMPS], ...previousSets };
-          editingStampSetOriginalName = previousOriginalName;
-          refreshSavedStampSets(previousOriginalName || 'AMENITY');
-          loadStampSet($('adminSavedStampSet').value);
-          showError(error && error.message ? error.message : 'スタンプセットを保存できませんでした。');
-          toast('スタンプセットの保存に失敗しました');
-        }
-      }
-
-      function loadStampSet(name) {
-        const saved = loadSavedStampSets();
-        if (!name || !saved[name]) return;
-        editingStampSetOriginalName = name;
-        $('adminStampSetName').value = name;
-        renderAdminStampChoices($('adminTemplate').value, saved[name], saved[name][0]);
-        setStampSetEditorMode(false, name);
-      }
-
-      async function deleteStampSet() {
-        const name = $('adminSavedStampSet').value || $('adminStampSetName').value.trim();
-        const saved = loadSavedStampSets();
-        if (!name || !saved[name]) return toast('削除する保存済みセットを選んでください');
-        if (name === 'AMENITY') return toast('AMENITYセットは削除せず、内容を編集して使えます');
-        const previousSets = loadSavedStampSets();
-        delete sharedStampSets[name];
-        refreshSavedStampSets('AMENITY');
-        loadStampSet($('adminSavedStampSet').value);
-        try {
-          await saveWorkspaceStampSets();
-          toast(`「${name}」を削除しました`);
-        } catch (error) {
-          sharedStampSets = { AMENITY: [...AMENITY_STAMPS], ...previousSets };
-          refreshSavedStampSets(name);
-          loadStampSet(name);
-          showError(error && error.message ? error.message : 'スタンプセットを削除できませんでした。');
-          toast('スタンプセットの削除に失敗しました');
-        }
-      }
-
-      function normalizeStampSet(value, defaultStamp = '⛄️') {
-        const requested = (Array.isArray(value) ? value : splitEmojiInput(value))
-          .map((stamp) => stamp === '🩵' ? '💙' : stamp);
-        if (defaultStamp === '🩵') defaultStamp = '💙';
-        const stamps = [...new Set(requested.filter((stamp) => typeof stamp === 'string' && /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(stamp)))].slice(0, 40);
-        const result = stamps.length ? stamps : (defaultStamp ? [...STAMPS] : []);
-        if (defaultStamp && /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(defaultStamp) && !result.includes(defaultStamp)) result.unshift(defaultStamp);
-        return result;
-      }
-
-      function stampsForTemplate(template, defaultStamp = '⛄️') {
-        const set = [...(TEMPLATE_STAMPS[template] || TEMPLATE_STAMPS.hotel)];
-        const normalizedDefault = defaultStamp === '🩵' ? '💙' : defaultStamp;
-        if (set.includes(normalizedDefault)) return set;
-        return set;
-      }
-
-      function encodeStampSet(stamps) {
-        let mask = 0n;
-        stamps.forEach((stamp) => {
-          const index = STAMPS.indexOf(stamp);
-          if (index >= 0) mask |= 1n << BigInt(index);
-        });
-        return mask.toString(36);
-      }
-
-      function decodeBase36(value) {
-        let result = 0n;
-        for (const char of String(value || '').toLowerCase()) {
-          const digit = parseInt(char, 36);
-          if (!Number.isFinite(digit)) return 0n;
-          result = result * 36n + BigInt(digit);
-        }
-        return result;
-      }
-
-      function decodeStampSet(value, fallback) {
-        if (!value) return [...fallback];
-        const mask = decodeBase36(value);
-        const selected = STAMPS.filter((_, index) => (mask & (1n << BigInt(index))) !== 0n);
-        return selected.length ? selected : [...fallback];
-      }
-
-      function renderAdminStampChoices(template, selected = null, preferred = '') {
-        const defaults = stampsForTemplate(template);
-        adminSelectedStamps = normalizeStampSet(Array.isArray(selected) ? selected : defaults, '');
-        $('adminStampListInput').value = adminSelectedStamps.join('');
-        renderAdminStampSetPreview();
-        syncAdminStampOptions(template, preferred, adminSelectedStamps);
-      }
-
-      function renderAdminStampSetPreview() {
-        const preview = $('adminStampSetPreview');
-        preview.innerHTML = '';
-        $('stampSetPreviewLabel').textContent = `現在のセット内容（${adminSelectedStamps.length}個）`;
-        if (!adminSelectedStamps.length) {
-          const empty = document.createElement('span');
-          empty.className = 'stamp-set-preview-empty';
-          empty.textContent = 'まだ選ばれていません。上の絵文字をタップしてください。';
-          preview.appendChild(empty);
-        }
-        adminSelectedStamps.forEach((stamp) => {
-          const item = document.createElement('span');
-          item.textContent = stamp;
-          item.title = STAMP_NAMES[stamp] || stamp;
-          preview.appendChild(item);
-        });
-      }
-
-      function syncAdminStampOptions(template, preferred = '⛄️', selected = adminSelectedStamps) {
-        const available = selected && selected.length ? selected : stampsForTemplate(template, preferred);
-        const selectedStamp = available.includes(preferred) ? preferred : available[0];
-        $('adminStamp').value = selectedStamp;
-      }
-
-      function firstParam(source, ...keys) {
-        for (const key of keys) {
-          if (source.has(key)) return source.get(key) || '';
-        }
-        return '';
-      }
-
       function configFromParams(source = params) {
-        const title = firstParam(source, 't', 'title').trim();
-        const song = (firstParam(source, 'q', 'song') || title).trim();
-        const start = firstParam(source, 's', 'start');
-        const release = firstParam(source, 'r', 'release');
-        const end = firstParam(source, 'f', 'end') || release;
-        const templateRaw = firstParam(source, 'v', 'template');
-        const templateAlias = { h: 'hotel', c: 'classic', j: 'journey' }[templateRaw] || templateRaw;
-        const template = ['classic', 'hotel', 'journey'].includes(templateAlias) ? templateAlias : 'hotel';
-        const incomingStampRaw = firstParam(source, 'e', 'stamp') || '⛄️';
-        const incomingStamp = incomingStampRaw === '🩵' ? '💙' : incomingStampRaw;
-        const directStampSet = firstParam(source, 'g', 'stampSet');
-        const availableStamps = directStampSet
-          ? normalizeStampSet(directStampSet, incomingStamp)
-          : decodeStampSet(firstParam(source, 'x', 'stamps'), stampsForTemplate(template));
-        const stamp = availableStamps.includes(incomingStamp) ? incomingStamp : availableStamps[0];
-        const stamps = availableStamps;
-        const colorRaw = firstParam(source, 'c', 'color');
-        const colorCandidate = /^[0-9a-f]{6}$/i.test(colorRaw) ? `#${colorRaw}` : colorRaw;
-        const color = /^#[0-9a-f]{6}$/i.test(colorCandidate) ? colorCandidate : '#4ea8de';
-        const link = safeUrl(firstParam(source, 'u', 'link'));
-        const apple = safeUrl(firstParam(source, 'a', 'apple'));
-        const spotify = safeUrl(firstParam(source, 'p', 'spotify'));
-        const line = safeUrl(firstParam(source, 'n', 'line'));
-        const youtube = safeUrl(firstParam(source, 'y', 'youtube'));
-        const shareTemplate = (firstParam(source, 'm', 'message') || DEFAULT_SHARE_TEMPLATE).slice(0, 500);
-        const seed = `${title}|${song}|${start}|${release}|${end}`;
-        const id = (firstParam(source, 'i', 'cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
-        if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(release) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || release < start || end < release) return null;
-        return { title, song, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, shareTemplate, template, id };
+        const title = (source.get('title') || '').trim();
+        const start = source.get('start') || '';
+        const release = source.get('release') || '';
+        const incomingStamp = source.get('stamp') || '⛄️';
+        const stamp = STAMPS.includes(incomingStamp) ? incomingStamp : '⛄️';
+        const color = /^#[0-9a-f]{6}$/i.test(source.get('color') || '') ? source.get('color') : '#4ea8de';
+        const link = safeUrl(source.get('link') || '');
+        const apple = safeUrl(source.get('apple') || '');
+        const spotify = safeUrl(source.get('spotify') || '');
+        const line = safeUrl(source.get('line') || '');
+        const youtube = safeUrl(source.get('youtube') || '');
+        const template = ['classic', 'hotel', 'journey'].includes(source.get('template')) ? source.get('template') : 'hotel';
+        const seed = `${title}|${start}|${release}`;
+        const id = (source.get('cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
+        if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(release) || release < start) return null;
+        return { title, start, release, stamp, color, link, apple, spotify, line, youtube, template, id };
       }
 
-      function configFromForm(options = {}) {
-        const allowIncomplete = Boolean(options.allowIncomplete);
-        const today = isoLocal();
-        const enteredTitle = $('adminTitle').value.trim();
-        const enteredSong = $('adminSong').value.trim();
-        const title = enteredTitle || (allowIncomplete ? '作成途中のカード' : '');
-        const song = enteredSong || (allowIncomplete ? '曲名未入力' : '');
-        const start = $('adminStart').value || (allowIncomplete ? today : '');
-        const release = $('adminRelease').value || (allowIncomplete ? start : '');
-        const end = $('adminEnd').value || release;
+      function configFromForm() {
+        const title = $('adminTitle').value.trim();
+        const start = $('adminStart').value;
+        const release = $('adminRelease').value;
         const rawLink = $('adminLink').value.trim();
         const link = safeUrl(rawLink);
         const rawApple = $('adminApple').value.trim();
@@ -2214,60 +962,42 @@
         const spotify = safeUrl(rawSpotify);
         const line = safeUrl(rawLine);
         const youtube = safeUrl(rawYoutube);
-        const shareTemplate = $('adminShareTemplate').value.trim() || DEFAULT_SHARE_TEMPLATE;
         const template = $('adminTemplate').value;
-        const rawApiUrl = $('adminApiUrl').value.trim();
-        const apiUrl = safeSharedApiUrl(rawApiUrl);
-        const availableStamps = adminSelectedStamps.length ? [...adminSelectedStamps] : stampsForTemplate(template);
-        const stamp = availableStamps.includes($('adminStamp').value) ? $('adminStamp').value : availableStamps[0];
-        const stamps = availableStamps;
-        const stampSets = loadSavedStampSets();
-        const color = '#4ea8de';
+        const stamp = $('adminStamp').value;
+        const color = selectedColor;
         let error = '';
-        if (!title) error = 'カードタイトルを入力してください。';
-        else if (!song) error = '1日1回聴く曲名を入力してください。';
-        else if (!start || !release || !end) error = '開始日・CD発売日・カード終了日を入力してください。';
+        if (!title) error = '表題曲名／カードタイトルを入力してください。';
+        else if (!start || !release) error = '開始日とCD発売日を入力してください。';
         else if (release < start) error = 'CD発売日は開始日以降にしてください。';
-        else if (end < release) error = 'カード終了日はCD発売日以降にしてください。';
-        else if (dateRange(start, end).length > 366) error = '期間は366日以内にしてください。';
+        else if (dateRange(start, release).length > 366) error = '期間は366日以内にしてください。';
         else if ([rawLink && !link, rawApple && !apple, rawSpotify && !spotify, rawLine && !line, rawYoutube && !youtube].some(Boolean)) error = '再生先は http:// または https:// で始まるURLにしてください。';
-        else if (!allowIncomplete && ![link, apple, spotify, line, youtube].some(Boolean)) error = '曲を聴くためのURLを1つ以上入力してください。';
-        else if (rawApiUrl && !apiUrl) error = '共同編集サーバーURLは、Apps Scriptでデプロイした /exec のURLを入力してください。';
         showError(error);
         if (error) return null;
-        const id = currentConfig && currentConfig.title === title && currentConfig.song === song && currentConfig.start === start && currentConfig.release === release && currentConfig.end === end
+        const id = currentConfig && currentConfig.title === title && currentConfig.start === start && currentConfig.release === release
           ? currentConfig.id
-          : hashText(`${title}|${song}|${start}|${release}|${end}`);
-        const stampSetName = $('adminSavedStampSet').value || editingStampSetOriginalName || 'AMENITY';
-        return { title, song, start, release, end, stamp, stamps, stampSets, stampSetName, color, link, apple, spotify, line, youtube, shareTemplate, template, id, apiUrl };
+          : hashText(`${title}|${start}|${release}`);
+        return { title, start, release, stamp, color, link, apple, spotify, line, youtube, template, id };
       }
 
       function configUrl(config, testMode = false) {
-        if (!testMode && config.sharedCardId && config.apiUrl) {
-          return sharedCardUrl(config.sharedCardId, config.apiUrl);
-        }
         const url = new URL(location.href);
         url.search = '';
         url.hash = '';
-        url.searchParams.set('t', config.title);
-        if (config.song && config.song !== config.title) url.searchParams.set('q', config.song);
-        url.searchParams.set('s', config.start);
-        url.searchParams.set('r', config.release);
-        if (config.end !== config.release) url.searchParams.set('f', config.end);
-        if (config.link) url.searchParams.set('u', config.link);
-        if (config.apple) url.searchParams.set('a', config.apple);
-        if (config.spotify) url.searchParams.set('p', config.spotify);
-        if (config.line) url.searchParams.set('n', config.line);
-        if (config.youtube) url.searchParams.set('y', config.youtube);
-        if (config.shareTemplate && config.shareTemplate !== DEFAULT_SHARE_TEMPLATE) url.searchParams.set('m', config.shareTemplate);
-        url.searchParams.set('e', config.stamp);
-        url.searchParams.set('x', encodeStampSet(config.stamps));
-        url.searchParams.set('g', config.stamps.join(' '));
-        url.searchParams.set('v', { hotel: 'h', classic: 'c', journey: 'j' }[config.template] || 'h');
-        url.searchParams.set('i', config.id);
+        url.searchParams.set('title', config.title);
+        url.searchParams.set('start', config.start);
+        url.searchParams.set('release', config.release);
+        if (config.link) url.searchParams.set('link', config.link);
+        if (config.apple) url.searchParams.set('apple', config.apple);
+        if (config.spotify) url.searchParams.set('spotify', config.spotify);
+        if (config.line) url.searchParams.set('line', config.line);
+        if (config.youtube) url.searchParams.set('youtube', config.youtube);
+        url.searchParams.set('stamp', config.stamp);
+        url.searchParams.set('color', config.color);
+        url.searchParams.set('template', config.template);
+        url.searchParams.set('cid', config.id);
         if (testMode) {
-          url.searchParams.set('z', '1');
-          url.searchParams.set('d', config.start);
+          url.searchParams.set('test', '1');
+          url.searchParams.set('today', config.start);
         }
         return url.href;
       }
@@ -2289,65 +1019,6 @@
         localStorage.setItem(storageKey(config), JSON.stringify([...stamps].sort()));
       }
 
-      function stampIconsKey(config) {
-        return `${isTestMode ? 'daily_stamp_test_icons_' : 'daily_stamp_icons_'}${config.id}`;
-      }
-
-      function loadStampIcons(config) {
-        try {
-          const saved = JSON.parse(localStorage.getItem(stampIconsKey(config)) || '{}');
-          return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
-        } catch (_) {
-          return {};
-        }
-      }
-
-      function saveStampIcons(config, icons) {
-        localStorage.setItem(stampIconsKey(config), JSON.stringify(icons));
-      }
-
-      function activeStampKey(config) {
-        return `${isTestMode ? 'daily_stamp_test_active_' : 'daily_stamp_active_'}${config.id}`;
-      }
-
-      function loadActiveStamp(config) {
-        const saved = localStorage.getItem(activeStampKey(config));
-        const available = normalizeStampSet(config.stamps, config.stamp);
-        return available.includes(saved) ? saved : config.stamp;
-      }
-
-      function saveActiveStamp(config, stamp) {
-        localStorage.setItem(activeStampKey(config), stamp);
-      }
-
-      function participantColorKey(config) {
-        return `${isTestMode ? 'daily_stamp_test_color_' : 'daily_stamp_color_'}${config.id}`;
-      }
-
-      function loadParticipantColor(config) {
-        const saved = localStorage.getItem(participantColorKey(config));
-        return COLORS.includes(saved) ? saved : (COLORS.includes(config.color) ? config.color : '#4ea8de');
-      }
-
-      function saveParticipantColor(config, color) {
-        if (COLORS.includes(color)) localStorage.setItem(participantColorKey(config), color);
-      }
-
-      function participantNameKey(config) {
-        return `${isTestMode ? 'daily_stamp_test_name_' : 'daily_stamp_name_'}${config.id}`;
-      }
-
-      function loadParticipantName(config) {
-        return (localStorage.getItem(participantNameKey(config)) || '').slice(0, 32);
-      }
-
-      function renderParticipantName(config) {
-        const name = loadParticipantName(config);
-        if (document.activeElement !== $('participantName')) $('participantName').value = name;
-        $('participantNameCard').textContent = name;
-        $('participantNameCard').classList.toggle('hidden', !name);
-      }
-
       function metaKey(config) {
         return `${isTestMode ? 'daily_stamp_test_meta_' : 'daily_stamp_meta_'}${config.id}`;
       }
@@ -2357,7 +1028,7 @@
         let meta = null;
         try { meta = JSON.parse(localStorage.getItem(metaKey(config)) || 'null'); } catch (_) { meta = null; }
         if (!meta || !/^\d{4}-\d{2}-\d{2}$/.test(meta.joinedOn || '')) {
-          const joinedOn = today < config.start ? config.start : (today > config.end ? config.end : today);
+          const joinedOn = today < config.start ? config.start : (today > config.release ? config.release : today);
           meta = { joinedOn };
           localStorage.setItem(metaKey(config), JSON.stringify(meta));
         }
@@ -2386,376 +1057,130 @@
         toastTimer = setTimeout(() => $('toast').classList.remove('show'), 1900);
       }
 
-      function renderParticipantColorChoices(config) {
-        const list = $('participantColorList');
+      function renderColorChoices() {
+        const list = $('colorList');
         list.innerHTML = '';
-        const activeColor = loadParticipantColor(config);
         COLORS.forEach((color) => {
           const button = document.createElement('button');
           button.type = 'button';
-          button.className = `color-choice${color === activeColor ? ' selected' : ''}`;
+          button.className = 'color-choice';
           button.style.setProperty('--dot', color);
           button.setAttribute('aria-label', `カラー ${color}`);
-          button.setAttribute('aria-pressed', color === activeColor ? 'true' : 'false');
           button.addEventListener('click', () => {
-            saveParticipantColor(config, color);
-            currentConfig = { ...currentConfig, color };
+            selectedColor = color;
             applyTheme(color);
-            [...list.children].forEach((item) => {
-              const selected = item === button;
-              item.classList.toggle('selected', selected);
-              item.setAttribute('aria-pressed', selected ? 'true' : 'false');
-            });
-            toast('カードカラーを変更しました');
+            [...list.children].forEach((item) => item.classList.toggle('selected', item === button));
           });
           list.appendChild(button);
         });
+        list.children[3].classList.add('selected');
       }
 
       function initAdminDefaults() {
         const today = isoLocal();
-        $('adminStart').value = firstParam(params, 's', 'start') || today;
-        $('adminRelease').value = firstParam(params, 'r', 'release') || addDays(today, 13);
-        $('adminEnd').value = firstParam(params, 'f', 'end') || $('adminRelease').value;
-        $('adminTitle').value = firstParam(params, 't', 'title');
-        $('adminSong').value = firstParam(params, 'q', 'song') || $('adminTitle').value;
-        $('adminLink').value = firstParam(params, 'u', 'link');
-        $('adminApple').value = firstParam(params, 'a', 'apple');
-        $('adminSpotify').value = firstParam(params, 'p', 'spotify');
-        $('adminLine').value = firstParam(params, 'n', 'line');
-        $('adminYoutube').value = firstParam(params, 'y', 'youtube');
-        $('adminShareTemplate').value = firstParam(params, 'm', 'message') || loadSavedShareTemplate() || DEFAULT_SHARE_TEMPLATE;
-        $('adminApiUrl').value = safeSharedApiUrl(incomingSharedApiUrl) || loadSavedSharedApiUrl();
-        const templateRaw = firstParam(params, 'v', 'template');
-        const template = { h: 'hotel', c: 'classic', j: 'journey' }[templateRaw] || templateRaw;
-        $('adminTemplate').value = ['classic', 'hotel', 'journey'].includes(template) ? template : 'hotel';
-        const incomingStamp = firstParam(params, 'e', 'stamp') || '⛄️';
-        const directStampSet = firstParam(params, 'g', 'stampSet');
-        const incomingStamps = directStampSet
-          ? normalizeStampSet(directStampSet, incomingStamp)
-          : decodeStampSet(firstParam(params, 'x', 'stamps'), stampsForTemplate($('adminTemplate').value));
-        refreshSavedStampSets('AMENITY');
-        $('adminStampSetName').value = 'AMENITY';
-        editingStampSetOriginalName = 'AMENITY';
-        renderAdminStampChoices($('adminTemplate').value, incomingStamps, incomingStamp === '🩵' ? '💙' : incomingStamp);
-        setStampSetEditorMode(false, 'AMENITY');
-        const colorRaw = firstParam(params, 'c', 'color');
-        const incoming = /^[0-9a-f]{6}$/i.test(colorRaw) ? `#${colorRaw}` : colorRaw;
+        $('adminStart').value = params.get('start') || today;
+        $('adminRelease').value = params.get('release') || addDays(today, 13);
+        $('adminTitle').value = params.get('title') || '';
+        $('adminLink').value = params.get('link') || '';
+        $('adminApple').value = params.get('apple') || '';
+        $('adminSpotify').value = params.get('spotify') || '';
+        $('adminLine').value = params.get('line') || '';
+        $('adminYoutube').value = params.get('youtube') || '';
+        $('adminTemplate').value = ['classic', 'hotel', 'journey'].includes(params.get('template')) ? params.get('template') : 'hotel';
+        $('adminStamp').value = params.get('stamp') || '⛄️';
+        const incoming = params.get('color');
         if (incoming && COLORS.includes(incoming)) {
+          selectedColor = incoming;
+          [...$('colorList').children].forEach((item, index) => item.classList.toggle('selected', COLORS[index] === incoming));
           applyTheme(incoming);
         }
-      }
-
-      function workspaceItemConfig(item, apiUrl = safeSharedApiUrl($('adminApiUrl').value)) {
-        if (!item || !item.config) return null;
-        return {
-          ...item.config,
-          id: item.id,
-          sharedCardId: item.id,
-          sharedEditKey: workspaceEditKey,
-          sharedRevision: Number(item.revision || 0),
-          apiUrl
-        };
-      }
-
-      function renderWorkspacePanel() {
-        const panel = $('workspacePanel');
-        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
-        const active = Boolean(apiUrl && workspaceEditKey);
-        panel.classList.toggle('hidden', !active);
-        if (!active) return;
-        const select = $('workspaceCardSelect');
-        const selectedId = editingWorkspaceCardId;
-        select.innerHTML = '';
-        if (!workspaceCards.length) {
-          const option = document.createElement('option');
-          option.value = '';
-          option.textContent = 'まだカードがありません';
-          select.appendChild(option);
-        } else {
-          if (!selectedId) {
-            const newOption = document.createElement('option');
-            newOption.value = '';
-            newOption.textContent = '＋ 新しいカードを作成中';
-            select.appendChild(newOption);
-          }
-          workspaceCards.forEach((item) => {
-            const option = document.createElement('option');
-            option.value = item.id;
-            option.textContent = `${item.config.title || '無題のカード'}（${formatDate(item.config.release, false)}発売）`;
-            select.appendChild(option);
-          });
-          select.value = workspaceCards.some((item) => item.id === selectedId)
-            ? selectedId
-            : '';
-        }
-        $('workspaceOpenButton').disabled = !select.value;
-        $('workspaceDeleteButton').disabled = !select.value;
-        $('workspaceNote').textContent = workspaceCards.length
-          ? `${workspaceCards.length}件のカードがあります。カード名を選ぶと編集対象が切り替わります。`
-          : '最初のカードを入力して保存してください。この共同管理URLは次回以降も同じです。';
-      }
-
-      async function refreshWorkspaceCards(apiUrl) {
-        if (!apiUrl || !workspaceEditKey) return;
-        const result = await loadSharedWorkspace(apiUrl, workspaceEditKey);
-        applyWorkspaceResult(result);
-        renderWorkspacePanel();
-      }
-
-      function applyWorkspaceResult(result) {
-        workspaceCards = Array.isArray(result && result.cards) ? result.cards : [];
-        workspaceStampSetsRevision = Number(result && result.settingsRevision || 0);
-        importSharedStampSets(result && result.stampSets);
-        saveWorkspaceCache();
-      }
-
-      function upsertWorkspaceCard(config) {
-        if (!config || !config.sharedCardId) return;
-        editingWorkspaceCardId = config.sharedCardId;
-        const item = {
-          id: config.sharedCardId,
-          config: sharedConfigPayload(config),
-          updatedAt: new Date().toISOString(),
-          revision: Number(config.sharedRevision || 0)
-        };
-        workspaceCards = [item, ...workspaceCards.filter((card) => card.id !== item.id)];
-        saveWorkspaceCache();
-        renderWorkspacePanel();
-      }
-
-      function openWorkspaceCard(cardId = $('workspaceCardSelect').value) {
-        const item = workspaceCards.find((card) => card.id === cardId);
-        const config = workspaceItemConfig(item);
-        if (!config) return toast('編集するカードを選んでください');
-        editingWorkspaceCardId = cardId;
-        currentConfig = config;
-        fillForm(config);
-        $('urlBox').classList.remove('show');
-        showAdmin();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      async function deleteWorkspaceCard() {
-        const cardId = $('workspaceCardSelect').value;
-        const item = workspaceCards.find((card) => card.id === cardId);
-        if (!item) return toast('削除するカードを選んでください');
-        const title = item.config && item.config.title ? item.config.title : '無題のカード';
-        if (!window.confirm(`「${title}」を削除しますか？\n\n参加者用URLも開けなくなります。この操作は元に戻せません。`)) return;
-        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
-        const button = $('workspaceDeleteButton');
-        button.disabled = true;
-        button.textContent = '削除中…';
-        try {
-          await postSharedRequest(apiUrl, {
-            action: 'delete',
-            id: cardId,
-            editKey: workspaceEditKey,
-            expectedRevision: Number(item.revision || 0)
-          });
-          workspaceCards = workspaceCards.filter((card) => card.id !== cardId);
-          saveWorkspaceCache();
-          if (currentConfig && currentConfig.sharedCardId === cardId) {
-            editingWorkspaceCardId = '';
-            currentConfig = null;
-            initAdminDefaults();
-            $('adminApiUrl').value = apiUrl;
-            $('urlBox').classList.remove('show');
-            showAdmin();
-          } else {
-            renderWorkspacePanel();
-          }
-          toast(`「${title}」を削除しました`);
-        } catch (error) {
-          showError(error && error.message ? error.message : 'カードを削除できませんでした。');
-          toast('カードの削除に失敗しました');
-        } finally {
-          button.disabled = false;
-          button.textContent = '削除';
-          renderWorkspacePanel();
-        }
-      }
-
-      function startNewWorkspaceCard() {
-        editingWorkspaceCardId = '';
-        currentConfig = null;
-        initAdminDefaults();
-        $('adminApiUrl').value = safeSharedApiUrl(incomingSharedApiUrl) || loadSavedSharedApiUrl();
-        $('urlBox').classList.remove('show');
-        showAdmin();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        toast('新しいカードを作成します');
       }
 
       function showAdmin() {
         $('testPanel').classList.add('hidden');
         $('participantView').classList.add('hidden');
-        $('sharedErrorView').classList.add('hidden');
         $('adminView').classList.remove('hidden');
         $('modeLink').textContent = currentConfig ? 'カードに戻る' : '';
-        $('modeLink').classList.toggle('hidden', !currentConfig);
         $('modeLink').onclick = currentConfig ? () => showParticipant(currentConfig) : null;
-        updateSharedAdminUi(currentConfig);
-        renderWorkspacePanel();
-      }
-
-      function updateSharedAdminUi(config = currentConfig) {
-        const activeApi = safeSharedApiUrl($('adminApiUrl').value);
-        const shared = config && config.sharedCardId && config.sharedEditKey && config.apiUrl === activeApi;
-        const hasApi = Boolean(activeApi);
-        const inWorkspace = Boolean(activeApi && workspaceEditKey);
-        $('adminHeading').textContent = shared ? 'スタンプカードを編集' : inWorkspace ? '新しいスタンプカードを作る' : hasApi ? '共同管理ページを作る' : '新しいスタンプカードを作る';
-        $('adminLead').textContent = shared
-          ? '内容を変更して保存すると、同じ参加者用URLに最新の内容が反映されます。'
-          : inWorkspace
-            ? 'カードを作成・保存すると、このカード専用の参加者用URLを発行します。'
-            : hasApi
-              ? '最初に共同管理URLだけを発行します。カードの作成と参加者用URLの発行は、共同管理ページを開いてから行います。'
-              : '曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。';
-        $('generateButton').textContent = generatedWorkspaceUrl
-          ? '共同管理ページを開く'
-          : shared
-            ? '変更を共有保存'
-            : inWorkspace
-              ? 'カードを保存して参加者用URLを発行'
-              : hasApi
-                ? '共同管理URLを発行'
-                : '参加者用URLを作る';
-        $('saveDraftButton').classList.toggle('hidden', !inWorkspace);
-        const status = $('sharedStatus');
-        status.classList.toggle('show', Boolean(shared || inWorkspace));
-        status.textContent = shared
-          ? '共同管理ページで編集中。保存すると参加者ページにも反映されます。'
-          : inWorkspace
-            ? '共同管理ページに新しいカードとして保存します。'
-          : '';
-        renderWorkspacePanel();
       }
 
       function showParticipant(config) {
-        const participantStamps = normalizeStampSet(config.stamps && config.stamps.length ? config.stamps : stampsForTemplate(config.template), config.stamp);
-        const participantStamp = participantStamps.includes(config.stamp) ? config.stamp : participantStamps[0];
-        config = { ...config, stamp: participantStamp, stamps: participantStamps };
-        const participantColor = loadParticipantColor(config);
-        currentConfig = { ...config, color: participantColor };
-        config = currentConfig;
-        applyTheme(participantColor);
+        currentConfig = config;
+        applyTheme(config.color);
         $('participantView').classList.remove('template-classic', 'template-hotel', 'template-journey');
         $('participantView').classList.add(`template-${config.template}`);
         $('adminView').classList.add('hidden');
         $('participantView').classList.remove('hidden');
         setupTestPanel(config);
-        const canManageHere = isTestMode || Boolean(config.sharedEditKey);
-        $('modeLink').textContent = canManageHere ? '管理用設定' : '';
-        $('modeLink').classList.toggle('hidden', !canManageHere);
-        $('modeLink').onclick = canManageHere ? () => {
+        $('modeLink').textContent = '管理用設定';
+        $('modeLink').onclick = () => {
           fillForm(config);
           showAdmin();
-        } : null;
+        };
         renderParticipant();
       }
 
       function fillForm(config) {
         $('adminTitle').value = config.title;
-        $('adminSong').value = config.song || config.title;
         $('adminStart').value = config.start;
         $('adminRelease').value = config.release;
-        $('adminEnd').value = config.end || config.release;
         $('adminLink').value = config.link;
         $('adminApple').value = config.apple || '';
         $('adminSpotify').value = config.spotify || '';
         $('adminLine').value = config.line || '';
         $('adminYoutube').value = config.youtube || '';
-        $('adminShareTemplate').value = config.shareTemplate || DEFAULT_SHARE_TEMPLATE;
         $('adminTemplate').value = config.template || 'hotel';
-        $('adminApiUrl').value = config.apiUrl || loadSavedSharedApiUrl();
-        if (!workspaceEditKey) importSharedStampSets(config.stampSets);
-        const savedSets = loadSavedStampSets();
-        const selectedSetName = savedSets[config.stampSetName]
-          ? config.stampSetName
-          : Object.keys(savedSets).find((name) => JSON.stringify(savedSets[name]) === JSON.stringify(config.stamps || [])) || 'AMENITY';
-        refreshSavedStampSets(selectedSetName);
-        editingStampSetOriginalName = selectedSetName;
-        $('adminStampSetName').value = selectedSetName;
-        renderAdminStampChoices($('adminTemplate').value, config.stamps, config.stamp);
-        setStampSetEditorMode(false, selectedSetName);
-        updateSharedAdminUi(config);
+        $('adminStamp').value = config.stamp;
+        selectedColor = config.color;
+        [...$('colorList').children].forEach((item, index) => item.classList.toggle('selected', COLORS[index] === config.color));
       }
 
       function setupTestPanel(config) {
         if (!isTestMode) return;
         const panel = $('testPanel');
-        const days = dateRange(config.start, config.end);
+        const days = dateRange(config.start, config.release);
         if (!days.includes(simulatedToday)) setTestToday(config.start);
-        if (panel.dataset.listenReset !== '1') {
-          localStorage.removeItem(listenReadyKey(config, currentDay()));
-          panel.dataset.listenReset = '1';
-        }
         panel.classList.remove('hidden');
         const effectLabels = { 3: '（演出1）', 5: '（演出2）', 10: '（演出3）', 15: '（演出4）', 20: '（演出4）' };
-        $('testCount').innerHTML = days.map((day, index) => `<option value="${index}">${index}${day === config.release ? '（発売日）' : effectLabels[index] || ''}</option>`).join('')
+        $('testCount').innerHTML = days.map((_, index) => `<option value="${index}">${index}${effectLabels[index] || ''}</option>`).join('')
           + `<option value="${days.length}">${days.length}（全日）</option>`;
         $('testTemplate').value = config.template;
 
         if (panel.dataset.ready === '1') return;
         panel.dataset.ready = '1';
         $('testCount').addEventListener('change', () => {
-          const campaignDays = dateRange(currentConfig.start, currentConfig.end);
+          const campaignDays = dateRange(currentConfig.start, currentConfig.release);
           const previous = loadStamps(currentConfig).size;
           const count = Math.max(0, Math.min(campaignDays.length, Number($('testCount').value) || 0));
           saveStamps(currentConfig, new Set(campaignDays.slice(0, count)));
-          const chosen = loadActiveStamp(currentConfig);
-          const icons = {};
-          campaignDays.slice(0, count).forEach((day) => { icons[day] = chosen; });
-          saveStampIcons(currentConfig, icons);
-          const targetDay = campaignDays[Math.min(count, campaignDays.length - 1)];
-          localStorage.removeItem(listenReadyKey(currentConfig, targetDay));
-          setTestToday(targetDay);
+          setTestToday(campaignDays[Math.min(count, campaignDays.length - 1)]);
           renderParticipant();
           if (count > previous && [3, 5, 10, 15, 20, campaignDays.length].includes(count)) launchConfetti();
         });
         $('testTemplate').addEventListener('change', () => {
-          const template = $('testTemplate').value;
-          const stamps = stampsForTemplate(template);
-          currentConfig = { ...currentConfig, template, stamps, stamp: stamps.includes(currentConfig.stamp) ? currentConfig.stamp : stamps[0] };
+          currentConfig = { ...currentConfig, template: $('testTemplate').value };
           showParticipant(currentConfig);
         });
         $('testReset').addEventListener('click', () => {
           localStorage.removeItem(storageKey(currentConfig));
           localStorage.removeItem(metaKey(currentConfig));
-          localStorage.removeItem(stampIconsKey(currentConfig));
-          localStorage.removeItem(activeStampKey(currentConfig));
-          localStorage.removeItem(participantColorKey(currentConfig));
-          localStorage.removeItem(participantNameKey(currentConfig));
-          dateRange(currentConfig.start, currentConfig.end).forEach((day) => localStorage.removeItem(listenReadyKey(currentConfig, day)));
           setTestToday(currentConfig.start);
           renderParticipant();
           toast('テスト状態をリセットしました');
         });
       }
 
-      function getListenLinks(config) {
-        return [
+      function renderListenLinks(config) {
+        const links = [
           ['まとめて選ぶ', config.link],
           ['Apple Music', config.apple],
           ['Spotify', config.spotify],
           ['LINE MUSIC', config.line],
           ['YouTube', config.youtube]
         ].filter((item) => item[1]);
-      }
-
-      function listenReadyKey(config, day) {
-        return `${isTestMode ? 'daily_stamp_test_listened_' : 'daily_stamp_listened_'}${config.id}_${day}`;
-      }
-
-      function hasOpenedListenPage(config, day) {
-        return localStorage.getItem(listenReadyKey(config, day)) === '1';
-      }
-
-      function openListenModal(config, day) {
-        const links = getListenLinks(config);
-        const wrap = $('listenModalLinks');
+        const wrap = $('listenLinks');
         wrap.innerHTML = '';
+        wrap.classList.toggle('hidden', links.length === 0);
         links.forEach(([label, href], index) => {
           const link = document.createElement('a');
           link.className = `btn ${index === 0 ? 'btn-primary' : 'btn-soft'}`;
@@ -2763,71 +1188,29 @@
           link.target = '_blank';
           link.rel = 'noopener';
           link.textContent = `▶ ${label}`;
-          link.addEventListener('click', () => {
-            localStorage.setItem(listenReadyKey(config, day), '1');
-            closeListenModal();
-            requestAnimationFrame(renderParticipant);
-          });
           wrap.appendChild(link);
         });
-        $('listenModal').classList.add('show');
-        $('listenModal').setAttribute('aria-hidden', 'false');
-      }
-
-      function closeListenModal() {
-        $('listenModal').classList.remove('show');
-        $('listenModal').setAttribute('aria-hidden', 'true');
-      }
-
-      function renderStampPicker(config) {
-        const active = loadActiveStamp(config);
-        $('stampPicker').classList.remove('hidden');
-        $('stampPicker').removeAttribute('hidden');
-        const choices = $('stampChoices');
-        choices.innerHTML = '';
-        normalizeStampSet(config.stamps, config.stamp).forEach((stamp) => {
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.className = `stamp-choice${stamp === active ? ' selected' : ''}`;
-          button.textContent = stamp;
-          button.setAttribute('aria-label', `${stamp}を今日のスタンプにする`);
-          button.setAttribute('aria-pressed', stamp === active ? 'true' : 'false');
-          button.addEventListener('click', () => {
-            saveActiveStamp(config, stamp);
-            renderParticipant();
-            toast(`${stamp} を次のスタンプに選びました`);
-          });
-          choices.appendChild(button);
-        });
-        const hint = $('stampScrollHint');
-        const updateScrollHint = () => {
-          const hasMore = choices.scrollWidth > choices.clientWidth + 4
-            && choices.scrollLeft + choices.clientWidth < choices.scrollWidth - 4;
-          hint.classList.toggle('hidden', !hasMore);
-        };
-        choices.onscroll = updateScrollHint;
-        requestAnimationFrame(updateScrollHint);
-        return active;
       }
 
       function renderParticipant() {
         const config = currentConfig;
-        const days = dateRange(config.start, config.end);
+        const days = dateRange(config.start, config.release);
         const today = currentDay();
         const meta = loadMeta(config);
         const stamps = loadStamps(config);
         const validStamps = new Set([...stamps].filter((day) => days.includes(day)));
         if (validStamps.size !== stamps.size) saveStamps(config, validStamps);
 
+        const templateLabels = {
+          hotel: 'AMENITY LISTENING CHECK-IN',
+          classic: 'DAILY LISTENING STAMP',
+          journey: 'RELEASE DAY JOURNEY'
+        };
+        $('templateLabel').textContent = templateLabels[config.template] || templateLabels.classic;
         $('campaignTitle').textContent = config.title;
         $('releaseDateText').textContent = formatDate(config.release);
-        $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.end, false)}`;
-        $('testBadge').classList.toggle('hidden', !isTestMode);
-        $('testTodayText').textContent = isTestMode ? formatDate(today, false) : '';
-        const activeStamp = renderStampPicker(config);
-        renderParticipantColorChoices(config);
-        renderParticipantName(config);
-        const stampIcons = loadStampIcons(config);
+        $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.release, false)}`;
+        renderListenLinks(config);
 
         const count = validStamps.size;
         if (isTestMode) {
@@ -2835,136 +1218,86 @@
           $('testTemplate').value = config.template;
         }
         const milestone = milestoneState(count, days.length);
-        const releaseDistance = Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000);
+        const daysLeft = Math.max(0, Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000));
         $('participantView').dataset.stage = String(milestone.stage);
         $('progressCount').textContent = `${count} STAMP${count === 1 ? '' : 'S'}`;
-        $('daysLeftText').textContent = today > config.end
-          ? 'イベント終了'
-          : today === config.release
-            ? '本日発売！'
-            : today < config.release
-              ? `発売日まであと${releaseDistance}日`
-              : `発売から${Math.abs(releaseDistance)}日`;
+        $('daysLeftText').textContent = today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`;
         $('progressBar').style.width = `${milestone.progress}%`;
         const progressTrack = document.querySelector('.progress-track');
         progressTrack.setAttribute('aria-valuenow', String(milestone.progress));
+        $('milestoneNote').textContent = count >= days.length ? '全日達成！' : `次の変化まであと${milestone.next - count}個`;
 
         const perfect = count === days.length && days.length > 0;
-        const eventFinished = today >= config.end;
+        const eventFinished = today >= config.release;
         $('completion').classList.toggle('show', perfect || eventFinished);
         $('completion').innerHTML = perfect
-          ? `PERFECT！<br>期間中毎日ありがとう ${config.stamp}✨`
-          : eventFinished ? `FINISH！<br>${count ? `${count}日間の参加、` : ''}ありがとう ${config.stamp}` : '';
+          ? `PERFECT！<br>発売日まで毎日ありがとう ${config.stamp}✨`
+          : eventFinished ? `RELEASE DAY！<br>${count}日間の参加、ありがとう ${config.stamp}` : '';
 
         const canStampToday = days.includes(today);
         const todayStamped = validStamps.has(today);
-        const todayIndex = days.indexOf(today);
-        $('skipTodayButton').parentElement.classList.toggle('test-mode', isTestMode);
-        $('skipTodayButton').classList.toggle('hidden', !isTestMode);
-        $('skipTodayButton').disabled = !isTestMode || todayIndex < 0 || todayIndex >= days.length - 1;
-        $('skipTodayButton').onclick = () => skipTestDay(config);
+        $('todayButton').parentElement.classList.remove('test-mode');
+        $('todayButton').classList.remove('hidden');
+        $('todayButton').disabled = !canStampToday;
+        $('todayButton').textContent = todayStamped ? '今日のスタンプを外す' : '聴いたのでスタンプを押す';
+        $('todayButton').onclick = () => toggleToday(config);
+
+        if (isTestMode) $('helperText').textContent = 'テスト中です。TODAYのマスを押すと翌日に進みます。3・5・10個の節目も順番に確認できます。';
+        else if (today < config.start) $('helperText').textContent = `${formatDate(config.start)}からスタートします。未来の日付にはまだスタンプを押せません。`;
+        else if (today > config.release) $('helperText').textContent = 'イベントは終了しました。集めたスタンプはこの端末に残ります。';
+        else $('helperText').textContent = '今日聴いたら今日のマスへ。空いた日があっても、また今日から続けられます。';
 
         const grid = $('stampGrid');
         grid.innerHTML = '';
         days.forEach((day) => {
           const date = parseLocalDate(day);
           const isToday = day === today;
-          const isRelease = day === config.release;
           const isStamped = validStamps.has(day);
           const isFuture = day > today;
           const isPrejoin = day < today && !isStamped;
-          const dayStamp = isStamped ? (stampIcons[day] || config.stamp) : (isToday ? activeStamp : config.stamp);
-          const needsAction = isToday && !isStamped;
-          const listenReady = getListenLinks(config).length === 0 || hasOpenedListenPage(config, day);
-          const element = document.createElement(isToday && isStamped ? 'button' : 'div');
-          if (isToday && isStamped) element.type = 'button';
-          element.className = `day${isToday ? ' today' : ''}${isRelease ? ' release-day' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}${isPrejoin ? ' prejoin' : ''}${needsAction ? ' day-action' : ''}`;
+          const isInteractive = isToday;
+          const element = document.createElement(isInteractive ? 'button' : 'div');
+          if (isInteractive) element.type = 'button';
+          element.className = `day${isToday ? ' today' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}${isPrejoin ? ' prejoin' : ''}`;
           const state = isPrejoin ? '参加前・開催済み' : isStamped ? 'スタンプ済み' : '未スタンプ';
-          element.setAttribute('aria-label', `${formatDate(day)} ${state}${isRelease ? ' CD発売日' : ''}${isToday ? ' 今日' : ''}${isTestMode ? ' テスト操作' : ''}`);
-          if (isToday && isStamped) element.addEventListener('click', () => toggleToday(config));
-          if (needsAction) {
-            element.setAttribute('role', 'button');
-            element.tabIndex = 0;
-            const activate = () => listenReady ? toggleToday(config) : openListenModal(config, day);
-            element.addEventListener('click', activate);
-            element.addEventListener('keydown', (event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                activate();
-              }
-            });
-          }
-          const dayAction = needsAction
-            ? `<span class="day-inline-action${listenReady ? ' stamp-ready' : ''}" data-stamp="${activeStamp}">${listenReady ? `${activeStamp} スタンプ` : '▶ 曲を聴く'}</span>${listenReady && getListenLinks(config).length ? '<button class="listen-reset" type="button">↩ まだ聴いていない</button>' : ''}`
-            : `<span class="day-stamp" aria-hidden="true">${dayStamp}</span>`;
+          element.setAttribute('aria-label', `${formatDate(day)} ${state}${isToday ? ' 今日' : ''}${isTestMode ? ' テスト操作' : ''}`);
+          if (isToday) element.addEventListener('click', () => toggleToday(config));
           element.innerHTML = `
-            <span class="day-tag-slot">${isRelease ? '<span class="release-tag">RELEASE</span>' : isToday ? '<span class="today-tag">TODAY</span>' : ''}</span>
+            ${isToday ? '<span class="today-tag">TODAY</span>' : ''}
             <span class="day-date">${date.getMonth() + 1}/${date.getDate()}</span>
             <span class="day-week">${WEEKDAYS[date.getDay()]}</span>
-            ${isPrejoin ? '<span class="day-state">開催済み</span>' : dayAction}
+            ${isPrejoin ? '<span class="day-state">開催済み</span>' : `<span class="day-stamp" aria-hidden="true">${config.stamp}</span>`}
           `;
-          const resetListen = element.querySelector('.listen-reset');
-          if (resetListen) resetListen.addEventListener('click', (event) => {
-            event.stopPropagation();
-            localStorage.removeItem(listenReadyKey(config, day));
-            renderParticipant();
-            toast('再生前の状態に戻しました');
-          });
           grid.appendChild(element);
         });
 
-        $('imageButton').onclick = requestShareImage;
-        $('imageButtonTop').onclick = requestShareImage;
+        $('xButton').onclick = () => shareToX(config);
+        $('imageButton').onclick = openShareImage;
+        $('imageButtonTop').onclick = openShareImage;
       }
 
       function toggleToday(config) {
         const today = currentDay();
-        if (today < config.start || today > config.end) return;
+        if (today < config.start || today > config.release) return;
         const stamps = loadStamps(config);
-        const stampIcons = loadStampIcons(config);
         const wasStamped = stamps.has(today);
         if (!isTestMode && !wasStamped && !window.confirm('今日、表題曲を聴きましたか？')) return;
-        if (wasStamped) {
-          stamps.delete(today);
-          delete stampIcons[today];
-        } else {
-          stamps.add(today);
-          stampIcons[today] = loadActiveStamp(config);
-        }
+        if (wasStamped) stamps.delete(today);
+        else stamps.add(today);
         saveStamps(config, stamps);
-        saveStampIcons(config, stampIcons);
-        const campaignDays = dateRange(config.start, config.end);
+        const campaignDays = dateRange(config.start, config.release);
         const todayIndex = campaignDays.indexOf(today);
         const nextDay = todayIndex >= 0 && todayIndex < campaignDays.length - 1 ? campaignDays[todayIndex + 1] : '';
-        if (isTestMode && !wasStamped && nextDay) {
-          localStorage.removeItem(listenReadyKey(config, nextDay));
-          setTestToday(nextDay);
-        }
+        if (isTestMode && !wasStamped && nextDay) setTestToday(nextDay);
         renderParticipant();
         if (!wasStamped) {
-          const total = dateRange(config.start, config.end).length;
+          const total = dateRange(config.start, config.release).length;
           if (isTestMode && nextDay) toast(`${formatDate(today, false)}にスタンプ。次は${formatDate(nextDay, false)}です`);
-          else toast(`${stampIcons[today]} 今日のスタンプを押しました`);
+          else toast(`${config.stamp} 今日のスタンプを押しました`);
           if ([3, 5, 10, 15, 20, total].includes(stamps.size)) launchConfetti();
         } else {
           toast('今日のスタンプを取り消しました');
         }
-      }
-
-      function skipTestDay(config) {
-        if (!isTestMode) return;
-        const days = dateRange(config.start, config.end);
-        const today = currentDay();
-        const todayIndex = days.indexOf(today);
-        if (todayIndex < 0 || todayIndex >= days.length - 1) {
-          toast('これ以上先の日付はありません');
-          return;
-        }
-        const nextDay = days[todayIndex + 1];
-        localStorage.removeItem(listenReadyKey(config, nextDay));
-        setTestToday(nextDay);
-        renderParticipant();
-        toast(`${formatDate(today, false)}は空欄のまま、${formatDate(nextDay, false)}へ進みました`);
       }
 
       function launchConfetti() {
@@ -2983,128 +1316,19 @@
         }
       }
 
-      function escapeXmlText(value) {
-        return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      }
-
-      async function loadSnapshotImage(url) {
-        return new Promise((resolve, reject) => {
-          const image = new Image();
-          image.onload = () => resolve(image);
-          image.onerror = () => reject(new Error('カード画像を読み込めませんでした'));
-          image.src = url;
-        });
-      }
-
-      async function buildScreenCanvas() {
-        const source = $('participantView');
-        const sourceWidth = Math.max(320, Math.round(source.getBoundingClientRect().width));
-        const clone = source.cloneNode(true);
-        clone.removeAttribute('id');
-        clone.classList.remove('hidden');
-        clone.querySelectorAll('.day-inline-action').forEach((button) => {
-          const day = button.closest('.day');
-          if (day) day.classList.remove('day-action');
-          const stamp = document.createElement('span');
-          stamp.className = 'day-stamp';
-          stamp.setAttribute('aria-hidden', 'true');
-          stamp.textContent = button.dataset.stamp || currentConfig.stamp;
-          button.replaceWith(stamp);
-        });
-        clone.querySelectorAll('.listen-reset, .participant-identity, .participant-color-picker, .listen-links, .stamp-picker, .action-row, .share-row').forEach((element) => element.remove());
-        clone.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
-        clone.style.width = `${sourceWidth}px`;
-        clone.style.maxWidth = 'none';
-        clone.style.margin = '0';
-        clone.style.animation = 'none';
-
-        const rootStyles = getComputedStyle(document.documentElement);
-        Array.from(rootStyles).filter((name) => name.startsWith('--')).forEach((name) => {
-          clone.style.setProperty(name, rootStyles.getPropertyValue(name));
-        });
-
-        const sandbox = document.createElement('div');
-        sandbox.setAttribute('aria-hidden', 'true');
-        sandbox.style.cssText = `position:fixed;left:-10000px;top:0;width:${sourceWidth}px;pointer-events:none;opacity:1;z-index:-1`;
-        sandbox.appendChild(clone);
-        document.body.appendChild(sandbox);
-        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-        const width = Math.ceil(clone.getBoundingClientRect().width);
-        const height = Math.ceil(clone.scrollHeight);
-
-        if (typeof window.html2canvas === 'function') {
-          try {
-            const canvas = await window.html2canvas(clone, {
-              backgroundColor: '#eaf2f8',
-              scale: 1080 / width,
-              width,
-              height,
-              windowWidth: width,
-              windowHeight: height,
-              useCORS: true,
-              allowTaint: true,
-              logging: false,
-              imageTimeout: 0,
-              scrollX: 0,
-              scrollY: 0
-            });
-            sandbox.remove();
-            return canvas;
-          } catch (error) {
-            console.warn('カードの直接画像化を再試行します', error);
-          }
-        }
-
-        const markup = clone.outerHTML;
-        sandbox.remove();
-
-        const pageCss = [...document.querySelectorAll('style')].map((style) => style.textContent).join('\n');
-        const snapshotCss = `${pageCss}\n*{animation:none!important;transition:none!important;-webkit-font-smoothing:antialiased}html,body{margin:0!important;padding:0!important;background:transparent!important}`;
-        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>${escapeXmlText(snapshotCss)}</style>${markup}</div></foreignObject></svg>`;
-        const svgUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
-        try {
-          const image = await loadSnapshotImage(svgUrl);
-          const scale = 1080 / width;
-          const canvas = document.createElement('canvas');
-          canvas.width = 1080;
-          canvas.height = Math.round(height * scale);
-          const ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#eaf2f8';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-          const sample = ctx.getImageData(Math.floor(canvas.width / 2), Math.min(canvas.height - 1, 20), 1, 1).data;
-          if (sample[3] === 0) throw new Error('カード画像が空です');
-          return canvas;
-        } finally {
-          URL.revokeObjectURL(svgUrl);
-        }
-      }
-
-      async function buildCanvas(config) {
-        try {
-          return await buildScreenCanvas();
-        } catch (error) {
-          console.warn('画面そのままの画像化に失敗したため、互換描画を使います', error);
-          return buildFallbackCanvas(config);
-        }
-      }
-
-      function buildFallbackCanvas(config) {
-        const days = dateRange(config.start, config.end);
+      function buildCanvas(config) {
+        const days = dateRange(config.start, config.release);
         const stamps = loadStamps(config);
-        const stampIcons = loadStampIcons(config);
-        const activeStamp = loadActiveStamp(config);
         const cols = config.template === 'classic' ? 5 : 4;
         const rows = Math.ceil(days.length / cols);
         const width = 1080;
         const cardX = 38;
         const cardWidth = width - cardX * 2;
-        const margin = 55;
-        const gap = 24;
+        const margin = 70;
+        const gap = 16;
         const cell = Math.floor((width - margin * 2 - gap * (cols - 1)) / cols);
-        const cellHeight = config.template === 'hotel' ? Math.round(cell * 1.16) : cell;
-        const gridTop = config.template === 'journey' ? 680 : 650;
+        const cellHeight = config.template === 'hotel' ? Math.round(cell * 1.14) : cell;
+        const gridTop = 650;
         const gridHeight = rows * cellHeight + Math.max(0, rows - 1) * gap;
         const height = gridTop + gridHeight + 125;
         const canvas = document.createElement('canvas');
@@ -3148,32 +1372,24 @@
           ctx.restore();
         }
 
-        ctx.fillStyle = isHotel ? '#cba957' : config.color;
+        ctx.fillStyle = config.color;
         roundRect(ctx, cardX, 38, cardWidth, 16, 8);
         ctx.fill();
-        if (isHotel) {
-          ctx.fillStyle = config.color;
-          ctx.fillRect(width / 2 - 48, 38, 96, 16);
-        }
 
         ctx.textAlign = 'center';
+        ctx.fillStyle = isHotel ? '#f3d58d' : config.color;
+        ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText(isHotel ? 'AMENITY LISTENING CHECK-IN' : isJourney ? 'RELEASE DAY JOURNEY' : 'DAILY LISTENING STAMP', width / 2, 105);
         ctx.fillStyle = isHotel ? '#fff4d5' : ink;
         ctx.font = '700 50px -apple-system, BlinkMacSystemFont, sans-serif';
-        drawCenteredText(ctx, config.title, width / 2, 145, width - 190, 56);
+        drawCenteredText(ctx, config.title, width / 2, 170, width - 190, 56);
         ctx.fillStyle = isHotel ? '#f3d58d' : muted;
         ctx.font = '500 26px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 210);
-        const participantName = loadParticipantName(config);
-        if (participantName) {
-          ctx.textAlign = 'right';
-          ctx.fillStyle = isHotel ? '#f3d58d' : muted;
-          ctx.font = '700 20px -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.fillText(participantName, width - margin, 275);
-        }
+        ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 235);
 
         const count = [...stamps].filter((day) => days.includes(day)).length;
         const milestone = milestoneState(count, days.length);
-        const releaseDistance = Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000);
+        const daysLeft = Math.max(0, Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000));
         ctx.textAlign = 'left';
         ctx.fillStyle = ink;
         ctx.font = '700 39px -apple-system, BlinkMacSystemFont, sans-serif';
@@ -3181,39 +1397,28 @@
         ctx.textAlign = 'right';
         ctx.fillStyle = muted;
         ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(today > config.end ? 'イベント終了' : today === config.release ? '本日発売！' : today < config.release ? `発売日まであと${releaseDistance}日` : `発売から${Math.abs(releaseDistance)}日`, width - margin, 350);
+        ctx.fillText(today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`, width - margin, 350);
         roundRect(ctx, margin, 378, width - margin * 2, 18, 9);
         ctx.fillStyle = '#e8eef3';
         ctx.fill();
         if (count) {
           roundRect(ctx, margin, 378, (width - margin * 2) * milestone.progress / 100, 18, 9);
-          if (isHotel) {
-            const progressGradient = ctx.createLinearGradient(margin, 0, width - margin, 0);
-            progressGradient.addColorStop(0, '#8f0c31');
-            progressGradient.addColorStop(.62, config.color);
-            progressGradient.addColorStop(1, '#d0aa54');
-            ctx.fillStyle = progressGradient;
-          } else ctx.fillStyle = config.color;
+          ctx.fillStyle = config.color;
           ctx.fill();
-          if (isHotel) {
-            const progressX = margin + (width - margin * 2) * milestone.progress / 100;
-            ctx.beginPath();
-            ctx.arc(progressX, 387, 7, 0, Math.PI * 2);
-            ctx.fillStyle = config.color;
-            ctx.fill();
-            ctx.strokeStyle = '#fff3cb';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-          }
         }
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = muted;
+        ctx.font = '500 22px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText(count >= days.length ? '全日達成！' : `次の変化まであと${milestone.next - count}個`, width - margin, 440);
 
         const stageAlpha = [.22, .42, .62, .82, 1][milestone.stage] || .22;
         ctx.save();
         ctx.globalAlpha = stageAlpha;
         ctx.textAlign = 'center';
-        ctx.fillStyle = isHotel ? '#c79e45' : config.color;
+        ctx.fillStyle = config.color;
         ctx.font = '700 36px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText('✦　✦　✦', width / 2, 475);
+        ctx.fillText('✦　✦　✦', width / 2, 510);
         ctx.restore();
 
         ctx.save();
@@ -3242,37 +1447,7 @@
         ctx.textAlign = 'right';
         ctx.fillStyle = isHotel ? '#dfbd6e' : muted;
         ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(`${formatDate(config.start, false)} — ${formatDate(config.end, false)}`, width - margin, 615);
-
-        if (isJourney) {
-          const routeY = 646;
-          const routeStartX = margin + 24;
-          const routeEndX = width - margin - 30;
-          ctx.save();
-          ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, .48)`;
-          ctx.lineWidth = 3;
-          ctx.setLineDash([10, 8]);
-          ctx.beginPath();
-          ctx.moveTo(routeStartX + 14, routeY);
-          ctx.lineTo(routeEndX - 18, routeY);
-          ctx.stroke();
-          ctx.setLineDash([]);
-          ctx.beginPath();
-          ctx.arc(routeStartX, routeY, 7, 0, Math.PI * 2);
-          ctx.fillStyle = config.color;
-          ctx.fill();
-          ctx.strokeStyle = '#fffdf8';
-          ctx.lineWidth = 3;
-          ctx.stroke();
-          ctx.translate(routeEndX, routeY);
-          ctx.rotate(8 * Math.PI / 180);
-          ctx.fillStyle = config.color;
-          ctx.font = '700 28px -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('✦', 0, 1);
-          ctx.restore();
-        }
+        ctx.fillText(`${formatDate(config.start, false)} — ${formatDate(config.release, false)}`, width - margin, 615);
 
         days.forEach((day, index) => {
           const col = index % cols;
@@ -3283,13 +1458,11 @@
           const prejoin = day < today && !stamped;
           const future = day > today;
           const isToday = day === today;
-          const isRelease = day === config.release;
-          const dayStamp = stamped ? (stampIcons[day] || config.stamp) : (isToday ? activeStamp : config.stamp);
           const radius = isJourney ? cell / 2 : isHotel ? 16 : 23;
           if (isHotel) archRect(ctx, x, y, cell, cellHeight);
           else roundRect(ctx, x, y, cell, cellHeight, radius);
-          if (isHotel) ctx.fillStyle = stamped ? '#efd17e' : prejoin ? '#bd737c' : future ? '#733044' : '#7e0929';
-          else ctx.fillStyle = stamped ? (isJourney ? `rgba(${r}, ${g}, ${b}, .13)` : config.color) : prejoin ? '#e1e6e9' : isJourney ? '#fffdf8' : '#f5f8fa';
+          if (isHotel) ctx.fillStyle = stamped ? '#efd17e' : prejoin ? '#ead6bf' : future ? '#733044' : '#7e0929';
+          else ctx.fillStyle = stamped ? config.color : prejoin ? '#e1e6e9' : isJourney ? '#fffdf8' : '#f5f8fa';
           if (stamped && isHotel) {
             ctx.save();
             const glow = ctx.createLinearGradient(x, y, x, y + cellHeight);
@@ -3297,71 +1470,46 @@
             glow.addColorStop(1, '#e8c46f');
             ctx.fillStyle = glow;
             ctx.shadowColor = 'rgba(255, 213, 111, .55)';
-            ctx.shadowBlur = 52;
+            ctx.shadowBlur = 20;
             ctx.fill();
             ctx.restore();
           } else ctx.fill();
-          if (isRelease) {
-            ctx.save();
-            ctx.shadowColor = 'rgba(255, 205, 72, .55)';
-            ctx.shadowBlur = 28;
-            ctx.strokeStyle = '#ffe18d';
-            ctx.lineWidth = 9;
-            ctx.stroke();
-            ctx.restore();
-          }
           if (isJourney && !stamped) ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, .3)`;
-          else if (isRelease) ctx.strokeStyle = '#e4b743';
           else if (isToday) ctx.strokeStyle = config.color;
           else if (isHotel) ctx.strokeStyle = prejoin ? '#cdb78e' : '#cba957';
           else ctx.strokeStyle = stamped ? config.color : '#dce7f0';
-          ctx.lineWidth = isToday || isRelease ? 9 : 5;
+          ctx.lineWidth = isToday ? 6 : 2;
           ctx.stroke();
           if (isHotel) {
             archRect(ctx, x + 9, y + 9, cell - 18, cellHeight - 18);
             ctx.strokeStyle = stamped ? 'rgba(87, 17, 39, .20)' : 'rgba(244, 220, 160, .24)';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 2;
             ctx.stroke();
           }
 
           const textColor = isHotel
-            ? stamped ? '#571127' : prejoin ? '#703342' : future ? '#c9a3a7' : '#f4dca0'
-            : stamped ? (isJourney ? '#24364a' : themeText) : prejoin ? '#8d979e' : '#52677b';
+            ? stamped ? '#571127' : prejoin ? '#a88579' : future ? '#c9a3a7' : '#f4dca0'
+            : stamped ? themeText : prejoin ? '#8d979e' : '#52677b';
           ctx.fillStyle = textColor;
           const date = parseLocalDate(day);
           ctx.textAlign = 'center';
-          if (isToday || isRelease) {
-            const tagText = isRelease ? 'RELEASE' : 'TODAY';
-            const tagWidth = Math.min(cell - 28, isRelease ? 94 : 82);
-            roundRect(ctx, x + cell / 2 - tagWidth / 2, y + 14, tagWidth, 25, 13);
-            ctx.fillStyle = '#fff4d5';
-            ctx.fill();
-            ctx.strokeStyle = '#cba957';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.fillStyle = '#5a1728';
-            ctx.font = `${isRelease ? '800 12px' : '800 14px'} -apple-system, BlinkMacSystemFont, sans-serif`;
-            ctx.fillText(tagText, x + cell / 2, y + 31);
+          ctx.font = '700 24px -apple-system, BlinkMacSystemFont, sans-serif';
+          ctx.fillText(`${date.getMonth() + 1}/${date.getDate()} （${WEEKDAYS[date.getDay()]}）`, x + cell / 2, y + 55);
+          if (isToday) {
+            ctx.fillStyle = stamped && isHotel ? '#571127' : isHotel ? '#fff1bd' : config.color;
+            ctx.font = '700 17px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText('TODAY', x + cell / 2, y + 87);
             ctx.fillStyle = textColor;
-            ctx.font = '800 34px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x + cell / 2, y + 72);
-            ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText(WEEKDAYS[date.getDay()], x + cell / 2, y + 106);
-          } else {
-            ctx.font = '700 33px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x + cell / 2, y + 80);
-            ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText(WEEKDAYS[date.getDay()], x + cell / 2, y + 116);
           }
           if (stamped) {
-            drawTiltedStamp(ctx, dayStamp, x + cell / 2, y + cellHeight * .76, 68, 1);
+            drawTiltedStamp(ctx, config.stamp, x + cell / 2, y + cellHeight * .67, 58, 1);
           } else if (prejoin) {
-            ctx.font = '700 23px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText('開催済み', x + cell / 2, y + cellHeight * .72);
+            ctx.font = '700 19px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText('開催済み', x + cell / 2, y + cellHeight * .64);
           } else {
             ctx.save();
             ctx.globalAlpha = .12;
-            drawTiltedStamp(ctx, dayStamp, x + cell / 2, y + cellHeight * .76, 58, .8);
+            drawTiltedStamp(ctx, config.stamp, x + cell / 2, y + cellHeight * .68, 48, .8);
             ctx.restore();
           }
         });
@@ -3369,7 +1517,7 @@
         ctx.textAlign = 'center';
         ctx.fillStyle = isHotel ? '#dfbd6e' : `rgba(${r}, ${g}, ${b}, .85)`;
         ctx.font = '700 22px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText('ONE LISTEN A DAY, KEEP THE MUSIC PLAYING', width / 2, height - 75);
+        ctx.fillText('ONE LISTEN A DAY, ALL THE WAY TO RELEASE DAY', width / 2, height - 75);
         return canvas;
       }
 
@@ -3430,123 +1578,22 @@
       }
 
       function canvasBlob(canvas) {
-        return new Promise((resolve, reject) => {
-          try {
-            canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('画像を作成できませんでした')), 'image/png', 0.95);
-          } catch (error) {
-            reject(error);
-          }
-        });
+        return new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.95));
       }
 
-      function imageConfettiReason(config) {
-        const days = dateRange(config.start, config.end);
-        const stamps = loadStamps(config);
-        const count = [...stamps].filter((day) => days.includes(day)).length;
-        const milestones = [...new Set([3, 5, 10, 15, 20, days.length])];
-        const isMilestone = count > 0 && milestones.includes(count) && (isTestMode || stamps.has(currentDay()));
-        const isRelease = currentDay() === config.release;
-        if (isRelease && isMilestone) return '発売日と節目の記録です。紙吹雪の有無を選べます。';
-        if (isRelease) return '発売日の記録です。紙吹雪の有無を選べます。';
-        if (isMilestone) return `${count}個達成の記録です。紙吹雪の有無を選べます。`;
-        return '';
-      }
-
-      function requestShareImage() {
-        const reason = imageConfettiReason(currentConfig);
-        if (!reason) {
-          openShareImage(false);
-          return;
-        }
-        $('confettiChoiceReason').textContent = reason;
-        $('confettiChoiceModal').classList.add('show');
-        $('confettiChoiceModal').setAttribute('aria-hidden', 'false');
-      }
-
-      function closeConfettiChoice() {
-        $('confettiChoiceModal').classList.remove('show');
-        $('confettiChoiceModal').setAttribute('aria-hidden', 'true');
-      }
-
-      function addConfettiToCanvas(canvas, config) {
-        const output = document.createElement('canvas');
-        output.width = canvas.width;
-        output.height = canvas.height;
-        const ctx = output.getContext('2d');
-        ctx.drawImage(canvas, 0, 0);
-        const palette = ['#ffcc33', '#7b2cbf', '#4ea8de', '#f97316', '#2a9d8f', '#283044', '#e63946', '#ff69b4', config.color, '#d4af37'];
-        const amount = Math.min(170, 105 + Math.round(output.height / 75));
-        ctx.save();
-        for (let i = 0; i < amount; i += 1) {
-          const edgePiece = i >= Math.round(amount * .68);
-          const fromLeft = i % 2 === 0;
-          const x = edgePiece
-            ? (fromLeft ? Math.random() * output.width * .20 : output.width * (.80 + Math.random() * .20))
-            : Math.random() * output.width;
-          const y = edgePiece
-            ? Math.random() * output.height
-            : Math.random() * output.height * .58;
-          const width = 14 + Math.random() * 22;
-          const height = 8 + Math.random() * 14;
-          ctx.save();
-          ctx.translate(x, y);
-          ctx.rotate(Math.random() * Math.PI);
-          ctx.globalAlpha = .82 + Math.random() * .18;
-          ctx.fillStyle = palette[i % palette.length];
-          ctx.strokeStyle = 'rgba(255,255,255,.72)';
-          ctx.lineWidth = 2;
-          if (i % 4 === 0) {
-            ctx.beginPath();
-            ctx.arc(0, 0, width * .45, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-          } else {
-            ctx.fillRect(-width / 2, -height / 2, width, height);
-            ctx.strokeRect(-width / 2, -height / 2, width, height);
-          }
-          ctx.restore();
-        }
-        for (let i = 0; i < 8; i += 1) {
-          const startX = output.width * (.08 + i * .12);
-          ctx.beginPath();
-          ctx.moveTo(startX, 0);
-          ctx.bezierCurveTo(startX - 65, 75, startX + 85, 135, startX + (i % 2 ? -45 : 45), 230 + i * 18);
-          ctx.strokeStyle = palette[(i + 2) % palette.length];
-          ctx.globalAlpha = .9;
-          ctx.lineWidth = 7;
-          ctx.lineCap = 'round';
-          ctx.stroke();
-        }
-        ctx.restore();
-        return output;
-      }
-
-      async function openShareImage(withConfetti = false) {
-        try {
-          const canvas = await buildCanvas(currentConfig);
-          const finishedCanvas = withConfetti ? addConfettiToCanvas(canvas, currentConfig) : canvas;
-          shareBlob = await canvasBlob(finishedCanvas);
-          $('shareImage').src = URL.createObjectURL(shareBlob);
-          const shareFile = new File([shareBlob], `daily-stamp-${currentConfig.id}.png`, { type: 'image/png' });
-          const canShareImage = Boolean(navigator.share && (!navigator.canShare || navigator.canShare({ files: [shareFile] })));
-          $('nativeShareButton').classList.toggle('hidden', !canShareImage);
-          $('saveImageButton').classList.toggle('hidden', canShareImage);
-          $('shareHelp').textContent = canShareImage
-            ? 'このボタンからSNSへの投稿や「画像を保存」を選べます。'
-            : '画像を長押しして共有するか、画像ファイルを保存してください。';
-          $('shareModal').classList.add('show');
-          $('shareModal').setAttribute('aria-hidden', 'false');
-        } catch (error) {
-          console.error(error);
-          toast('画像を作れませんでした。ページを再読み込みしてお試しください');
-        }
+      async function openShareImage() {
+        const canvas = buildCanvas(currentConfig);
+        shareBlob = await canvasBlob(canvas);
+        $('shareImage').src = URL.createObjectURL(shareBlob);
+        $('shareModal').classList.add('show');
+        $('shareModal').setAttribute('aria-hidden', 'false');
       }
 
       async function nativeShareImage() {
         if (!shareBlob) return;
         const file = new File([shareBlob], `daily-stamp-${currentConfig.id}.png`, { type: 'image/png' });
         const text = shareText(currentConfig);
-        if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           try { await navigator.share({ files: [file], text }); } catch (error) { if (error.name !== 'AbortError') toast('共有できませんでした'); }
         } else {
           saveImage();
@@ -3569,241 +1616,59 @@
       }
 
       function shareText(config) {
-        const days = dateRange(config.start, config.end);
+        const days = dateRange(config.start, config.release);
         const count = [...loadStamps(config)].filter((day) => days.includes(day)).length;
-        const participantUrl = configUrl(config);
-        const replacements = {
-          '{スタンプ}': config.stamp,
-          '{カードタイトル}': config.title,
-          '{曲名}': config.song || config.title,
-          '{スタンプ数}': String(count),
-          '{参加者用URL}': participantUrl
-        };
-        let text = config.shareTemplate || DEFAULT_SHARE_TEMPLATE;
-        Object.entries(replacements).forEach(([token, value]) => { text = text.split(token).join(value); });
-        text = text.trim();
-        if (!text.includes(participantUrl)) text += `\n${participantUrl}`;
-        return text;
+        return `${config.stamp} ${config.title}\n発売日まで1日1回聴いています！\n【${count} STAMPS】\n#SnowMan`;
       }
 
-      function showGeneratedUrls(participantUrl, adminUrl = '') {
-        $('participantUrlEntry').classList.remove('hidden');
-        $('generatedUrlLink').href = participantUrl;
-        $('generatedUrlLink').textContent = participantUrl;
-        $('generatedUrlLabel').textContent = adminUrl ? '共有カードのURL' : '参加者へ共有するURL';
-        $('adminUrlEntry').classList.toggle('hidden', !adminUrl);
-        if (adminUrl) {
-          $('generatedAdminUrlLink').href = adminUrl;
-          $('generatedAdminUrlLink').textContent = adminUrl;
-          $('urlBoxNotice').textContent = '共同管理URLは全カード共通です。管理者だけで共有し、次回のCDでも同じURLを使ってください。参加者には参加者用URLだけを配布します。';
-        } else {
-          $('generatedAdminUrlLink').href = '#';
-          $('generatedAdminUrlLink').textContent = '';
-          $('urlBoxNotice').textContent = 'URLをタップすると参加者用ページを開けます。確認後、「コピー」から配布できます。';
-        }
-        $('urlBox').classList.add('show');
+      function shareToX(config) {
+        const text = shareText(config);
+        const url = configUrl(config);
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'noopener');
       }
 
-      function showGeneratedAdminUrl(adminUrl) {
-        $('participantUrlEntry').classList.add('hidden');
-        $('adminUrlEntry').classList.remove('hidden');
-        $('generatedUrlLabel').textContent = '共同管理ページができました';
-        $('generatedAdminUrlLink').href = adminUrl;
-        $('generatedAdminUrlLink').textContent = adminUrl;
-        $('urlBoxNotice').textContent = 'このURLを共同管理者だけで共有してください。共同管理ページを開いてカードを作成すると、参加者用URLを発行できます。';
-        $('urlBox').classList.add('show');
-      }
-
-      async function generate(mode = 'participant') {
-        const testMode = mode === 'test';
-        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
-        if (!testMode && generatedWorkspaceUrl) {
-          location.href = generatedWorkspaceUrl;
-          return;
-        }
-        if (!testMode && apiUrl && !workspaceEditKey) {
-          workspaceEditKey = randomToken(32);
-          saveWorkspaceEditKey(apiUrl, workspaceEditKey);
-          generatedWorkspaceUrl = sharedAdminUrl(apiUrl, workspaceEditKey);
-          try { localStorage.setItem(SAVED_SHARED_API_URL_KEY, apiUrl); } catch (_) {}
-          showGeneratedAdminUrl(generatedWorkspaceUrl);
-          updateSharedAdminUi(currentConfig);
-          toast('共同管理URLを発行しました');
-          return;
-        }
+      function generate(mode = 'participant') {
         const config = configFromForm();
         if (!config) return;
+        const testMode = mode === 'test';
+        const url = configUrl(config, testMode);
+        if (mode === 'preview') {
+          history.replaceState(null, '', url);
+          showParticipant(config);
+          return;
+        }
         if (testMode) {
-          location.href = configUrl(config, true);
+          location.href = url;
           return;
         }
-        if (!apiUrl) {
-          showGeneratedUrls(configUrl(config));
-          toast('参加者用URLを作りました');
-          return;
-        }
-        $('generateButton').disabled = true;
-        $('generateButton').textContent = '共有保存中…';
-        try {
-          const saved = await saveSharedConfig(config, apiUrl);
-          currentConfig = saved;
-          upsertWorkspaceCard(saved);
-          showGeneratedUrls(sharedCardUrl(saved.sharedCardId, saved.apiUrl));
-          updateSharedAdminUi(saved);
-          toast('共有カードを保存しました');
-        } catch (error) {
-          showError(error && error.message ? error.message : '共同編集カードを保存できませんでした。');
-          toast('共有保存に失敗しました');
-        } finally {
-          $('generateButton').disabled = false;
-          updateSharedAdminUi(currentConfig);
-        }
+        $('generatedUrl').value = url;
+        $('generatedUrlLabel').textContent = '参加者へ共有するURL';
+        $('urlBox').classList.add('show');
+        $('generatedUrl').select();
+        toast('参加者用URLを作りました');
       }
 
-      async function saveDraft() {
-        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
-        if (!apiUrl || !workspaceEditKey) {
-          showError('共同管理ページから一時保存してください。');
-          return;
-        }
-        const config = configFromForm({ allowIncomplete: true });
-        if (!config) return;
-        const button = $('saveDraftButton');
-        button.disabled = true;
-        button.textContent = '一時保存中…';
-        try {
-          const saved = await saveSharedConfig(config, apiUrl);
-          currentConfig = saved;
-          upsertWorkspaceCard(saved);
-          $('urlBox').classList.remove('show');
-          updateSharedAdminUi(saved);
-          toast('一時保存しました。このページを閉じても大丈夫です');
-        } catch (error) {
-          showError(error && error.message ? error.message : '作業内容を一時保存できませんでした。');
-          toast('一時保存に失敗しました');
-        } finally {
-          button.disabled = false;
-          button.textContent = '作業内容を一時保存';
-        }
-      }
-
-      async function copyUrl(value, message) {
+      async function copyGeneratedUrl() {
+        const value = $('generatedUrl').value;
         try {
           await navigator.clipboard.writeText(value);
         } catch (_) {
-          const temporary = document.createElement('textarea');
-          temporary.value = value;
-          temporary.setAttribute('readonly', '');
-          temporary.style.position = 'fixed';
-          temporary.style.opacity = '0';
-          document.body.appendChild(temporary);
-          temporary.select();
+          $('generatedUrl').select();
           document.execCommand('copy');
-          temporary.remove();
         }
-        toast(message);
+        const copiedTestUrl = new URL(value).searchParams.get('test') === '1';
+        toast(copiedTestUrl ? 'テスト用URLをコピーしました' : '参加者用URLをコピーしました');
       }
 
-      function copyGeneratedUrl() {
-        return copyUrl($('generatedUrlLink').href, '参加者用URLをコピーしました');
-      }
-
-      function copyGeneratedAdminUrl() {
-        return copyUrl($('generatedAdminUrlLink').href, '共同管理URLをコピーしました');
-      }
-
-      function copyCurrentAdminUrl() {
-        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
-        if (!apiUrl || !workspaceEditKey) return toast('共同管理URLがありません');
-        return copyUrl(sharedAdminUrl(apiUrl, workspaceEditKey), '共同管理URLをコピーしました');
-      }
-
-      function showSharedError(message) {
-        $('participantView').classList.add('hidden');
-        $('adminView').classList.add('hidden');
-        $('sharedErrorView').classList.remove('hidden');
-        $('sharedErrorText').textContent = message || '通信状態を確認して、もう一度読み込んでください。';
-        $('modeLink').classList.add('hidden');
-      }
-
-      async function init() {
+      function init() {
+        renderColorChoices();
         initAdminDefaults();
-        let config = null;
-        let sharedLoadError = '';
-        let usedWorkspaceCache = false;
-        const requestedAdmin = params.get('admin') === '1';
-        const sharedApi = safeSharedApiUrl(incomingSharedApiUrl);
-        if (requestedAdmin && sharedApi && !workspaceEditKey) {
-          workspaceEditKey = loadWorkspaceEditKey(sharedApi) || randomToken(32);
-          saveWorkspaceEditKey(sharedApi, workspaceEditKey);
-        }
-        if (requestedAdmin && sharedApi && workspaceEditKey) {
-          saveWorkspaceEditKey(sharedApi, workspaceEditKey);
-          if (params.get('edit') !== workspaceEditKey) {
-            history.replaceState(null, '', sharedAdminUrl(sharedApi, workspaceEditKey));
-          }
-        }
-        if (requestedAdmin && sharedApi && workspaceEditKey) {
-          const cachedWorkspace = loadWorkspaceCache(sharedApi, workspaceEditKey);
-          if (cachedWorkspace) {
-            const cachedItem = incomingSharedCardId
-              ? cachedWorkspace.cards.find((card) => card.id === incomingSharedCardId)
-              : cachedWorkspace.cards[0];
-            if (!incomingSharedCardId || cachedItem) {
-              applyWorkspaceResult(cachedWorkspace);
-              if (cachedItem) config = workspaceItemConfig(cachedItem, sharedApi);
-              usedWorkspaceCache = true;
-            }
-          }
-        }
-        if (usedWorkspaceCache) {
-          setTimeout(() => {
-            refreshWorkspaceCards(sharedApi).catch(() => {});
-          }, 50);
-        } else if (incomingSharedCardId) {
-          try {
-            const result = await loadSharedConfig(sharedApi, incomingSharedCardId, incomingSharedEditKey);
-            if (requestedAdmin && (!incomingSharedEditKey || !result.canEdit)) {
-              throw new Error('共同管理URLの編集キーを確認してください。参加者用URLからは管理画面を開けません。');
-            }
-            config = {
-              ...result.config,
-              id: incomingSharedCardId,
-              sharedCardId: incomingSharedCardId,
-              sharedEditKey: result.canEdit ? incomingSharedEditKey : '',
-              sharedRevision: Number(result.revision || 0),
-              apiUrl: sharedApi
-            };
-            if (result.canEdit) {
-              workspaceEditKey = incomingSharedEditKey;
-              const workspace = await loadSharedWorkspace(sharedApi, workspaceEditKey);
-              applyWorkspaceResult(workspace);
-            }
-          } catch (error) {
-            sharedLoadError = error && error.message ? error.message : '共有カードを読み込めませんでした。';
-          }
-        } else if (requestedAdmin && sharedApi && workspaceEditKey) {
-          try {
-            const workspace = await loadSharedWorkspace(sharedApi, workspaceEditKey);
-            applyWorkspaceResult(workspace);
-            if (workspaceCards.length) {
-              config = workspaceItemConfig(workspaceCards[0], sharedApi);
-            }
-          } catch (error) {
-            sharedLoadError = error && error.message ? error.message : '共同管理ページを読み込めませんでした。';
-          }
-        } else if (incomingSharedApiUrl) {
-          sharedLoadError = '共同管理URLの編集キーを確認してください。';
-        } else {
-          config = configFromParams();
-        }
+        let config = configFromParams();
         if (isTestMode && !config) {
           config = {
             title: '動作確認用テストカード',
-            song: 'ALL SUITE',
             start: '2026-10-01',
             release: '2026-10-14',
-            end: '2026-10-20',
             stamp: '⛄️',
             color: '#4ea8de',
             link: '',
@@ -3811,95 +1676,25 @@
             spotify: '',
             line: '',
             youtube: '',
-            shareTemplate: DEFAULT_SHARE_TEMPLATE,
             template: 'hotel',
             id: 'test-demo'
           };
         }
         currentConfig = config;
-        const forceAdmin = requestedAdmin;
-        if (forceAdmin && config && config.sharedCardId) editingWorkspaceCardId = config.sharedCardId;
-        if (sharedLoadError) showSharedError(sharedLoadError);
-        else if (config && !forceAdmin) showParticipant(config);
-        else {
-          if (config) fillForm(config);
-          showAdmin();
-        }
+        const forceAdmin = params.get('admin') === '1';
+        if (config && !forceAdmin) showParticipant(config);
+        else showAdmin();
         if (isTestMode) requestAnimationFrame(() => window.scrollTo(0, 0));
 
+        $('previewButton').addEventListener('click', () => generate('preview'));
         $('generateButton').addEventListener('click', () => generate('participant'));
-        $('saveDraftButton').addEventListener('click', saveDraft);
         $('testGenerateButton').addEventListener('click', () => generate('test'));
-        $('adminTemplate').addEventListener('change', () => {
-          renderAdminStampChoices($('adminTemplate').value, adminSelectedStamps, adminSelectedStamps[0]);
-        });
-        const syncDateLimits = () => {
-          $('adminRelease').min = $('adminStart').value;
-          $('adminEnd').min = $('adminRelease').value;
-          if (!$('adminEnd').value || $('adminEnd').value < $('adminRelease').value) $('adminEnd').value = $('adminRelease').value;
-        };
-        $('adminStart').addEventListener('change', syncDateLimits);
-        $('adminRelease').addEventListener('change', syncDateLimits);
-        syncDateLimits();
         $('copyButton').addEventListener('click', copyGeneratedUrl);
-        $('copyAdminButton').addEventListener('click', copyGeneratedAdminUrl);
-        $('adminApiUrl').addEventListener('input', () => updateSharedAdminUi(currentConfig));
-        $('workspaceOpenButton').addEventListener('click', () => openWorkspaceCard());
-        $('workspaceCardSelect').addEventListener('change', (event) => openWorkspaceCard(event.target.value));
-        $('workspaceDeleteButton').addEventListener('click', deleteWorkspaceCard);
-        $('workspaceNewButton').addEventListener('click', startNewWorkspaceCard);
-        $('workspaceCopyAdminButton').addEventListener('click', copyCurrentAdminUrl);
-        $('sharedReloadButton').addEventListener('click', () => location.reload());
-        $('saveShareTemplateButton').addEventListener('click', saveShareTemplate);
-        $('resetShareTemplateButton').addEventListener('click', resetShareTemplate);
-        $('adminStampListInput').addEventListener('input', () => {
-          adminSelectedStamps = normalizeStampSet(splitEmojiInput($('adminStampListInput').value), '');
-          renderAdminStampSetPreview();
-          syncAdminStampOptions($('adminTemplate').value, adminSelectedStamps[0] || '', adminSelectedStamps);
-        });
-        $('saveStampSetButton').addEventListener('click', saveStampSet);
-        $('deleteStampSetButton').addEventListener('click', deleteStampSet);
-        $('newStampSetButton').addEventListener('click', () => {
-          $('adminSavedStampSet').value = '';
-          $('adminStampSetName').value = '';
-          editingStampSetOriginalName = '';
-          renderAdminStampChoices($('adminTemplate').value, [], '');
-          setStampSetEditorMode(true);
-          $('adminStampSetName').focus();
-          toast('①名前 → ②絵文字 → ③保存の順に作成してください');
-        });
-        $('adminSavedStampSet').addEventListener('change', () => loadStampSet($('adminSavedStampSet').value));
-        $('participantName').addEventListener('input', () => {
-          if (!currentConfig) return;
-          const name = $('participantName').value.slice(0, 32);
-          localStorage.setItem(participantNameKey(currentConfig), name);
-          $('participantNameCard').textContent = name;
-          $('participantNameCard').classList.toggle('hidden', !name.trim());
-        });
         $('nativeShareButton').addEventListener('click', nativeShareImage);
         $('saveImageButton').addEventListener('click', saveImage);
         $('closeModalButton').addEventListener('click', closeModal);
         $('shareModal').addEventListener('click', (event) => { if (event.target === $('shareModal')) closeModal(); });
-        $('imageWithConfettiButton').addEventListener('click', () => {
-          closeConfettiChoice();
-          openShareImage(true);
-        });
-        $('imageWithoutConfettiButton').addEventListener('click', () => {
-          closeConfettiChoice();
-          openShareImage(false);
-        });
-        $('confettiChoiceModal').addEventListener('click', (event) => {
-          if (event.target === $('confettiChoiceModal')) closeConfettiChoice();
-        });
-        $('closeListenModalButton').addEventListener('click', closeListenModal);
-        $('listenModal').addEventListener('click', (event) => { if (event.target === $('listenModal')) closeListenModal(); });
-        document.addEventListener('keydown', (event) => {
-          if (event.key === 'Escape') {
-            closeModal();
-            closeConfettiChoice();
-            closeListenModal();
-          }
-        });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeModal(); });
       }
 
       init();
