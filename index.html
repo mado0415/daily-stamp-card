@@ -1248,6 +1248,17 @@
     </div>
   </div>
 
+  <div id="confettiChoiceModal" class="modal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="confettiChoiceTitle">
+      <h2 id="confettiChoiceTitle">画像に紙吹雪を載せますか？</h2>
+      <p id="confettiChoiceReason" class="listen-modal-copy"></p>
+      <div class="modal-actions">
+        <button id="imageWithConfettiButton" class="btn btn-primary" type="button">🎉 紙吹雪あり</button>
+        <button id="imageWithoutConfettiButton" class="btn btn-plain" type="button">紙吹雪なし</button>
+      </div>
+    </div>
+  </div>
+
   <div id="listenModal" class="modal" aria-hidden="true">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="listenModalTitle">
       <h2 id="listenModalTitle">曲を聴く</h2>
@@ -2037,8 +2048,8 @@
         });
 
         $('xButton').onclick = () => shareToX(config);
-        $('imageButton').onclick = openShareImage;
-        $('imageButtonTop').onclick = openShareImage;
+        $('imageButton').onclick = requestShareImage;
+        $('imageButtonTop').onclick = requestShareImage;
       }
 
       function toggleToday(config) {
@@ -2533,9 +2544,73 @@
         });
       }
 
-      async function openShareImage() {
+      function imageConfettiReason(config) {
+        const days = dateRange(config.start, config.end);
+        const stamps = loadStamps(config);
+        const count = [...stamps].filter((day) => days.includes(day)).length;
+        const milestones = [...new Set([3, 5, 10, 15, 20, days.length])];
+        const isMilestone = count > 0 && milestones.includes(count) && (isTestMode || stamps.has(currentDay()));
+        const isRelease = currentDay() === config.release;
+        if (isRelease && isMilestone) return '発売日と節目の記録です。紙吹雪の有無を選べます。';
+        if (isRelease) return '発売日の記録です。紙吹雪の有無を選べます。';
+        if (isMilestone) return `${count}個達成の記録です。紙吹雪の有無を選べます。`;
+        return '';
+      }
+
+      function requestShareImage() {
+        const reason = imageConfettiReason(currentConfig);
+        if (!reason) {
+          openShareImage(false);
+          return;
+        }
+        $('confettiChoiceReason').textContent = reason;
+        $('confettiChoiceModal').classList.add('show');
+        $('confettiChoiceModal').setAttribute('aria-hidden', 'false');
+      }
+
+      function closeConfettiChoice() {
+        $('confettiChoiceModal').classList.remove('show');
+        $('confettiChoiceModal').setAttribute('aria-hidden', 'true');
+      }
+
+      function addConfettiToCanvas(canvas, config) {
+        const ctx = canvas.getContext('2d');
+        const palette = [...COLORS, config.color, '#d4af37'];
+        const amount = Math.min(110, 58 + Math.round(canvas.height / 90));
+        ctx.save();
+        for (let i = 0; i < amount; i += 1) {
+          const edgePiece = i >= Math.round(amount * .55);
+          const fromLeft = i % 2 === 0;
+          const x = edgePiece
+            ? (fromLeft ? Math.random() * canvas.width * .18 : canvas.width * (.82 + Math.random() * .18))
+            : Math.random() * canvas.width;
+          const y = edgePiece
+            ? Math.random() * canvas.height
+            : Math.random() * canvas.height * .42;
+          const width = 7 + Math.random() * 14;
+          const height = 4 + Math.random() * 10;
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(Math.random() * Math.PI);
+          ctx.globalAlpha = .72 + Math.random() * .25;
+          ctx.fillStyle = palette[i % palette.length];
+          if (i % 4 === 0) {
+            ctx.beginPath();
+            ctx.arc(0, 0, width * .45, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillRect(-width / 2, -height / 2, width, height);
+          }
+          ctx.restore();
+        }
+        ctx.restore();
+        return canvas;
+      }
+
+      async function openShareImage(withConfetti = false) {
         try {
           const canvas = await buildCanvas(currentConfig);
+          if (withConfetti) addConfettiToCanvas(canvas, currentConfig);
           shareBlob = await canvasBlob(canvas);
           $('shareImage').src = URL.createObjectURL(shareBlob);
           const shareFile = new File([shareBlob], `daily-stamp-${currentConfig.id}.png`, { type: 'image/png' });
@@ -2695,11 +2770,23 @@
         $('saveImageButton').addEventListener('click', saveImage);
         $('closeModalButton').addEventListener('click', closeModal);
         $('shareModal').addEventListener('click', (event) => { if (event.target === $('shareModal')) closeModal(); });
+        $('imageWithConfettiButton').addEventListener('click', () => {
+          closeConfettiChoice();
+          openShareImage(true);
+        });
+        $('imageWithoutConfettiButton').addEventListener('click', () => {
+          closeConfettiChoice();
+          openShareImage(false);
+        });
+        $('confettiChoiceModal').addEventListener('click', (event) => {
+          if (event.target === $('confettiChoiceModal')) closeConfettiChoice();
+        });
         $('closeListenModalButton').addEventListener('click', closeListenModal);
         $('listenModal').addEventListener('click', (event) => { if (event.target === $('listenModal')) closeListenModal(); });
         document.addEventListener('keydown', (event) => {
           if (event.key === 'Escape') {
             closeModal();
+            closeConfettiChoice();
             closeListenModal();
           }
         });
