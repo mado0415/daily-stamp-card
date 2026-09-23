@@ -180,6 +180,7 @@
     .btn-primary { color: var(--theme-text); background: var(--theme); }
     .btn-soft { color: var(--ink); background: rgba(var(--theme-rgb), .12); }
     .btn-plain { color: #4e6479; background: #edf3f7; }
+    .btn-danger { color: #9b2c2c; background: #fde8e8; }
     .btn[disabled] { opacity: .46; transform: none; }
     .btn-full { width: 100%; }
 
@@ -958,7 +959,7 @@
     }
     .workspace-panel h2 { margin: 0; font-size: 15px; }
     .workspace-panel .btn { min-height: 38px; padding: 8px 11px; font-size: 12px; }
-    .workspace-card-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    .workspace-card-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; }
     .workspace-card-row select {
       width: 100%;
       min-width: 0;
@@ -1324,6 +1325,7 @@
         <div class="workspace-card-row">
           <select id="workspaceCardSelect" aria-label="編集するカード"></select>
           <button id="workspaceOpenButton" class="btn btn-soft" type="button">編集</button>
+          <button id="workspaceDeleteButton" class="btn btn-danger" type="button">削除</button>
         </div>
         <p id="workspaceNote" class="workspace-note"></p>
         <button id="workspaceCopyAdminButton" class="btn btn-plain btn-full" type="button">共同管理URLをコピー</button>
@@ -1538,6 +1540,7 @@
       let workspaceEditKey = /^[a-zA-Z0-9_-]{32,160}$/.test(incomingSharedEditKey) ? incomingSharedEditKey : '';
       let workspaceCards = [];
       let workspaceStampSetsRevision = 0;
+      let editingWorkspaceCardId = /^[a-zA-Z0-9_-]{16,80}$/.test(incomingSharedCardId) ? incomingSharedCardId : '';
 
       const $ = (id) => document.getElementById(id);
 
@@ -1867,13 +1870,18 @@
       async function saveSharedConfig(config, apiUrl) {
         if (sharedSaveBusy) throw new Error('保存中です。少し待ってからもう一度お試しください。');
         sharedSaveBusy = true;
-        const sameSharedCard = currentConfig && currentConfig.sharedCardId
-          && currentConfig.sharedEditKey && currentConfig.apiUrl === apiUrl;
-        const cardId = sameSharedCard ? currentConfig.sharedCardId : randomToken(12);
-        const editKey = sameSharedCard ? currentConfig.sharedEditKey : (workspaceEditKey || randomToken(32));
+        const activeWorkspaceCard = editingWorkspaceCardId
+          ? workspaceCards.find((card) => card.id === editingWorkspaceCardId)
+          : null;
+        const sameSharedCard = Boolean(editingWorkspaceCardId && (activeWorkspaceCard
+          || (currentConfig && currentConfig.sharedCardId === editingWorkspaceCardId)));
+        const cardId = sameSharedCard ? editingWorkspaceCardId : randomToken(12);
+        const editKey = workspaceEditKey || (currentConfig && currentConfig.sharedEditKey) || randomToken(32);
         workspaceEditKey = editKey;
         saveWorkspaceEditKey(apiUrl, editKey);
-        const expectedRevision = sameSharedCard ? Number(currentConfig.sharedRevision || 0) : 0;
+        const expectedRevision = sameSharedCard
+          ? Number(activeWorkspaceCard ? activeWorkspaceCard.revision : currentConfig.sharedRevision || 0)
+          : 0;
         const storedConfig = sharedConfigPayload(config);
         try {
           const saved = await postSharedRequest(apiUrl, {
@@ -1884,6 +1892,7 @@
             config: storedConfig
           });
           try { localStorage.setItem(SAVED_SHARED_API_URL_KEY, apiUrl); } catch (_) {}
+          editingWorkspaceCardId = cardId;
           return {
             ...storedConfig,
             id: cardId,
@@ -2414,7 +2423,7 @@
         panel.classList.toggle('hidden', !active);
         if (!active) return;
         const select = $('workspaceCardSelect');
-        const selectedId = currentConfig && currentConfig.sharedCardId ? currentConfig.sharedCardId : '';
+        const selectedId = editingWorkspaceCardId;
         select.innerHTML = '';
         if (!workspaceCards.length) {
           const option = document.createElement('option');
@@ -2422,6 +2431,12 @@
           option.textContent = 'まだカードがありません';
           select.appendChild(option);
         } else {
+          if (!selectedId) {
+            const newOption = document.createElement('option');
+            newOption.value = '';
+            newOption.textContent = '＋ 新しいカードを作成中';
+            select.appendChild(newOption);
+          }
           workspaceCards.forEach((item) => {
             const option = document.createElement('option');
             option.value = item.id;
@@ -2430,11 +2445,12 @@
           });
           select.value = workspaceCards.some((item) => item.id === selectedId)
             ? selectedId
-            : workspaceCards[0].id;
+            : '';
         }
-        $('workspaceOpenButton').disabled = !workspaceCards.length;
+        $('workspaceOpenButton').disabled = !select.value;
+        $('workspaceDeleteButton').disabled = !select.value;
         $('workspaceNote').textContent = workspaceCards.length
-          ? `${workspaceCards.length}件のカードを、この共同管理ページから編集できます。`
+          ? `${workspaceCards.length}件のカードがあります。カード名を選ぶと編集対象が切り替わります。`
           : '最初のカードを入力して保存してください。この共同管理URLは次回以降も同じです。';
       }
 
@@ -2453,6 +2469,7 @@
 
       function upsertWorkspaceCard(config) {
         if (!config || !config.sharedCardId) return;
+        editingWorkspaceCardId = config.sharedCardId;
         const item = {
           id: config.sharedCardId,
           config: sharedConfigPayload(config),
@@ -2467,6 +2484,7 @@
         const item = workspaceCards.find((card) => card.id === cardId);
         const config = workspaceItemConfig(item);
         if (!config) return toast('編集するカードを選んでください');
+        editingWorkspaceCardId = cardId;
         currentConfig = config;
         fillForm(config);
         $('urlBox').classList.remove('show');
@@ -2474,7 +2492,47 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
+      async function deleteWorkspaceCard() {
+        const cardId = $('workspaceCardSelect').value;
+        const item = workspaceCards.find((card) => card.id === cardId);
+        if (!item) return toast('削除するカードを選んでください');
+        const title = item.config && item.config.title ? item.config.title : '無題のカード';
+        if (!window.confirm(`「${title}」を削除しますか？\n\n参加者用URLも開けなくなります。この操作は元に戻せません。`)) return;
+        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
+        const button = $('workspaceDeleteButton');
+        button.disabled = true;
+        button.textContent = '削除中…';
+        try {
+          await postSharedRequest(apiUrl, {
+            action: 'delete',
+            id: cardId,
+            editKey: workspaceEditKey,
+            expectedRevision: Number(item.revision || 0)
+          });
+          workspaceCards = workspaceCards.filter((card) => card.id !== cardId);
+          if (currentConfig && currentConfig.sharedCardId === cardId) {
+            editingWorkspaceCardId = '';
+            currentConfig = null;
+            initAdminDefaults();
+            $('adminApiUrl').value = apiUrl;
+            $('urlBox').classList.remove('show');
+            showAdmin();
+          } else {
+            renderWorkspacePanel();
+          }
+          toast(`「${title}」を削除しました`);
+        } catch (error) {
+          showError(error && error.message ? error.message : 'カードを削除できませんでした。');
+          toast('カードの削除に失敗しました');
+        } finally {
+          button.disabled = false;
+          button.textContent = '削除';
+          renderWorkspacePanel();
+        }
+      }
+
       function startNewWorkspaceCard() {
+        editingWorkspaceCardId = '';
         currentConfig = null;
         initAdminDefaults();
         $('adminApiUrl').value = safeSharedApiUrl(incomingSharedApiUrl) || loadSavedSharedApiUrl();
@@ -3697,6 +3755,7 @@
         }
         currentConfig = config;
         const forceAdmin = requestedAdmin;
+        if (forceAdmin && config && config.sharedCardId) editingWorkspaceCardId = config.sharedCardId;
         if (sharedLoadError) showSharedError(sharedLoadError);
         else if (config && !forceAdmin) showParticipant(config);
         else {
@@ -3723,6 +3782,8 @@
         $('copyAdminButton').addEventListener('click', copyGeneratedAdminUrl);
         $('adminApiUrl').addEventListener('input', () => updateSharedAdminUi(currentConfig));
         $('workspaceOpenButton').addEventListener('click', () => openWorkspaceCard());
+        $('workspaceCardSelect').addEventListener('change', (event) => openWorkspaceCard(event.target.value));
+        $('workspaceDeleteButton').addEventListener('click', deleteWorkspaceCard);
         $('workspaceNewButton').addEventListener('click', startNewWorkspaceCard);
         $('workspaceCopyAdminButton').addEventListener('click', copyCurrentAdminUrl);
         $('sharedReloadButton').addEventListener('click', () => location.reload());
