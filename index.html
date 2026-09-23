@@ -1108,8 +1108,12 @@
 
       <div class="form-grid">
         <div class="field wide">
-          <label for="adminTitle">表題曲名／カードタイトル</label>
+          <label for="adminTitle">カードタイトル</label>
           <input id="adminTitle" type="text" maxlength="60" placeholder="例：○○○ DAILY STAMP">
+        </div>
+        <div class="field wide">
+          <label for="adminSong">1日1回聴く曲名</label>
+          <input id="adminSong" type="text" maxlength="80" placeholder="例：ALL SUITE">
         </div>
         <div class="field">
           <label for="adminStart">開始日</label>
@@ -1441,6 +1445,7 @@
 
       function configFromParams(source = params) {
         const title = firstParam(source, 't', 'title').trim();
+        const song = (firstParam(source, 'q', 'song') || title).trim();
         const start = firstParam(source, 's', 'start');
         const release = firstParam(source, 'r', 'release');
         const end = firstParam(source, 'f', 'end') || release;
@@ -1460,14 +1465,15 @@
         const spotify = safeUrl(firstParam(source, 'p', 'spotify'));
         const line = safeUrl(firstParam(source, 'n', 'line'));
         const youtube = safeUrl(firstParam(source, 'y', 'youtube'));
-        const seed = `${title}|${start}|${release}|${end}`;
+        const seed = `${title}|${song}|${start}|${release}|${end}`;
         const id = (firstParam(source, 'i', 'cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
         if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(release) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || release < start || end < release) return null;
-        return { title, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, template, id };
+        return { title, song, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, template, id };
       }
 
       function configFromForm() {
         const title = $('adminTitle').value.trim();
+        const song = $('adminSong').value.trim();
         const start = $('adminStart').value;
         const release = $('adminRelease').value;
         const end = $('adminEnd').value || release;
@@ -1487,7 +1493,8 @@
         const stamps = availableStamps;
         const color = '#4ea8de';
         let error = '';
-        if (!title) error = '表題曲名／カードタイトルを入力してください。';
+        if (!title) error = 'カードタイトルを入力してください。';
+        else if (!song) error = '1日1回聴く曲名を入力してください。';
         else if (!start || !release || !end) error = '開始日・CD発売日・カード終了日を入力してください。';
         else if (release < start) error = 'CD発売日は開始日以降にしてください。';
         else if (end < release) error = 'カード終了日はCD発売日以降にしてください。';
@@ -1496,10 +1503,10 @@
         else if (![link, apple, spotify, line, youtube].some(Boolean)) error = '曲を聴くためのURLを1つ以上入力してください。';
         showError(error);
         if (error) return null;
-        const id = currentConfig && currentConfig.title === title && currentConfig.start === start && currentConfig.release === release && currentConfig.end === end
+        const id = currentConfig && currentConfig.title === title && currentConfig.song === song && currentConfig.start === start && currentConfig.release === release && currentConfig.end === end
           ? currentConfig.id
-          : hashText(`${title}|${start}|${release}|${end}`);
-        return { title, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, template, id };
+          : hashText(`${title}|${song}|${start}|${release}|${end}`);
+        return { title, song, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, template, id };
       }
 
       function configUrl(config, testMode = false) {
@@ -1507,6 +1514,7 @@
         url.search = '';
         url.hash = '';
         url.searchParams.set('t', config.title);
+        if (config.song && config.song !== config.title) url.searchParams.set('q', config.song);
         url.searchParams.set('s', config.start);
         url.searchParams.set('r', config.release);
         if (config.end !== config.release) url.searchParams.set('f', config.end);
@@ -1672,6 +1680,7 @@
         $('adminRelease').value = firstParam(params, 'r', 'release') || addDays(today, 13);
         $('adminEnd').value = firstParam(params, 'f', 'end') || $('adminRelease').value;
         $('adminTitle').value = firstParam(params, 't', 'title');
+        $('adminSong').value = firstParam(params, 'q', 'song') || $('adminTitle').value;
         $('adminLink').value = firstParam(params, 'u', 'link');
         $('adminApple').value = firstParam(params, 'a', 'apple');
         $('adminSpotify').value = firstParam(params, 'p', 'spotify');
@@ -1723,6 +1732,7 @@
 
       function fillForm(config) {
         $('adminTitle').value = config.title;
+        $('adminSong').value = config.song || config.title;
         $('adminStart').value = config.start;
         $('adminRelease').value = config.release;
         $('adminEnd').value = config.end || config.release;
@@ -2512,13 +2522,13 @@
       function shareText(config) {
         const days = dateRange(config.start, config.end);
         const count = [...loadStamps(config)].filter((day) => days.includes(day)).length;
-        return `${config.stamp} ${config.title}\n1日1回聴いています！\n【${count} STAMPS】\n#SnowMan`;
+        const participantUrl = configUrl(config);
+        return `${config.stamp} ${config.title}\n「${config.song || config.title}」を1日1回聴いています！\n【${count} STAMPS】\n${participantUrl}\n#SnowMan`;
       }
 
       function shareToX(config) {
         const text = shareText(config);
-        const url = configUrl(config);
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'noopener');
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
       }
 
       function generate(mode = 'participant') {
@@ -2563,6 +2573,7 @@
         if (isTestMode && !config) {
           config = {
             title: '動作確認用テストカード',
+            song: 'ALL SUITE',
             start: '2026-10-01',
             release: '2026-10-14',
             end: '2026-10-20',
