@@ -840,6 +840,25 @@
     .stamp-set-row.actions .btn {
       padding-inline: 6px;
     }
+    .stamp-set-preview-wrap {
+      padding: 10px 11px;
+      border: 1px solid #d9e4ec;
+      border-radius: 12px;
+      background: #fff;
+    }
+    .stamp-set-preview-label {
+      margin: 0 0 7px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .stamp-set-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 23px;
+      line-height: 1.25;
+    }
 
     .share-help {
       margin: 10px 2px 0;
@@ -1251,7 +1270,7 @@
     <section id="adminView" class="card admin-card hidden" aria-label="スタンプカード管理設定">
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
-      <p class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日以降まで続ける場合は、カード終了日を発売日より後に設定できます。</p>
+      <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日以降まで続ける場合は、カード終了日を発売日より後に設定できます。</p>
 
       <section id="workspacePanel" class="workspace-panel hidden" aria-label="共同管理カード一覧">
         <div class="workspace-panel-head">
@@ -1263,6 +1282,7 @@
           <button id="workspaceOpenButton" class="btn btn-soft" type="button">編集</button>
         </div>
         <p id="workspaceNote" class="workspace-note"></p>
+        <button id="workspaceCopyAdminButton" class="btn btn-plain btn-full" type="button">共同管理URLをコピー</button>
       </section>
 
       <div class="form-grid">
@@ -1319,6 +1339,10 @@
             </div>
             <input id="adminStampSetName" type="text" maxlength="40" placeholder="セット名" aria-label="絵文字セット名">
             <p class="admin-stamp-help">選んだセットの名前と内容を、この下でそのまま編集できます。</p>
+            <div class="stamp-set-preview-wrap">
+              <p class="stamp-set-preview-label">このセットの内容</p>
+              <div id="adminStampSetPreview" class="stamp-set-preview" aria-live="polite"></div>
+            </div>
             <div id="adminStampChoices" class="admin-stamp-choices" role="group" aria-label="参加者が選べる絵文字"></div>
             <p class="admin-stamp-help">色が付いた絵文字だけが参加者に表示されます。タップで登録・解除できます。</p>
             <div class="stamp-set-row">
@@ -1347,7 +1371,7 @@
         <div class="field wide shared-settings">
           <label for="adminApiUrl">共同編集サーバーURL（Apps Script）</label>
           <input id="adminApiUrl" type="url" inputmode="url" placeholder="https://script.google.com/macros/s/.../exec">
-          <p class="field-note">入力すると、設定を共有保存して共同管理URLを発行します。空欄なら、これまでどおりURL内に設定を入れたカードを作ります。</p>
+          <p class="field-note">最初に共同管理ページを作るための接続先です。共同管理ページを開いた後は、ここを変更する必要はありません。</p>
           <p id="sharedStatus" class="shared-status"></p>
         </div>
       </div>
@@ -1360,7 +1384,7 @@
 
       <div id="urlBox" class="url-box">
         <p id="generatedUrlLabel" class="url-box-label">参加者へ共有するURL</p>
-        <div class="url-entry">
+        <div id="participantUrlEntry" class="url-entry">
           <p class="url-entry-label">参加者用URL</p>
           <div class="url-copy-row">
             <a id="generatedUrlLink" class="generated-url-link" href="#" target="_blank" rel="noopener"></a>
@@ -1467,6 +1491,7 @@
       let sharedSaveBusy = false;
       let sharedStampSets = { AMENITY: [...AMENITY_STAMPS] };
       let editingStampSetOriginalName = 'AMENITY';
+      let generatedWorkspaceUrl = '';
       let workspaceEditKey = /^[a-zA-Z0-9_-]{32,160}$/.test(incomingSharedEditKey) ? incomingSharedEditKey : '';
       let workspaceCards = [];
 
@@ -1953,6 +1978,14 @@
             renderAdminStampChoices(template, adminSelectedStamps, nextPreferred);
           });
         });
+        const preview = $('adminStampSetPreview');
+        preview.innerHTML = '';
+        adminSelectedStamps.forEach((stamp) => {
+          const item = document.createElement('span');
+          item.textContent = stamp;
+          item.title = STAMP_NAMES[stamp] || stamp;
+          preview.appendChild(item);
+        });
         syncAdminStampOptions(template, preferred, adminSelectedStamps);
       }
 
@@ -2337,8 +2370,23 @@
         const shared = config && config.sharedCardId && config.sharedEditKey && config.apiUrl === activeApi;
         const hasApi = Boolean(activeApi);
         const inWorkspace = Boolean(activeApi && workspaceEditKey);
-        $('adminHeading').textContent = shared ? 'スタンプカードを編集' : '新しいスタンプカードを作る';
-        $('generateButton').textContent = shared ? '変更を共有保存' : hasApi ? 'カードを共同保存' : '参加者用URLを作る';
+        $('adminHeading').textContent = shared ? 'スタンプカードを編集' : inWorkspace ? '新しいスタンプカードを作る' : hasApi ? '共同管理ページを作る' : '新しいスタンプカードを作る';
+        $('adminLead').textContent = shared
+          ? '内容を変更して保存すると、同じ参加者用URLに最新の内容が反映されます。'
+          : inWorkspace
+            ? 'カードを作成・保存すると、このカード専用の参加者用URLを発行します。'
+            : hasApi
+              ? '最初に共同管理URLだけを発行します。カードの作成と参加者用URLの発行は、共同管理ページを開いてから行います。'
+              : '曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。';
+        $('generateButton').textContent = generatedWorkspaceUrl
+          ? '共同管理ページを開く'
+          : shared
+            ? '変更を共有保存'
+            : inWorkspace
+              ? 'カードを保存して参加者用URLを発行'
+              : hasApi
+                ? '共同管理URLを発行'
+                : '参加者用URLを作る';
         const status = $('sharedStatus');
         status.classList.toggle('show', Boolean(shared || inWorkspace));
         status.textContent = shared
@@ -3303,6 +3351,7 @@
       }
 
       function showGeneratedUrls(participantUrl, adminUrl = '') {
+        $('participantUrlEntry').classList.remove('hidden');
         $('generatedUrlLink').href = participantUrl;
         $('generatedUrlLink').textContent = participantUrl;
         $('generatedUrlLabel').textContent = adminUrl ? '共有カードのURL' : '参加者へ共有するURL';
@@ -3319,15 +3368,38 @@
         $('urlBox').classList.add('show');
       }
 
+      function showGeneratedAdminUrl(adminUrl) {
+        $('participantUrlEntry').classList.add('hidden');
+        $('adminUrlEntry').classList.remove('hidden');
+        $('generatedUrlLabel').textContent = '共同管理ページができました';
+        $('generatedAdminUrlLink').href = adminUrl;
+        $('generatedAdminUrlLink').textContent = adminUrl;
+        $('urlBoxNotice').textContent = 'このURLを共同管理者だけで共有してください。共同管理ページを開いてカードを作成すると、参加者用URLを発行できます。';
+        $('urlBox').classList.add('show');
+      }
+
       async function generate(mode = 'participant') {
+        const testMode = mode === 'test';
+        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
+        if (!testMode && generatedWorkspaceUrl) {
+          location.href = generatedWorkspaceUrl;
+          return;
+        }
+        if (!testMode && apiUrl && !workspaceEditKey) {
+          workspaceEditKey = randomToken(32);
+          generatedWorkspaceUrl = sharedAdminUrl(apiUrl, workspaceEditKey);
+          try { localStorage.setItem(SAVED_SHARED_API_URL_KEY, apiUrl); } catch (_) {}
+          showGeneratedAdminUrl(generatedWorkspaceUrl);
+          updateSharedAdminUi(currentConfig);
+          toast('共同管理URLを発行しました');
+          return;
+        }
         const config = configFromForm();
         if (!config) return;
-        const testMode = mode === 'test';
         if (testMode) {
           location.href = configUrl(config, true);
           return;
         }
-        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
         if (!apiUrl) {
           showGeneratedUrls(configUrl(config));
           toast('参加者用URLを作りました');
@@ -3340,10 +3412,7 @@
           currentConfig = saved;
           importSharedStampSets(saved.stampSets);
           await refreshWorkspaceCards(saved.apiUrl);
-          showGeneratedUrls(
-            sharedCardUrl(saved.sharedCardId, saved.apiUrl),
-            sharedAdminUrl(saved.apiUrl, saved.sharedEditKey)
-          );
+          showGeneratedUrls(sharedCardUrl(saved.sharedCardId, saved.apiUrl));
           updateSharedAdminUi(saved);
           toast('共有カードを保存しました');
         } catch (error) {
@@ -3378,6 +3447,12 @@
 
       function copyGeneratedAdminUrl() {
         return copyUrl($('generatedAdminUrlLink').href, '共同管理URLをコピーしました');
+      }
+
+      function copyCurrentAdminUrl() {
+        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
+        if (!apiUrl || !workspaceEditKey) return toast('共同管理URLがありません');
+        return copyUrl(sharedAdminUrl(apiUrl, workspaceEditKey), '共同管理URLをコピーしました');
       }
 
       function showSharedError(message) {
@@ -3480,6 +3555,7 @@
         $('adminApiUrl').addEventListener('input', () => updateSharedAdminUi(currentConfig));
         $('workspaceOpenButton').addEventListener('click', () => openWorkspaceCard());
         $('workspaceNewButton').addEventListener('click', startNewWorkspaceCard);
+        $('workspaceCopyAdminButton').addEventListener('click', copyCurrentAdminUrl);
         $('sharedReloadButton').addEventListener('click', () => location.reload());
         $('saveShareTemplateButton').addEventListener('click', saveShareTemplate);
         $('resetShareTemplateButton').addEventListener('click', resetShareTemplate);
