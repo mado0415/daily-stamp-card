@@ -145,6 +145,13 @@
       transition: width .35s ease;
     }
 
+    .milestone-note {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
     .action-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -237,6 +244,19 @@
     }
 
     .day.future { opacity: .55; }
+    .day.prejoin {
+      opacity: .34;
+      background: #edf2f6;
+    }
+    .day.prejoin .day-stamp { display: none; }
+    .day-state {
+      height: 29px;
+      display: grid;
+      place-items: center;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
     .day-date { font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .day-week { font-size: 10px; font-weight: 700; }
     .day-stamp {
@@ -295,6 +315,119 @@
     }
 
     .completion.show { display: block; }
+
+    .stage-decoration {
+      min-height: 28px;
+      margin: -5px 24px 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      color: var(--theme);
+      font-size: 20px;
+      letter-spacing: .16em;
+      opacity: .24;
+      transition: opacity .3s ease, transform .3s ease;
+    }
+
+    .card[data-stage="1"] .stage-decoration { opacity: .45; }
+    .card[data-stage="2"] .stage-decoration { opacity: .65; transform: scale(1.03); }
+    .card[data-stage="3"] .stage-decoration { opacity: .82; transform: scale(1.06); }
+    .card[data-stage="4"] .stage-decoration { opacity: 1; transform: scale(1.1); }
+
+    .card.template-hotel {
+      --paper: #fffaf0;
+      --ink: #293b45;
+      --muted: #7a6b58;
+      --line: #e7d8be;
+      --wash: #faf1df;
+    }
+
+    .template-hotel .hero {
+      color: #fffaf0;
+      background:
+        linear-gradient(135deg, rgba(18, 42, 52, .96), rgba(35, 68, 74, .94)),
+        radial-gradient(circle at 30% 20%, rgba(var(--theme-rgb), .25), transparent 36%);
+    }
+
+    .template-hotel .eyebrow,
+    .template-hotel .release-line,
+    .template-hotel .release-line strong { color: #f8e7bd; }
+    .template-hotel .stamp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .template-hotel .day {
+      aspect-ratio: .86 / 1;
+      border-radius: 7px 7px 14px 14px;
+      color: #e8dcc6;
+      background: #294852;
+      border-color: #46646a;
+      box-shadow: inset 0 5px 0 rgba(255,255,255,.04);
+    }
+    .template-hotel .day.stamped {
+      color: #2a3540;
+      background: #ffe6a3;
+      box-shadow: 0 0 20px rgba(255, 202, 92, .45);
+    }
+    .template-hotel .day.prejoin { color: #8f9694; background: #dfe3df; border-color: #d2d7d3; }
+    .template-hotel .day.future { opacity: .68; }
+    .template-hotel .stamp-section { background: #f7eedc; }
+
+    .card.template-journey { --paper: #fffdf8; }
+    .template-journey .stamp-grid {
+      position: relative;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px 11px;
+    }
+    .template-journey .stamp-grid::before {
+      content: "";
+      position: absolute;
+      inset: 50% 5%;
+      height: 3px;
+      background: repeating-linear-gradient(90deg, rgba(var(--theme-rgb), .28) 0 10px, transparent 10px 17px);
+      transform: translateY(-50%);
+    }
+    .template-journey .day {
+      aspect-ratio: 1;
+      z-index: 1;
+      border-radius: 50%;
+      background: #fffdf8;
+      border: 2px solid rgba(var(--theme-rgb), .3);
+    }
+    .template-journey .day.stamped { border-color: var(--theme); }
+    .template-journey .today-tag { top: -1px; right: 50%; transform: translateX(50%); }
+
+    .listen-links {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      padding: 0 24px 10px;
+    }
+
+    .listen-links .btn { min-height: 43px; font-size: 13px; }
+
+    .test-panel {
+      margin: 0 0 12px;
+      padding: 15px;
+      color: #31495f;
+      background: rgba(255, 255, 255, .95);
+      border: 1px solid rgba(var(--theme-rgb), .28);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(48, 83, 112, .10);
+    }
+
+    .test-panel h2 { margin: 0; font-size: 15px; }
+    .test-panel p { margin: 5px 0 12px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .test-controls { display: grid; grid-template-columns: 1.15fr .8fr 1.25fr auto; gap: 8px; align-items: end; }
+    .test-field label { display: block; margin: 0 0 4px; font-size: 11px; font-weight: 800; }
+    .test-field input, .test-field select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid #cddae5;
+      border-radius: 10px;
+      padding: 8px 9px;
+      color: var(--ink);
+      background: #fff;
+      font-size: 14px;
+    }
 
     .admin-card { padding: 29px 22px 24px; }
     .admin-card h1 { font-size: 27px; }
@@ -463,10 +596,14 @@
     .hidden { display: none !important; }
 
     @media (max-width: 500px) {
-      .shell { padding-left: 10px; padding-right: 10px; }
+      .shell {
+        padding-top: calc(max(18px, env(safe-area-inset-top)) + 28px);
+        padding-left: 10px;
+        padding-right: 10px;
+      }
       .card { border-radius: 22px; }
       .hero { padding-left: 17px; padding-right: 17px; }
-      .progress-area, .action-row, .share-row { padding-left: 17px; padding-right: 17px; }
+      .progress-area, .action-row, .share-row, .listen-links { padding-left: 17px; padding-right: 17px; }
       .card-divider { margin-left: 17px; margin-right: 17px; }
       .stamp-section { padding-left: 12px; padding-right: 12px; }
       .stamp-grid { gap: 6px; }
@@ -474,6 +611,7 @@
       .day-date { font-size: 12px; }
       .day-stamp { font-size: 22px; height: 26px; }
       .form-grid { grid-template-columns: 1fr; }
+      .test-controls { grid-template-columns: 1fr 1fr; }
       .field.wide { grid-column: auto; }
       .admin-card { padding-left: 17px; padding-right: 17px; }
     }
@@ -495,29 +633,56 @@
       <button id="modeLink" class="mode-link" type="button"></button>
     </div>
 
+    <section id="testPanel" class="test-panel hidden" aria-label="テスト操作">
+      <h2>🧪 TEST MODE</h2>
+      <p>実際の日付や本番のスタンプ記録には影響しません。変更するとすぐカードへ反映されます。</p>
+      <div class="test-controls">
+        <div class="test-field">
+          <label for="testDate">仮の「今日」</label>
+          <input id="testDate" type="date">
+        </div>
+        <div class="test-field">
+          <label for="testCount">スタンプ数</label>
+          <select id="testCount"></select>
+        </div>
+        <div class="test-field">
+          <label for="testTemplate">テンプレート</label>
+          <select id="testTemplate">
+            <option value="hotel">🏨 HOTEL</option>
+            <option value="classic">◯ STAMP</option>
+            <option value="journey">🚏 JOURNEY</option>
+          </select>
+        </div>
+        <button id="testReset" class="btn btn-plain" type="button">リセット</button>
+      </div>
+    </section>
+
     <section id="participantView" class="card hidden" aria-label="表題曲デイリースタンプカード">
       <header class="hero">
-        <p class="eyebrow">DAILY LISTENING STAMP</p>
+        <p id="templateLabel" class="eyebrow">DAILY LISTENING STAMP</p>
         <h1 id="campaignTitle"></h1>
         <p class="release-line"><strong id="releaseDateText"></strong> CD RELEASE</p>
       </header>
 
       <div class="progress-area">
         <div class="progress-copy">
-          <strong id="progressCount">0 / 0</strong>
-          <span id="progressPercent">0% complete</span>
+          <strong id="progressCount">0 STAMPS</strong>
+          <span id="daysLeftText"></span>
         </div>
-        <div class="progress-track" role="progressbar" aria-label="スタンプ達成率" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress-track" role="progressbar" aria-label="次のマイルストーンまでの進み具合" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div id="progressBar" class="progress-bar"></div>
         </div>
+        <p id="milestoneNote" class="milestone-note"></p>
       </div>
 
+      <div id="listenLinks" class="listen-links"></div>
       <div class="action-row">
-        <a id="listenButton" class="btn btn-primary" target="_blank" rel="noopener">▶ 曲を聴く</a>
         <button id="todayButton" class="btn btn-soft" type="button">スタンプを押す</button>
+        <button id="imageButtonTop" class="btn btn-plain" type="button">記録を画像にする</button>
       </div>
 
-      <div id="completion" class="completion">全日達成しました！<br>発売日まで毎日ありがとう ⛄️✨</div>
+      <div id="stageDecoration" class="stage-decoration" aria-hidden="true">✦　✦　✦</div>
+      <div id="completion" class="completion"></div>
       <div class="card-divider"></div>
 
       <section class="stamp-section">
@@ -554,8 +719,28 @@
           <input id="adminRelease" type="date">
         </div>
         <div class="field wide">
-          <label for="adminLink">「曲を聴く」ボタンのURL</label>
-          <input id="adminLink" type="url" inputmode="url" placeholder="https://...">
+          <label for="adminLink">共通の再生ページURL（任意）</label>
+          <input id="adminLink" type="url" inputmode="url" placeholder="公式スマートリンクなど https://...">
+        </div>
+        <div class="field">
+          <label for="adminApple">Apple Music（任意）</label>
+          <input id="adminApple" type="url" inputmode="url" placeholder="https://music.apple.com/..."></div>
+        <div class="field">
+          <label for="adminSpotify">Spotify（任意）</label>
+          <input id="adminSpotify" type="url" inputmode="url" placeholder="https://open.spotify.com/..."></div>
+        <div class="field">
+          <label for="adminLine">LINE MUSIC（任意）</label>
+          <input id="adminLine" type="url" inputmode="url" placeholder="https://music.line.me/..."></div>
+        <div class="field">
+          <label for="adminYoutube">YouTube（任意）</label>
+          <input id="adminYoutube" type="url" inputmode="url" placeholder="https://youtu.be/..."></div>
+        <div class="field">
+          <label for="adminTemplate">カードテンプレート</label>
+          <select id="adminTemplate">
+            <option value="hotel">🏨 HOTEL｜ホテル</option>
+            <option value="classic">◯ STAMP｜ポイントカード</option>
+            <option value="journey">🚏 JOURNEY｜発売日への道</option>
+          </select>
         </div>
         <div class="field">
           <label for="adminStamp">スタンプの絵柄</label>
@@ -612,8 +797,12 @@
         '#ffcc33', '#7b2cbf', '#f8f9fa', '#4ea8de', '#f97316',
         '#2a9d8f', '#283044', '#e63946', '#ff69b4'
       ];
+      const STAMPS = ['⛄️', '🎵', '💿', '⭐️', '💙'];
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
       const params = new URLSearchParams(location.search);
+      const isTestMode = params.get('test') === '1';
+      const incomingTestDate = params.get('today') || '';
+      let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(incomingTestDate) ? incomingTestDate : '2026-10-07';
       let selectedColor = '#4ea8de';
       let currentConfig = null;
       let shareBlob = null;
@@ -631,6 +820,10 @@
         const m = String(date.getMonth() + 1).padStart(2, '0');
         const d = String(date.getDate()).padStart(2, '0');
         return `${y}-${m}-${d}`;
+      }
+
+      function currentDay() {
+        return isTestMode ? simulatedToday : isoLocal();
       }
 
       function addDays(value, amount) {
@@ -701,13 +894,19 @@
         const title = (source.get('title') || '').trim();
         const start = source.get('start') || '';
         const release = source.get('release') || '';
-        const stamp = source.get('stamp') || '⛄️';
+        const incomingStamp = source.get('stamp') || '⛄️';
+        const stamp = STAMPS.includes(incomingStamp) ? incomingStamp : '⛄️';
         const color = /^#[0-9a-f]{6}$/i.test(source.get('color') || '') ? source.get('color') : '#4ea8de';
         const link = safeUrl(source.get('link') || '');
-        const seed = `${title}|${start}|${release}|${stamp}|${color}`;
+        const apple = safeUrl(source.get('apple') || '');
+        const spotify = safeUrl(source.get('spotify') || '');
+        const line = safeUrl(source.get('line') || '');
+        const youtube = safeUrl(source.get('youtube') || '');
+        const template = ['classic', 'hotel', 'journey'].includes(source.get('template')) ? source.get('template') : 'hotel';
+        const seed = `${title}|${start}|${release}`;
         const id = (source.get('cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
         if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(release) || release < start) return null;
-        return { title, start, release, stamp, color, link, id };
+        return { title, start, release, stamp, color, link, apple, spotify, line, youtube, template, id };
       }
 
       function configFromForm() {
@@ -716,6 +915,15 @@
         const release = $('adminRelease').value;
         const rawLink = $('adminLink').value.trim();
         const link = safeUrl(rawLink);
+        const rawApple = $('adminApple').value.trim();
+        const rawSpotify = $('adminSpotify').value.trim();
+        const rawLine = $('adminLine').value.trim();
+        const rawYoutube = $('adminYoutube').value.trim();
+        const apple = safeUrl(rawApple);
+        const spotify = safeUrl(rawSpotify);
+        const line = safeUrl(rawLine);
+        const youtube = safeUrl(rawYoutube);
+        const template = $('adminTemplate').value;
         const stamp = $('adminStamp').value;
         const color = selectedColor;
         let error = '';
@@ -723,11 +931,13 @@
         else if (!start || !release) error = '開始日とCD発売日を入力してください。';
         else if (release < start) error = 'CD発売日は開始日以降にしてください。';
         else if (dateRange(start, release).length > 366) error = '期間は366日以内にしてください。';
-        else if (rawLink && !link) error = '再生先は http:// または https:// で始まるURLにしてください。';
+        else if ([rawLink && !link, rawApple && !apple, rawSpotify && !spotify, rawLine && !line, rawYoutube && !youtube].some(Boolean)) error = '再生先は http:// または https:// で始まるURLにしてください。';
         showError(error);
         if (error) return null;
-        const id = hashText(`${title}|${start}|${release}|${stamp}|${color}`);
-        return { title, start, release, stamp, color, link, id };
+        const id = currentConfig && currentConfig.title === title && currentConfig.start === start && currentConfig.release === release
+          ? currentConfig.id
+          : hashText(`${title}|${start}|${release}`);
+        return { title, start, release, stamp, color, link, apple, spotify, line, youtube, template, id };
       }
 
       function configUrl(config) {
@@ -738,14 +948,19 @@
         url.searchParams.set('start', config.start);
         url.searchParams.set('release', config.release);
         if (config.link) url.searchParams.set('link', config.link);
+        if (config.apple) url.searchParams.set('apple', config.apple);
+        if (config.spotify) url.searchParams.set('spotify', config.spotify);
+        if (config.line) url.searchParams.set('line', config.line);
+        if (config.youtube) url.searchParams.set('youtube', config.youtube);
         url.searchParams.set('stamp', config.stamp);
         url.searchParams.set('color', config.color);
+        url.searchParams.set('template', config.template);
         url.searchParams.set('cid', config.id);
         return url.href;
       }
 
       function storageKey(config) {
-        return `daily_stamp_${config.id}`;
+        return `${isTestMode ? 'daily_stamp_test_' : 'daily_stamp_'}${config.id}`;
       }
 
       function loadStamps(config) {
@@ -759,6 +974,32 @@
 
       function saveStamps(config, stamps) {
         localStorage.setItem(storageKey(config), JSON.stringify([...stamps].sort()));
+      }
+
+      function metaKey(config) {
+        return `${isTestMode ? 'daily_stamp_test_meta_' : 'daily_stamp_meta_'}${config.id}`;
+      }
+
+      function loadMeta(config) {
+        const today = currentDay();
+        let meta = null;
+        try { meta = JSON.parse(localStorage.getItem(metaKey(config)) || 'null'); } catch (_) { meta = null; }
+        if (!meta || !/^\d{4}-\d{2}-\d{2}$/.test(meta.joinedOn || '')) {
+          const joinedOn = today < config.start ? config.start : (today > config.release ? config.release : today);
+          meta = { joinedOn };
+          localStorage.setItem(metaKey(config), JSON.stringify(meta));
+        }
+        return meta;
+      }
+
+      function milestoneState(count, total) {
+        const marks = [...new Set([3, 5, 10, 15, 20, total])].filter((value) => value > 0 && value <= total).sort((a, b) => a - b);
+        const next = marks.find((value) => value > count) || total;
+        const previous = [...marks].reverse().find((value) => value <= count) || 0;
+        const span = Math.max(1, next - previous);
+        const progress = count >= total ? 100 : Math.round(((count - previous) / span) * 100);
+        const stage = count >= total ? 4 : count >= 10 ? 3 : count >= 5 ? 2 : count >= 3 ? 1 : 0;
+        return { next, previous, progress, stage };
       }
 
       function showError(message) {
@@ -798,6 +1039,11 @@
         $('adminRelease').value = params.get('release') || addDays(today, 13);
         $('adminTitle').value = params.get('title') || '';
         $('adminLink').value = params.get('link') || '';
+        $('adminApple').value = params.get('apple') || '';
+        $('adminSpotify').value = params.get('spotify') || '';
+        $('adminLine').value = params.get('line') || '';
+        $('adminYoutube').value = params.get('youtube') || '';
+        $('adminTemplate').value = ['classic', 'hotel', 'journey'].includes(params.get('template')) ? params.get('template') : 'hotel';
         $('adminStamp').value = params.get('stamp') || '⛄️';
         const incoming = params.get('color');
         if (incoming && COLORS.includes(incoming)) {
@@ -808,6 +1054,7 @@
       }
 
       function showAdmin() {
+        $('testPanel').classList.add('hidden');
         $('participantView').classList.add('hidden');
         $('adminView').classList.remove('hidden');
         $('modeLink').textContent = currentConfig ? 'カードに戻る' : '';
@@ -817,8 +1064,11 @@
       function showParticipant(config) {
         currentConfig = config;
         applyTheme(config.color);
+        $('participantView').classList.remove('template-classic', 'template-hotel', 'template-journey');
+        $('participantView').classList.add(`template-${config.template}`);
         $('adminView').classList.add('hidden');
         $('participantView').classList.remove('hidden');
+        setupTestPanel(config);
         $('modeLink').textContent = '管理用設定';
         $('modeLink').onclick = () => {
           fillForm(config);
@@ -832,43 +1082,131 @@
         $('adminStart').value = config.start;
         $('adminRelease').value = config.release;
         $('adminLink').value = config.link;
+        $('adminApple').value = config.apple || '';
+        $('adminSpotify').value = config.spotify || '';
+        $('adminLine').value = config.line || '';
+        $('adminYoutube').value = config.youtube || '';
+        $('adminTemplate').value = config.template || 'hotel';
         $('adminStamp').value = config.stamp;
         selectedColor = config.color;
         [...$('colorList').children].forEach((item, index) => item.classList.toggle('selected', COLORS[index] === config.color));
       }
 
+      function setupTestPanel(config) {
+        if (!isTestMode) return;
+        const panel = $('testPanel');
+        const days = dateRange(config.start, config.release);
+        if (!days.includes(simulatedToday)) simulatedToday = days[Math.floor((days.length - 1) / 2)];
+        panel.classList.remove('hidden');
+        $('testDate').min = config.start;
+        $('testDate').max = config.release;
+        $('testDate').value = simulatedToday;
+        $('testCount').innerHTML = days.map((_, index) => `<option value="${index}">${index}</option>`).join('')
+          + `<option value="${days.length}">${days.length}（全日）</option>`;
+        $('testTemplate').value = config.template;
+
+        if (panel.dataset.ready === '1') return;
+        panel.dataset.ready = '1';
+        $('testDate').addEventListener('change', () => {
+          simulatedToday = $('testDate').value;
+          renderParticipant();
+        });
+        $('testCount').addEventListener('change', () => {
+          const campaignDays = dateRange(currentConfig.start, currentConfig.release);
+          const previous = loadStamps(currentConfig).size;
+          const count = Math.max(0, Math.min(campaignDays.length, Number($('testCount').value) || 0));
+          saveStamps(currentConfig, new Set(campaignDays.slice(0, count)));
+          renderParticipant();
+          if (count > previous && [3, 5, 10, 15, 20, campaignDays.length].includes(count)) launchConfetti();
+        });
+        $('testTemplate').addEventListener('change', () => {
+          currentConfig = { ...currentConfig, template: $('testTemplate').value };
+          showParticipant(currentConfig);
+        });
+        $('testReset').addEventListener('click', () => {
+          localStorage.removeItem(storageKey(currentConfig));
+          localStorage.removeItem(metaKey(currentConfig));
+          const campaignDays = dateRange(currentConfig.start, currentConfig.release);
+          simulatedToday = campaignDays[Math.floor((campaignDays.length - 1) / 2)];
+          renderParticipant();
+          toast('テスト状態をリセットしました');
+        });
+      }
+
+      function renderListenLinks(config) {
+        const links = [
+          ['まとめて選ぶ', config.link],
+          ['Apple Music', config.apple],
+          ['Spotify', config.spotify],
+          ['LINE MUSIC', config.line],
+          ['YouTube', config.youtube]
+        ].filter((item) => item[1]);
+        const wrap = $('listenLinks');
+        wrap.innerHTML = '';
+        wrap.classList.toggle('hidden', links.length === 0);
+        links.forEach(([label, href], index) => {
+          const link = document.createElement('a');
+          link.className = `btn ${index === 0 ? 'btn-primary' : 'btn-soft'}`;
+          link.href = href;
+          link.target = '_blank';
+          link.rel = 'noopener';
+          link.textContent = `▶ ${label}`;
+          wrap.appendChild(link);
+        });
+      }
+
       function renderParticipant() {
         const config = currentConfig;
         const days = dateRange(config.start, config.release);
-        const today = isoLocal();
+        const today = currentDay();
+        const meta = loadMeta(config);
         const stamps = loadStamps(config);
         const validStamps = new Set([...stamps].filter((day) => days.includes(day)));
         if (validStamps.size !== stamps.size) saveStamps(config, validStamps);
 
+        const templateLabels = {
+          hotel: 'HOTEL LISTENING CHECK-IN',
+          classic: 'DAILY LISTENING STAMP',
+          journey: 'RELEASE DAY JOURNEY'
+        };
+        $('templateLabel').textContent = templateLabels[config.template] || templateLabels.classic;
         $('campaignTitle').textContent = config.title;
         $('releaseDateText').textContent = formatDate(config.release);
         $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.release, false)}`;
-        $('listenButton').href = config.link || '#';
-        $('listenButton').classList.toggle('hidden', !config.link);
+        renderListenLinks(config);
 
         const count = validStamps.size;
-        const percent = days.length ? Math.round((count / days.length) * 100) : 0;
-        $('progressCount').textContent = `${count} / ${days.length}`;
-        $('progressPercent').textContent = `${percent}% complete`;
-        $('progressBar').style.width = `${percent}%`;
+        if (isTestMode) {
+          $('testDate').value = simulatedToday;
+          $('testCount').value = String(count);
+          $('testTemplate').value = config.template;
+        }
+        const milestone = milestoneState(count, days.length);
+        const daysLeft = Math.max(0, Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000));
+        $('participantView').dataset.stage = String(milestone.stage);
+        $('progressCount').textContent = `${count} STAMP${count === 1 ? '' : 'S'}`;
+        $('daysLeftText').textContent = today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`;
+        $('progressBar').style.width = `${milestone.progress}%`;
         const progressTrack = document.querySelector('.progress-track');
-        progressTrack.setAttribute('aria-valuenow', String(percent));
-        $('completion').classList.toggle('show', count === days.length && days.length > 0);
+        progressTrack.setAttribute('aria-valuenow', String(milestone.progress));
+        $('milestoneNote').textContent = count >= days.length ? '全日達成！' : `次の変化まであと${milestone.next - count}個`;
+
+        const perfect = count === days.length && days.length > 0;
+        const eventFinished = today >= config.release;
+        $('completion').classList.toggle('show', perfect || eventFinished);
+        $('completion').innerHTML = perfect
+          ? `PERFECT！<br>発売日まで毎日ありがとう ${config.stamp}✨`
+          : eventFinished ? `RELEASE DAY！<br>${count}日間の参加、ありがとう ${config.stamp}` : '';
 
         const canStampToday = days.includes(today);
         const todayStamped = validStamps.has(today);
         $('todayButton').disabled = !canStampToday;
-        $('todayButton').textContent = todayStamped ? '今日のスタンプを外す' : 'スタンプを押す';
+        $('todayButton').textContent = todayStamped ? '今日のスタンプを外す' : '聴いたのでスタンプを押す';
         $('todayButton').onclick = () => toggleToday(config);
 
         if (today < config.start) $('helperText').textContent = `${formatDate(config.start)}からスタートします。未来の日付にはまだスタンプを押せません。`;
-        else if (today > config.release) $('helperText').textContent = 'このカードの期間は終了しました。記録はこの端末に残ります。';
-        else $('helperText').textContent = '曲を聴いたら、今日のマスをタップ。過去の日付へ後から押すことはできません。';
+        else if (today > config.release) $('helperText').textContent = 'イベントは終了しました。集めたスタンプはこの端末に残ります。';
+        else $('helperText').textContent = '今日聴いたら今日のマスへ。空いた日があっても、また今日から続けられます。';
 
         const grid = $('stampGrid');
         grid.innerHTML = '';
@@ -877,36 +1215,41 @@
           const isToday = day === today;
           const isStamped = validStamps.has(day);
           const isFuture = day > today;
+          const isPrejoin = day < today && !isStamped;
           const element = document.createElement(isToday ? 'button' : 'div');
           if (isToday) element.type = 'button';
-          element.className = `day${isToday ? ' today' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}`;
-          element.setAttribute('aria-label', `${formatDate(day)} ${isStamped ? 'スタンプ済み' : '未スタンプ'}${isToday ? ' 今日' : ''}`);
+          element.className = `day${isToday ? ' today' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}${isPrejoin ? ' prejoin' : ''}`;
+          const state = isPrejoin ? '参加前・開催済み' : isStamped ? 'スタンプ済み' : '未スタンプ';
+          element.setAttribute('aria-label', `${formatDate(day)} ${state}${isToday ? ' 今日' : ''}`);
           if (isToday) element.addEventListener('click', () => toggleToday(config));
           element.innerHTML = `
             ${isToday ? '<span class="today-tag">TODAY</span>' : ''}
             <span class="day-date">${date.getMonth() + 1}/${date.getDate()}</span>
             <span class="day-week">${WEEKDAYS[date.getDay()]}</span>
-            <span class="day-stamp" aria-hidden="true">${config.stamp}</span>
+            ${isPrejoin ? '<span class="day-state">開催済み</span>' : `<span class="day-stamp" aria-hidden="true">${config.stamp}</span>`}
           `;
           grid.appendChild(element);
         });
 
-        $('xButton').onclick = () => shareToX(config, count, days.length);
+        $('xButton').onclick = () => shareToX(config);
         $('imageButton').onclick = openShareImage;
+        $('imageButtonTop').onclick = openShareImage;
       }
 
       function toggleToday(config) {
-        const today = isoLocal();
+        const today = currentDay();
         if (today < config.start || today > config.release) return;
         const stamps = loadStamps(config);
         const wasStamped = stamps.has(today);
+        if (!isTestMode && !wasStamped && !window.confirm('今日、表題曲を聴きましたか？')) return;
         if (wasStamped) stamps.delete(today);
         else stamps.add(today);
         saveStamps(config, stamps);
         renderParticipant();
         if (!wasStamped) {
+          const total = dateRange(config.start, config.release).length;
           toast(`${config.stamp} 今日のスタンプを押しました`);
-          if (stamps.size === dateRange(config.start, config.release).length) launchConfetti();
+          if ([3, 5, 10, 15, 20, total].includes(stamps.size)) launchConfetti();
         } else {
           toast('今日のスタンプを取り消しました');
         }
@@ -931,7 +1274,8 @@
       function buildCanvas(config) {
         const days = dateRange(config.start, config.release);
         const stamps = loadStamps(config);
-        const cols = 5;
+        const meta = loadMeta(config);
+        const cols = config.template === 'classic' ? 5 : 4;
         const rows = Math.ceil(days.length / cols);
         const width = 1080;
         const margin = 74;
@@ -946,7 +1290,7 @@
         const [r, g, b] = colorRgb(config.color);
         const themeText = contrastText(config.color);
 
-        ctx.fillStyle = '#eef5f9';
+        ctx.fillStyle = config.template === 'hotel' ? '#17343d' : config.template === 'journey' ? '#f5efe3' : '#eef5f9';
         ctx.fillRect(0, 0, width, height);
         roundRect(ctx, 38, 38, width - 76, height - 76, 36);
         ctx.fillStyle = '#ffffff';
@@ -956,9 +1300,9 @@
         ctx.fill();
 
         ctx.textAlign = 'center';
-        ctx.fillStyle = config.color;
+        ctx.fillStyle = config.template === 'hotel' ? '#f0ce8b' : config.color;
         ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText('DAILY LISTENING STAMP', width / 2, 120);
+        ctx.fillText(config.template === 'hotel' ? 'HOTEL LISTENING CHECK-IN' : config.template === 'journey' ? 'RELEASE DAY JOURNEY' : 'DAILY LISTENING STAMP', width / 2, 120);
         ctx.fillStyle = '#24364a';
         ctx.font = '700 50px -apple-system, BlinkMacSystemFont, sans-serif';
         drawCenteredText(ctx, config.title, width / 2, 185, width - 190, 56);
@@ -967,19 +1311,20 @@
         ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 240);
 
         const count = [...stamps].filter((day) => days.includes(day)).length;
+        const milestone = milestoneState(count, days.length);
         ctx.textAlign = 'left';
         ctx.fillStyle = '#24364a';
         ctx.font = '700 39px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(`${count} / ${days.length}`, margin, 330);
+        ctx.fillText(`${count} STAMPS`, margin, 330);
         ctx.textAlign = 'right';
         ctx.fillStyle = '#718096';
         ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(`${Math.round(count / days.length * 100)}% complete`, width - margin, 330);
+        ctx.fillText(count >= days.length ? 'PERFECT!' : `NEXT ${milestone.next}`, width - margin, 330);
         roundRect(ctx, margin, 354, width - margin * 2, 18, 9);
         ctx.fillStyle = '#e8eef3';
         ctx.fill();
         if (count) {
-          roundRect(ctx, margin, 354, (width - margin * 2) * count / days.length, 18, 9);
+          roundRect(ctx, margin, 354, (width - margin * 2) * milestone.progress / 100, 18, 9);
           ctx.fillStyle = config.color;
           ctx.fill();
         }
@@ -991,20 +1336,24 @@
           const x = margin + col * (cell + gap);
           const y = top + row * (cell + gap);
           const stamped = stamps.has(day);
+          const prejoin = day < currentDay() && !stamped;
           roundRect(ctx, x, y, cell, cell, 23);
-          ctx.fillStyle = stamped ? config.color : '#f5f8fa';
+          ctx.fillStyle = stamped ? config.color : prejoin ? '#e1e6e9' : config.template === 'hotel' ? '#294852' : '#f5f8fa';
           ctx.fill();
           ctx.strokeStyle = stamped ? config.color : '#dce7f0';
           ctx.lineWidth = 2;
           ctx.stroke();
           const date = parseLocalDate(day);
           ctx.textAlign = 'center';
-          ctx.fillStyle = stamped ? themeText : '#52677b';
+          ctx.fillStyle = stamped ? themeText : prejoin ? '#8d979e' : config.template === 'hotel' ? '#e8dcc6' : '#52677b';
           ctx.font = '700 24px -apple-system, BlinkMacSystemFont, sans-serif';
           ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}（${WEEKDAYS[date.getDay()]}）`, x + cell / 2, y + 48);
           if (stamped) {
             ctx.font = '58px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
             ctx.fillText(config.stamp, x + cell / 2, y + 124);
+          } else if (prejoin) {
+            ctx.font = '700 19px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText('開催済み', x + cell / 2, y + 112);
           }
         });
 
@@ -1087,7 +1436,7 @@
       function shareText(config) {
         const days = dateRange(config.start, config.release);
         const count = [...loadStamps(config)].filter((day) => days.includes(day)).length;
-        return `${config.stamp} ${config.title}\n発売日まで1日1回聴いています！\n【${count}/${days.length}日】\n#SnowMan`;
+        return `${config.stamp} ${config.title}\n発売日まで1日1回聴いています！\n【${count} STAMPS】\n#SnowMan`;
       }
 
       function shareToX(config) {
@@ -1124,7 +1473,23 @@
       function init() {
         renderColorChoices();
         initAdminDefaults();
-        const config = configFromParams();
+        let config = configFromParams();
+        if (isTestMode && !config) {
+          config = {
+            title: '動作確認用テストカード',
+            start: '2026-10-01',
+            release: '2026-10-14',
+            stamp: '⛄️',
+            color: '#4ea8de',
+            link: '',
+            apple: '',
+            spotify: '',
+            line: '',
+            youtube: '',
+            template: 'hotel',
+            id: 'test-demo'
+          };
+        }
         currentConfig = config;
         const forceAdmin = params.get('admin') === '1';
         if (config && !forceAdmin) showParticipant(config);
