@@ -1081,6 +1081,10 @@
       margin-top: 22px;
     }
 
+    .admin-actions .draft-save {
+      grid-column: 1 / -1;
+    }
+
     .url-box {
       display: none;
       margin-top: 18px;
@@ -1416,6 +1420,7 @@
 
       <p id="adminError" class="error" role="alert"></p>
       <div class="admin-actions">
+        <button id="saveDraftButton" class="btn btn-soft draft-save hidden" type="button">作業内容を一時保存</button>
         <button id="testGenerateButton" class="btn btn-plain" type="button">日付を進めて動作テスト</button>
         <button id="generateButton" class="btn btn-primary" type="button">参加者用URLを作る</button>
       </div>
@@ -2082,11 +2087,15 @@
         return { title, song, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, shareTemplate, template, id };
       }
 
-      function configFromForm() {
-        const title = $('adminTitle').value.trim();
-        const song = $('adminSong').value.trim();
-        const start = $('adminStart').value;
-        const release = $('adminRelease').value;
+      function configFromForm(options = {}) {
+        const allowIncomplete = Boolean(options.allowIncomplete);
+        const today = isoLocal();
+        const enteredTitle = $('adminTitle').value.trim();
+        const enteredSong = $('adminSong').value.trim();
+        const title = enteredTitle || (allowIncomplete ? '作成途中のカード' : '');
+        const song = enteredSong || (allowIncomplete ? '曲名未入力' : '');
+        const start = $('adminStart').value || (allowIncomplete ? today : '');
+        const release = $('adminRelease').value || (allowIncomplete ? start : '');
         const end = $('adminEnd').value || release;
         const rawLink = $('adminLink').value.trim();
         const link = safeUrl(rawLink);
@@ -2115,7 +2124,7 @@
         else if (end < release) error = 'カード終了日はCD発売日以降にしてください。';
         else if (dateRange(start, end).length > 366) error = '期間は366日以内にしてください。';
         else if ([rawLink && !link, rawApple && !apple, rawSpotify && !spotify, rawLine && !line, rawYoutube && !youtube].some(Boolean)) error = '再生先は http:// または https:// で始まるURLにしてください。';
-        else if (![link, apple, spotify, line, youtube].some(Boolean)) error = '曲を聴くためのURLを1つ以上入力してください。';
+        else if (!allowIncomplete && ![link, apple, spotify, line, youtube].some(Boolean)) error = '曲を聴くためのURLを1つ以上入力してください。';
         else if (rawApiUrl && !apiUrl) error = '共同編集サーバーURLは、Apps Scriptでデプロイした /exec のURLを入力してください。';
         showError(error);
         if (error) return null;
@@ -2436,6 +2445,7 @@
               : hasApi
                 ? '共同管理URLを発行'
                 : '参加者用URLを作る';
+        $('saveDraftButton').classList.toggle('hidden', !inWorkspace);
         const status = $('sharedStatus');
         status.classList.toggle('show', Boolean(shared || inWorkspace));
         status.textContent = shared
@@ -3475,6 +3485,34 @@
         }
       }
 
+      async function saveDraft() {
+        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
+        if (!apiUrl || !workspaceEditKey) {
+          showError('共同管理ページから一時保存してください。');
+          return;
+        }
+        const config = configFromForm({ allowIncomplete: true });
+        if (!config) return;
+        const button = $('saveDraftButton');
+        button.disabled = true;
+        button.textContent = '一時保存中…';
+        try {
+          const saved = await saveSharedConfig(config, apiUrl);
+          currentConfig = saved;
+          importSharedStampSets(saved.stampSets);
+          await refreshWorkspaceCards(saved.apiUrl);
+          $('urlBox').classList.remove('show');
+          updateSharedAdminUi(saved);
+          toast('一時保存しました。このページを閉じても大丈夫です');
+        } catch (error) {
+          showError(error && error.message ? error.message : '作業内容を一時保存できませんでした。');
+          toast('一時保存に失敗しました');
+        } finally {
+          button.disabled = false;
+          button.textContent = '作業内容を一時保存';
+        }
+      }
+
       async function copyUrl(value, message) {
         try {
           await navigator.clipboard.writeText(value);
@@ -3599,6 +3637,7 @@
         if (isTestMode) requestAnimationFrame(() => window.scrollTo(0, 0));
 
         $('generateButton').addEventListener('click', () => generate('participant'));
+        $('saveDraftButton').addEventListener('click', saveDraft);
         $('testGenerateButton').addEventListener('click', () => generate('test'));
         $('adminTemplate').addEventListener('change', () => {
           renderAdminStampChoices($('adminTemplate').value, adminSelectedStamps, adminSelectedStamps[0]);
