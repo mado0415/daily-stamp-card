@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- build: 20260924-0825-stamp-sets-recovery -->
+<!-- build: 20260924-0850-shared-url-position -->
 <html lang="ja">
 <head>
   <meta charset="utf-8">
@@ -944,6 +944,22 @@
       line-height: 1.75;
     }
 
+    .workspace-share-panel {
+      margin: 0 0 14px;
+      padding: 15px;
+      border: 1px solid #d7e2eb;
+      border-radius: 16px;
+      background: #f7fafc;
+    }
+    .workspace-share-panel h2 { margin: 0 0 5px; font-size: 15px; }
+    .workspace-share-panel p {
+      margin: 0 0 11px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.55;
+    }
+    .workspace-share-panel .btn { min-height: 42px; font-size: 12px; }
+
     .workspace-panel {
       margin: 0 0 22px;
       padding: 15px;
@@ -1327,6 +1343,12 @@
       <h1 id="adminHeading">スタンプカードを作る</h1>
       <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日以降まで続ける場合は、カード終了日を発売日より後に設定できます。</p>
 
+      <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
+        <h2>共同管理者にこのページを共有</h2>
+        <p>すべてのカードで共通のURLです。カードを切り替えても変わりません。</p>
+        <button id="workspaceCopyAdminButton" class="btn btn-plain btn-full" type="button">この共同管理ページのURLをコピー</button>
+      </section>
+
       <section id="workspacePanel" class="workspace-panel hidden" aria-label="共同管理カード一覧">
         <div class="workspace-panel-head">
           <h2>共同管理カード</h2>
@@ -1338,7 +1360,6 @@
           <button id="workspaceDeleteButton" class="btn btn-danger" type="button">削除</button>
         </div>
         <p id="workspaceNote" class="workspace-note"></p>
-        <button id="workspaceCopyAdminButton" class="btn btn-plain btn-full" type="button">共同管理URLをコピー</button>
       </section>
 
       <div class="form-grid">
@@ -2471,9 +2492,11 @@
 
       function renderWorkspacePanel() {
         const panel = $('workspacePanel');
+        const sharePanel = $('workspaceSharePanel');
         const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
         const active = Boolean(apiUrl && workspaceEditKey);
         panel.classList.toggle('hidden', !active);
+        sharePanel.classList.toggle('hidden', !active);
         if (!active) return;
         const select = $('workspaceCardSelect');
         const selectedId = editingWorkspaceCardId;
