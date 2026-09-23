@@ -364,6 +364,47 @@
     .template-hotel .eyebrow,
     .template-hotel .release-line,
     .template-hotel .release-line strong { color: #f3d58d; }
+    .template-hotel::before {
+      background: linear-gradient(90deg, #cba957 0 45%, var(--theme) 45% 55%, #cba957 55% 100%);
+    }
+    .template-hotel .eyebrow::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin: 0 7px 1px 0;
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 50%;
+      background: var(--theme);
+      box-shadow: 0 0 0 2px rgba(243,213,141,.24);
+    }
+    .template-hotel .progress-bar {
+      position: relative;
+      background: linear-gradient(90deg, #8f0c31, #d0aa54);
+    }
+    .template-hotel .progress-bar::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 0;
+      width: 8px;
+      height: 8px;
+      border: 2px solid #fff3cb;
+      border-radius: 50%;
+      background: var(--theme);
+      transform: translate(50%, -50%);
+    }
+    .template-hotel .btn-primary {
+      color: #fff3d0;
+      background: #8d0b30;
+      border: 1px solid #cba957;
+    }
+    .template-hotel .btn-soft {
+      color: #5a1728;
+      background: #f5dfae;
+      border: 1px solid rgba(203,169,87,.55);
+    }
+    .template-hotel .today-tag { color: #741029; }
     .template-hotel .stamp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .template-hotel .day {
       aspect-ratio: .86 / 1;
@@ -405,6 +446,21 @@
     .template-hotel .stamp-section .helper { color: #f5dfaa; }
     .template-hotel .stamp-section .section-head span { color: #dfbd6e; }
     .template-hotel .stage-decoration { color: #c79e45; }
+
+    .test-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0 0 12px;
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: 999px;
+      padding: 5px 10px;
+      color: #fff7df;
+      background: rgba(48, 14, 24, .35);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .06em;
+    }
 
     .card.template-journey { --paper: #fffdf8; }
     .template-journey .stamp-grid {
@@ -690,6 +746,7 @@
 
     <section id="participantView" class="card hidden" aria-label="表題曲デイリースタンプカード">
       <header class="hero">
+        <p id="testBadge" class="test-badge hidden">🧪 動作テスト｜仮の今日 <span id="testTodayText"></span></p>
         <p id="templateLabel" class="eyebrow">DAILY LISTENING STAMP</p>
         <h1 id="campaignTitle"></h1>
         <p class="release-line"><strong id="releaseDateText"></strong> CD RELEASE</p>
@@ -791,9 +848,9 @@
 
       <p id="adminError" class="error" role="alert"></p>
       <div class="admin-actions">
-        <button id="previewButton" class="btn btn-soft" type="button">本番表示を確認</button>
+        <button id="previewButton" class="btn btn-soft" type="button">本番の日付で確認</button>
         <button id="generateButton" class="btn btn-primary" type="button">参加者用URLを作る</button>
-        <button id="testGenerateButton" class="btn btn-plain" type="button">テストページを開く</button>
+        <button id="testGenerateButton" class="btn btn-plain" type="button">日付を進めて動作テスト</button>
       </div>
 
       <div id="urlBox" class="url-box">
@@ -832,7 +889,7 @@
       const STAMPS = ['⛄️', '🎵', '💿', '⭐️', '💙'];
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
       const params = new URLSearchParams(location.search);
-      const isTestMode = params.get('test') === '1';
+      const isTestMode = params.get('test') === '1' || params.get('mode') === 'test';
       let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(params.get('today') || '') ? params.get('today') : '';
       let selectedColor = '#4ea8de';
       let currentConfig = null;
@@ -997,6 +1054,7 @@
         url.searchParams.set('cid', config.id);
         if (testMode) {
           url.searchParams.set('test', '1');
+          url.searchParams.set('mode', 'test');
           url.searchParams.set('today', config.start);
         }
         return url.href;
@@ -1210,6 +1268,8 @@
         $('campaignTitle').textContent = config.title;
         $('releaseDateText').textContent = formatDate(config.release);
         $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.release, false)}`;
+        $('testBadge').classList.toggle('hidden', !isTestMode);
+        $('testTodayText').textContent = isTestMode ? formatDate(today, false) : '';
         renderListenLinks(config);
 
         const count = validStamps.size;
@@ -1372,9 +1432,13 @@
           ctx.restore();
         }
 
-        ctx.fillStyle = config.color;
+        ctx.fillStyle = isHotel ? '#cba957' : config.color;
         roundRect(ctx, cardX, 38, cardWidth, 16, 8);
         ctx.fill();
+        if (isHotel) {
+          ctx.fillStyle = config.color;
+          ctx.fillRect(width / 2 - 48, 38, 96, 16);
+        }
 
         ctx.textAlign = 'center';
         ctx.fillStyle = isHotel ? '#f3d58d' : config.color;
@@ -1403,8 +1467,23 @@
         ctx.fill();
         if (count) {
           roundRect(ctx, margin, 378, (width - margin * 2) * milestone.progress / 100, 18, 9);
-          ctx.fillStyle = config.color;
+          if (isHotel) {
+            const progressGradient = ctx.createLinearGradient(margin, 0, width - margin, 0);
+            progressGradient.addColorStop(0, '#8f0c31');
+            progressGradient.addColorStop(1, '#d0aa54');
+            ctx.fillStyle = progressGradient;
+          } else ctx.fillStyle = config.color;
           ctx.fill();
+          if (isHotel) {
+            const progressX = margin + (width - margin * 2) * milestone.progress / 100;
+            ctx.beginPath();
+            ctx.arc(progressX, 387, 7, 0, Math.PI * 2);
+            ctx.fillStyle = config.color;
+            ctx.fill();
+            ctx.strokeStyle = '#fff3cb';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+          }
         }
 
         ctx.textAlign = 'right';
@@ -1416,7 +1495,7 @@
         ctx.save();
         ctx.globalAlpha = stageAlpha;
         ctx.textAlign = 'center';
-        ctx.fillStyle = config.color;
+        ctx.fillStyle = isHotel ? '#c79e45' : config.color;
         ctx.font = '700 36px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillText('✦　✦　✦', width / 2, 510);
         ctx.restore();
@@ -1461,7 +1540,7 @@
           const radius = isJourney ? cell / 2 : isHotel ? 16 : 23;
           if (isHotel) archRect(ctx, x, y, cell, cellHeight);
           else roundRect(ctx, x, y, cell, cellHeight, radius);
-          if (isHotel) ctx.fillStyle = stamped ? '#efd17e' : prejoin ? '#ead6bf' : future ? '#733044' : '#7e0929';
+          if (isHotel) ctx.fillStyle = stamped ? '#efd17e' : prejoin ? '#bd737c' : future ? '#733044' : '#7e0929';
           else ctx.fillStyle = stamped ? config.color : prejoin ? '#e1e6e9' : isJourney ? '#fffdf8' : '#f5f8fa';
           if (stamped && isHotel) {
             ctx.save();
@@ -1475,7 +1554,7 @@
             ctx.restore();
           } else ctx.fill();
           if (isJourney && !stamped) ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, .3)`;
-          else if (isToday) ctx.strokeStyle = config.color;
+          else if (isToday) ctx.strokeStyle = isHotel ? '#f1d681' : config.color;
           else if (isHotel) ctx.strokeStyle = prejoin ? '#cdb78e' : '#cba957';
           else ctx.strokeStyle = stamped ? config.color : '#dce7f0';
           ctx.lineWidth = isToday ? 6 : 2;
@@ -1488,28 +1567,35 @@
           }
 
           const textColor = isHotel
-            ? stamped ? '#571127' : prejoin ? '#a88579' : future ? '#c9a3a7' : '#f4dca0'
+            ? stamped ? '#571127' : prejoin ? '#703342' : future ? '#c9a3a7' : '#f4dca0'
             : stamped ? themeText : prejoin ? '#8d979e' : '#52677b';
           ctx.fillStyle = textColor;
           const date = parseLocalDate(day);
           ctx.textAlign = 'center';
-          ctx.font = '700 24px -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.fillText(`${date.getMonth() + 1}/${date.getDate()} （${WEEKDAYS[date.getDay()]}）`, x + cell / 2, y + 55);
           if (isToday) {
-            ctx.fillStyle = stamped && isHotel ? '#571127' : isHotel ? '#fff1bd' : config.color;
-            ctx.font = '700 17px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText('TODAY', x + cell / 2, y + 87);
+            ctx.fillStyle = isHotel ? '#741029' : config.color;
+            ctx.font = '800 17px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText('TODAY', x + cell / 2, y + 43);
             ctx.fillStyle = textColor;
+            ctx.font = '800 27px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x + cell / 2, y + 76);
+            ctx.font = '700 21px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(WEEKDAYS[date.getDay()], x + cell / 2, y + 104);
+          } else {
+            ctx.font = '700 25px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x + cell / 2, y + 62);
+            ctx.font = '700 20px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(WEEKDAYS[date.getDay()], x + cell / 2, y + 90);
           }
           if (stamped) {
-            drawTiltedStamp(ctx, config.stamp, x + cell / 2, y + cellHeight * .67, 58, 1);
+            drawTiltedStamp(ctx, config.stamp, x + cell / 2, y + cellHeight * .72, 58, 1);
           } else if (prejoin) {
             ctx.font = '700 19px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText('開催済み', x + cell / 2, y + cellHeight * .64);
+            ctx.fillText('開催済み', x + cell / 2, y + cellHeight * .68);
           } else {
             ctx.save();
             ctx.globalAlpha = .12;
-            drawTiltedStamp(ctx, config.stamp, x + cell / 2, y + cellHeight * .68, 48, .8);
+            drawTiltedStamp(ctx, config.stamp, x + cell / 2, y + cellHeight * .72, 48, .8);
             ctx.restore();
           }
         });
