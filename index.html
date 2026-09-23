@@ -1276,10 +1276,11 @@
             </div>
             <div class="stamp-set-row">
               <select id="adminSavedStampSet" aria-label="保存済みスタンプセット">
-                <option value="">保存済みセットを選ぶ</option>
+                <option value="">このカードのセットを選ぶ</option>
               </select>
               <button id="newStampSetButton" class="btn btn-plain" type="button">新しいセット</button>
             </div>
+            <p class="field-note">名前付きセットも共同編集カードに保存され、共同管理者と共有されます。</p>
           </div>
         </div>
         <div class="field">
@@ -1319,10 +1320,10 @@
           <textarea id="adminShareTemplate" maxlength="500" spellcheck="false"></textarea>
           <p class="field-note">使える項目：{カードタイトル} {曲名} {スタンプ数} {参加者用URL}<br>絵文字とハッシュタグは直接入力できます。参加者用URLを消した場合は文末へ自動追加されます。</p>
           <div class="template-save-row">
-            <button id="saveShareTemplateButton" class="btn btn-soft" type="button">この端末に保存</button>
+            <button id="saveShareTemplateButton" class="btn btn-soft" type="button">このカードに反映</button>
             <button id="resetShareTemplateButton" class="btn btn-plain" type="button">初期文に戻す</button>
           </div>
-          <p class="field-note">保存すると、次回この端末で管理画面を開いたときに自動で読み込みます。</p>
+          <p class="field-note">共同編集カードを保存すると、共同管理者にも同じ内容が表示されます。</p>
         </div>
         <div class="field wide shared-settings">
           <label for="adminApiUrl">共同編集サーバーURL（Apps Script）</label>
@@ -1431,8 +1432,6 @@
       };
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
       const DEFAULT_SHARE_TEMPLATE = '⛄️ {カードタイトル}\n「{曲名}」を1日1回聴いています！\n【{スタンプ数} STAMPS】\n{参加者用URL}\n#SnowMan';
-      const SAVED_SHARE_TEMPLATE_KEY = 'daily_stamp_saved_share_template_v1';
-      const SAVED_STAMP_SETS_KEY = 'daily_stamp_saved_stamp_sets_v1';
       const SAVED_SHARED_API_URL_KEY = 'daily_stamp_shared_api_url_v1';
       const params = new URLSearchParams(location.search);
       const isTestMode = params.get('z') === '1' || params.get('test') === '1' || params.get('mode') === 'test';
@@ -1446,6 +1445,7 @@
       let shareBlob = null;
       let toastTimer = null;
       let sharedSaveBusy = false;
+      let sharedStampSets = {};
 
       const $ = (id) => document.getElementById(id);
 
@@ -1592,17 +1592,23 @@
             reject(new Error('共同編集URLが正しくありません。'));
             return;
           }
-          const callback = `sharedCardCallback_${randomToken(8)}`;
-          const script = document.createElement('script');
+          const requestId = `shared_${randomToken(8)}`;
+          const frame = document.createElement('iframe');
+          frame.hidden = true;
+          frame.setAttribute('aria-hidden', 'true');
           let finished = false;
           const cleanup = () => {
             if (finished) return;
             finished = true;
             clearTimeout(timer);
-            script.remove();
-            try { delete window[callback]; } catch (_) { window[callback] = undefined; }
+            window.removeEventListener('message', receive);
+            frame.remove();
           };
-          window[callback] = (result) => {
+          const receive = (event) => {
+            if (event.source !== frame.contentWindow) return;
+            const message = event.data;
+            if (!message || message.type !== 'daily-stamp-shared-card' || message.requestId !== requestId) return;
+            const result = message.result;
             cleanup();
             if (!result || !result.ok || !result.config) {
               reject(new Error(result && result.error ? result.error : '共有カードを読み込めませんでした。'));
@@ -1610,22 +1616,22 @@
             }
             resolve(result);
           };
+          window.addEventListener('message', receive);
           const url = new URL(api);
-          url.searchParams.set('action', 'load');
+          url.searchParams.set('action', 'loadframe');
           url.searchParams.set('id', cardId);
           if (editKey) url.searchParams.set('edit', editKey);
-          url.searchParams.set('callback', callback);
-          script.src = url.href;
-          script.async = true;
-          script.onerror = () => {
+          url.searchParams.set('requestId', requestId);
+          frame.src = url.href;
+          frame.onerror = () => {
             cleanup();
             reject(new Error('共同編集サーバーへ接続できませんでした。'));
           };
           const timer = setTimeout(() => {
             cleanup();
             reject(new Error('共同編集サーバーの応答に時間がかかっています。'));
-          }, 15000);
-          document.head.appendChild(script);
+          }, 45000);
+          document.body.appendChild(frame);
         });
       }
 
@@ -1692,26 +1698,16 @@
       }
 
       function loadSavedShareTemplate() {
-        try {
-          return (localStorage.getItem(SAVED_SHARE_TEMPLATE_KEY) || '').slice(0, 500);
-        } catch (_) {
-          return '';
-        }
+        return '';
       }
 
       function saveShareTemplate() {
         const template = $('adminShareTemplate').value.trim() || DEFAULT_SHARE_TEMPLATE;
-        try {
-          localStorage.setItem(SAVED_SHARE_TEMPLATE_KEY, template);
-          $('adminShareTemplate').value = template;
-          toast('投稿テンプレートをこの端末に保存しました');
-        } catch (_) {
-          toast('保存できませんでした');
-        }
+        $('adminShareTemplate').value = template;
+        toast('このカードの設定に反映しました。共同編集カードを保存すると共有されます');
       }
 
       function resetShareTemplate() {
-        try { localStorage.removeItem(SAVED_SHARE_TEMPLATE_KEY); } catch (_) {}
         $('adminShareTemplate').value = DEFAULT_SHARE_TEMPLATE;
         toast('投稿テンプレートを初期文に戻しました');
       }
@@ -1728,29 +1724,21 @@
       }
 
       function loadSavedStampSets() {
-        try {
-          const saved = JSON.parse(localStorage.getItem(SAVED_STAMP_SETS_KEY) || '{}');
-          if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return {};
-          return Object.fromEntries(Object.entries(saved)
-            .map(([name, stamps]) => [String(name).slice(0, 40), normalizeStampSet(stamps, '')])
-            .filter(([name, stamps]) => name && stamps.length));
-        } catch (_) {
-          return {};
-        }
+        return Object.fromEntries(Object.entries(sharedStampSets)
+          .map(([name, stamps]) => [String(name).slice(0, 40), normalizeStampSet(stamps, '')])
+          .filter(([name, stamps]) => name && stamps.length));
       }
 
       function importSharedStampSets(stampSets) {
         if (!stampSets || typeof stampSets !== 'object' || Array.isArray(stampSets)) return;
-        const merged = loadSavedStampSets();
+        const imported = {};
         Object.entries(stampSets).slice(0, 30).forEach(([name, stamps]) => {
           const cleanName = String(name || '').trim().slice(0, 40);
           const cleanStamps = normalizeStampSet(stamps, '');
-          if (cleanName && cleanStamps.length) merged[cleanName] = cleanStamps;
+          if (cleanName && cleanStamps.length) imported[cleanName] = cleanStamps;
         });
-        try {
-          localStorage.setItem(SAVED_STAMP_SETS_KEY, JSON.stringify(merged));
-          refreshSavedStampSets();
-        } catch (_) {}
+        sharedStampSets = imported;
+        refreshSavedStampSets();
       }
 
       function refreshSavedStampSets(selectedName = '') {
@@ -1759,7 +1747,7 @@
         select.innerHTML = '';
         const placeholder = document.createElement('option');
         placeholder.value = '';
-        placeholder.textContent = '保存済みセットを選ぶ';
+        placeholder.textContent = 'このカードのセットを選ぶ';
         select.appendChild(placeholder);
         Object.keys(saved).sort((a, b) => a.localeCompare(b, 'ja')).forEach((name) => {
           const option = document.createElement('option');
@@ -1782,15 +1770,9 @@
       function saveStampSet() {
         const name = $('adminStampSetName').value.trim().slice(0, 40);
         if (!name) return toast('セット名を入力してください');
-        const saved = loadSavedStampSets();
-        saved[name] = [...adminSelectedStamps];
-        try {
-          localStorage.setItem(SAVED_STAMP_SETS_KEY, JSON.stringify(saved));
-          refreshSavedStampSets(name);
-          toast(`「${name}」をこの端末に保存しました`);
-        } catch (_) {
-          toast('セットを保存できませんでした');
-        }
+        sharedStampSets[name] = [...adminSelectedStamps];
+        refreshSavedStampSets(name);
+        toast(`「${name}」をこのカードに反映しました。共同編集カードを保存すると共有されます`);
       }
 
       function loadStampSet(name) {
@@ -1805,15 +1787,10 @@
         const name = $('adminSavedStampSet').value || $('adminStampSetName').value.trim();
         const saved = loadSavedStampSets();
         if (!name || !saved[name]) return toast('削除する保存済みセットを選んでください');
-        delete saved[name];
-        try {
-          localStorage.setItem(SAVED_STAMP_SETS_KEY, JSON.stringify(saved));
-          $('adminStampSetName').value = '';
-          refreshSavedStampSets();
-          toast(`「${name}」を削除しました`);
-        } catch (_) {
-          toast('削除できませんでした');
-        }
+        delete sharedStampSets[name];
+        $('adminStampSetName').value = '';
+        refreshSavedStampSets();
+        toast(`「${name}」をこのカードから削除しました。共同編集カードを保存すると共有されます`);
       }
 
       function normalizeStampSet(value, defaultStamp = '⛄️') {
