@@ -618,7 +618,14 @@
       background: #fffdf8;
       border: 2px solid rgba(var(--theme-rgb), .3);
     }
-    .template-journey .day.stamped { border-color: var(--theme); }
+    .template-journey .day.stamped {
+      color: #24364a;
+      background: rgba(var(--theme-rgb), .13);
+      border-color: var(--theme);
+      box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .10);
+    }
+    .template-journey .day.stamped .day-date,
+    .template-journey .day.stamped .day-week { color: #24364a; }
     .template-journey .today-tag { top: 4px; }
 
     .listen-links {
@@ -695,6 +702,57 @@
       background: #f8e8c7;
     }
     .template-hotel .stamp-choice { background: #fff8df; }
+
+    .participant-color-picker {
+      margin: 0 24px 16px;
+      padding: 11px 13px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255,255,255,.48);
+    }
+    .participant-color-picker p {
+      margin: 0 0 9px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .participant-color-picker .color-choice { width: 31px; height: 31px; }
+    .template-hotel .participant-color-picker {
+      border-color: rgba(203,169,87,.65);
+      background: #f8e8c7;
+    }
+
+    .admin-stamp-choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 4px 0 2px;
+    }
+    .admin-stamp-choice {
+      width: 42px;
+      height: 42px;
+      border: 1px solid #cddae5;
+      border-radius: 12px;
+      color: #24364a;
+      background: #f4f7fa;
+      font-size: 22px;
+      line-height: 1;
+      opacity: .42;
+    }
+    .admin-stamp-choice.selected {
+      border-color: var(--theme);
+      background: rgba(var(--theme-rgb), .12);
+      box-shadow: 0 0 0 2px rgba(var(--theme-rgb), .18);
+      opacity: 1;
+    }
+
+    .share-help {
+      margin: 10px 2px 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+      text-align: center;
+    }
 
     .test-panel {
       margin: 0 0 12px;
@@ -944,7 +1002,7 @@
         <div class="test-field">
           <label for="testTemplate">テンプレート</label>
           <select id="testTemplate">
-            <option value="hotel">🏨 AMENITY HOTEL</option>
+            <option value="hotel">🏨 HOTEL ALL SUITE</option>
             <option value="classic">◯ STAMP</option>
             <option value="journey">🚏 JOURNEY</option>
           </select>
@@ -974,6 +1032,11 @@
       <div class="participant-identity">
         <label for="participantName">NAME / @ACCOUNT</label>
         <input id="participantName" type="text" maxlength="32" autocomplete="nickname" placeholder="@username または名前（任意）">
+      </div>
+
+      <div class="participant-color-picker">
+        <p>カードカラーを選ぶ</p>
+        <div id="participantColorList" class="color-list" role="group" aria-label="カードカラー"></div>
       </div>
 
       <div id="stampPicker" class="stamp-picker">
@@ -1046,18 +1109,19 @@
         <div class="field">
           <label for="adminTemplate">カードテンプレート</label>
           <select id="adminTemplate">
-            <option value="hotel">🏨 AMENITY HOTEL｜ホテル</option>
+            <option value="hotel">🏨 HOTEL ALL SUITE｜ホテル</option>
             <option value="classic">◯ STAMP｜ポイントカード</option>
             <option value="journey">🚏 JOURNEY｜発売日への道</option>
           </select>
         </div>
         <div class="field wide">
           <label for="adminStampSet">参加者が選べるスタンプ</label>
-          <input id="adminStampSet" type="text" inputmode="text">
-          <p class="field-note">使いたい絵文字を空白で区切って並べます。イベントごとに入れ替えられます。</p>
+          <input id="adminStampSet" type="hidden">
+          <div id="adminStampSetChoices" class="admin-stamp-choices" role="group" aria-label="参加者が選べるスタンプ"></div>
+          <p class="field-note">使うスタンプをタップしてください。色が付いたものが参加者に表示されます。</p>
         </div>
         <div class="field">
-          <label for="adminStamp">スタンプの絵柄</label>
+          <label for="adminStamp">最初に選ばれているスタンプ</label>
           <select id="adminStamp">
             <option value="⛄️">⛄️ 雪だるま</option>
             <option value="🎵">🎵 音符</option>
@@ -1075,7 +1139,7 @@
             <option value="💛">💛 イエロー</option>
             <option value="💜">💜 パープル</option>
             <option value="🤍">🤍 ホワイト</option>
-            <option value="🩵">🩵 ブルー</option>
+            <option value="💙">💙 ブルー</option>
             <option value="🧡">🧡 オレンジ</option>
             <option value="💚">💚 グリーン</option>
             <option value="🖤">🖤 ブラック</option>
@@ -1086,10 +1150,6 @@
             <option value="🤖">🤖 ロボット</option>
             <option value="🕺">🕺 ダンス</option>
           </select>
-        </div>
-        <div class="field">
-          <label>カードカラー</label>
-          <div id="colorList" class="color-list" role="group" aria-label="カードカラー"></div>
         </div>
       </div>
 
@@ -1114,9 +1174,10 @@
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
       <h2 id="shareTitle">スタンプカード画像</h2>
       <img id="shareImage" alt="スタンプカードの共有画像">
+      <p id="shareHelp" class="share-help">「SNS・写真アプリへ共有」から、投稿先や「画像を保存」を選べます。</p>
       <div class="modal-actions">
-        <button id="nativeShareButton" class="btn btn-primary" type="button">画像を共有</button>
-        <button id="saveImageButton" class="btn btn-soft" type="button">画像を保存</button>
+        <button id="nativeShareButton" class="btn btn-primary" type="button">SNS・写真アプリへ共有</button>
+        <button id="saveImageButton" class="btn btn-soft" type="button">画像ファイルを保存</button>
         <button id="closeModalButton" class="btn btn-plain btn-full" type="button">閉じる</button>
       </div>
     </div>
@@ -1146,14 +1207,13 @@
       ];
       const STAMPS = [
         '⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🔑', '🛎️', '🧳', '☕️', '🪥', '🪮', '🏨',
-        '💛', '💜', '🤍', '🩵', '🧡', '💚', '🖤', '❤️', '🩷', '🎈', '🔫', '🤖', '🕺'
+        '💛', '💜', '🤍', '💙', '🧡', '💚', '🖤', '❤️', '🩷', '🎈', '🔫', '🤖', '🕺'
       ];
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
       const params = new URLSearchParams(location.search);
       const isTestMode = params.get('z') === '1' || params.get('test') === '1' || params.get('mode') === 'test';
       const incomingTestDay = params.get('d') || params.get('today') || '';
       let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(incomingTestDay) ? incomingTestDay : '';
-      let selectedColor = '#4ea8de';
       let currentConfig = null;
       let shareBlob = null;
       let toastTimer = null;
@@ -1249,7 +1309,9 @@
       }
 
       function normalizeStampSet(value, defaultStamp = '⛄️') {
-        const requested = Array.isArray(value) ? value : String(value || '').trim().split(/[\s,]+/);
+        const requested = (Array.isArray(value) ? value : String(value || '').trim().split(/[\s,]+/))
+          .map((stamp) => stamp === '🩵' ? '💙' : stamp);
+        if (defaultStamp === '🩵') defaultStamp = '💙';
         const stamps = [...new Set(requested.filter((stamp) => STAMPS.includes(stamp)))];
         const result = stamps.length ? stamps : [...STAMPS];
         if (STAMPS.includes(defaultStamp) && !result.includes(defaultStamp)) result.unshift(defaultStamp);
@@ -1268,7 +1330,8 @@
         const start = firstParam(source, 's', 'start');
         const release = firstParam(source, 'r', 'release');
         const end = firstParam(source, 'f', 'end') || release;
-        const incomingStamp = firstParam(source, 'e', 'stamp') || '⛄️';
+        const incomingStampRaw = firstParam(source, 'e', 'stamp') || '⛄️';
+        const incomingStamp = incomingStampRaw === '🩵' ? '💙' : incomingStampRaw;
         const stamp = STAMPS.includes(incomingStamp) ? incomingStamp : '⛄️';
         const stamps = normalizeStampSet(firstParam(source, 'x', 'icons'), stamp);
         const colorRaw = firstParam(source, 'c', 'color');
@@ -1306,7 +1369,7 @@
         const template = $('adminTemplate').value;
         const stamp = $('adminStamp').value;
         const stamps = normalizeStampSet($('adminStampSet').value, stamp);
-        const color = selectedColor;
+        const color = '#4ea8de';
         let error = '';
         if (!title) error = '表題曲名／カードタイトルを入力してください。';
         else if (!start || !release || !end) error = '開始日・CD発売日・カード終了日を入力してください。';
@@ -1338,7 +1401,6 @@
         url.searchParams.set('e', config.stamp);
         const stampSet = normalizeStampSet(config.stamps, config.stamp);
         if (stampSet.join('|') !== STAMPS.join('|')) url.searchParams.set('x', stampSet.join(','));
-        url.searchParams.set('c', config.color.replace('#', ''));
         url.searchParams.set('v', { hotel: 'h', classic: 'c', journey: 'j' }[config.template] || 'h');
         url.searchParams.set('i', config.id);
         if (testMode) {
@@ -1396,6 +1458,19 @@
         localStorage.setItem(activeStampKey(config), stamp);
       }
 
+      function participantColorKey(config) {
+        return `${isTestMode ? 'daily_stamp_test_color_' : 'daily_stamp_color_'}${config.id}`;
+      }
+
+      function loadParticipantColor(config) {
+        const saved = localStorage.getItem(participantColorKey(config));
+        return COLORS.includes(saved) ? saved : (COLORS.includes(config.color) ? config.color : '#4ea8de');
+      }
+
+      function saveParticipantColor(config, color) {
+        if (COLORS.includes(color)) localStorage.setItem(participantColorKey(config), color);
+      }
+
       function participantNameKey(config) {
         return `${isTestMode ? 'daily_stamp_test_name_' : 'daily_stamp_name_'}${config.id}`;
       }
@@ -1449,23 +1524,61 @@
         toastTimer = setTimeout(() => $('toast').classList.remove('show'), 1900);
       }
 
-      function renderColorChoices() {
-        const list = $('colorList');
+      function renderParticipantColorChoices(config) {
+        const list = $('participantColorList');
         list.innerHTML = '';
+        const activeColor = loadParticipantColor(config);
         COLORS.forEach((color) => {
           const button = document.createElement('button');
           button.type = 'button';
-          button.className = 'color-choice';
+          button.className = `color-choice${color === activeColor ? ' selected' : ''}`;
           button.style.setProperty('--dot', color);
           button.setAttribute('aria-label', `カラー ${color}`);
+          button.setAttribute('aria-pressed', color === activeColor ? 'true' : 'false');
           button.addEventListener('click', () => {
-            selectedColor = color;
+            saveParticipantColor(config, color);
+            currentConfig = { ...currentConfig, color };
             applyTheme(color);
-            [...list.children].forEach((item) => item.classList.toggle('selected', item === button));
+            [...list.children].forEach((item) => {
+              const selected = item === button;
+              item.classList.toggle('selected', selected);
+              item.setAttribute('aria-pressed', selected ? 'true' : 'false');
+            });
+            toast('カードカラーを変更しました');
           });
           list.appendChild(button);
         });
-        list.children[3].classList.add('selected');
+      }
+
+      function renderAdminStampChoices(value) {
+        const selected = new Set(normalizeStampSet(value, $('adminStamp').value));
+        const list = $('adminStampSetChoices');
+        list.innerHTML = '';
+        const sync = () => { $('adminStampSet').value = [...selected].join(' '); };
+        STAMPS.forEach((stamp) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = `admin-stamp-choice${selected.has(stamp) ? ' selected' : ''}`;
+          button.textContent = stamp;
+          button.setAttribute('aria-label', `${stamp}を${selected.has(stamp) ? '外す' : '追加する'}`);
+          button.setAttribute('aria-pressed', selected.has(stamp) ? 'true' : 'false');
+          button.addEventListener('click', () => {
+            if (selected.has(stamp)) {
+              if (selected.size === 1) {
+                toast('スタンプは1つ以上選んでください');
+                return;
+              }
+              selected.delete(stamp);
+              if ($('adminStamp').value === stamp) $('adminStamp').value = [...selected][0];
+            } else selected.add(stamp);
+            sync();
+            button.classList.toggle('selected', selected.has(stamp));
+            button.setAttribute('aria-pressed', selected.has(stamp) ? 'true' : 'false');
+            button.setAttribute('aria-label', `${stamp}を${selected.has(stamp) ? '外す' : '追加する'}`);
+          });
+          list.appendChild(button);
+        });
+        sync();
       }
 
       function initAdminDefaults() {
@@ -1482,13 +1595,13 @@
         const templateRaw = firstParam(params, 'v', 'template');
         const template = { h: 'hotel', c: 'classic', j: 'journey' }[templateRaw] || templateRaw;
         $('adminTemplate').value = ['classic', 'hotel', 'journey'].includes(template) ? template : 'hotel';
-        $('adminStamp').value = firstParam(params, 'e', 'stamp') || '⛄️';
+        const incomingStamp = firstParam(params, 'e', 'stamp') || '⛄️';
+        $('adminStamp').value = incomingStamp === '🩵' ? '💙' : incomingStamp;
         $('adminStampSet').value = normalizeStampSet(firstParam(params, 'x', 'icons'), $('adminStamp').value).join(' ');
+        renderAdminStampChoices($('adminStampSet').value);
         const colorRaw = firstParam(params, 'c', 'color');
         const incoming = /^[0-9a-f]{6}$/i.test(colorRaw) ? `#${colorRaw}` : colorRaw;
         if (incoming && COLORS.includes(incoming)) {
-          selectedColor = incoming;
-          [...$('colorList').children].forEach((item, index) => item.classList.toggle('selected', COLORS[index] === incoming));
           applyTheme(incoming);
         }
       }
@@ -1502,8 +1615,10 @@
       }
 
       function showParticipant(config) {
-        currentConfig = config;
-        applyTheme(config.color);
+        const participantColor = loadParticipantColor(config);
+        currentConfig = { ...config, color: participantColor };
+        config = currentConfig;
+        applyTheme(participantColor);
         $('participantView').classList.remove('template-classic', 'template-hotel', 'template-journey');
         $('participantView').classList.add(`template-${config.template}`);
         $('adminView').classList.add('hidden');
@@ -1530,8 +1645,7 @@
         $('adminTemplate').value = config.template || 'hotel';
         $('adminStamp').value = config.stamp;
         $('adminStampSet').value = normalizeStampSet(config.stamps, config.stamp).join(' ');
-        selectedColor = config.color;
-        [...$('colorList').children].forEach((item, index) => item.classList.toggle('selected', COLORS[index] === config.color));
+        renderAdminStampChoices($('adminStampSet').value);
       }
 
       function setupTestPanel(config) {
@@ -1569,6 +1683,7 @@
           localStorage.removeItem(metaKey(currentConfig));
           localStorage.removeItem(stampIconsKey(currentConfig));
           localStorage.removeItem(activeStampKey(currentConfig));
+          localStorage.removeItem(participantColorKey(currentConfig));
           localStorage.removeItem(participantNameKey(currentConfig));
           dateRange(currentConfig.start, currentConfig.end).forEach((day) => localStorage.removeItem(listenReadyKey(currentConfig, day)));
           setTestToday(currentConfig.start);
@@ -1663,7 +1778,7 @@
         if (validStamps.size !== stamps.size) saveStamps(config, validStamps);
 
         const templateLabels = {
-          hotel: 'AMENITY LISTENING CHECK-IN',
+          hotel: 'HOTEL ALL SUITE',
           classic: 'DAILY LISTENING STAMP',
           journey: 'RELEASE DAY JOURNEY'
         };
@@ -1674,6 +1789,7 @@
         $('testBadge').classList.toggle('hidden', !isTestMode);
         $('testTodayText').textContent = isTestMode ? formatDate(today, false) : '';
         const activeStamp = renderStampPicker(config);
+        renderParticipantColorChoices(config);
         renderParticipantName(config);
         const stampIcons = loadStampIcons(config);
 
@@ -1848,13 +1964,15 @@
         clone.removeAttribute('id');
         clone.classList.remove('hidden');
         clone.querySelectorAll('.day-inline-action').forEach((button) => {
+          const day = button.closest('.day');
+          if (day) day.classList.remove('day-action');
           const stamp = document.createElement('span');
           stamp.className = 'day-stamp';
           stamp.setAttribute('aria-hidden', 'true');
           stamp.textContent = button.dataset.stamp || currentConfig.stamp;
           button.replaceWith(stamp);
         });
-        clone.querySelectorAll('.listen-reset, .participant-identity, .listen-links, .stamp-picker, .action-row, .share-row').forEach((element) => element.remove());
+        clone.querySelectorAll('.listen-reset, .participant-identity, .participant-color-picker, .listen-links, .stamp-picker, .action-row, .share-row').forEach((element) => element.remove());
         clone.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
         clone.style.width = `${sourceWidth}px`;
         clone.style.maxWidth = 'none';
@@ -2002,7 +2120,7 @@
         ctx.textAlign = 'center';
         ctx.fillStyle = isHotel ? '#f3d58d' : config.color;
         ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(isHotel ? 'AMENITY LISTENING CHECK-IN' : isJourney ? 'RELEASE DAY JOURNEY' : 'DAILY LISTENING STAMP', width / 2, 105);
+        ctx.fillText(isHotel ? 'HOTEL ALL SUITE' : isJourney ? 'RELEASE DAY JOURNEY' : 'DAILY LISTENING STAMP', width / 2, 105);
         ctx.fillStyle = isHotel ? '#fff4d5' : ink;
         ctx.font = '700 50px -apple-system, BlinkMacSystemFont, sans-serif';
         drawCenteredText(ctx, config.title, width / 2, 170, width - 190, 56);
@@ -2104,7 +2222,7 @@
           if (isHotel) archRect(ctx, x, y, cell, cellHeight);
           else roundRect(ctx, x, y, cell, cellHeight, radius);
           if (isHotel) ctx.fillStyle = stamped ? '#efd17e' : prejoin ? '#bd737c' : future ? '#733044' : '#7e0929';
-          else ctx.fillStyle = stamped ? config.color : prejoin ? '#e1e6e9' : isJourney ? '#fffdf8' : '#f5f8fa';
+          else ctx.fillStyle = stamped ? (isJourney ? `rgba(${r}, ${g}, ${b}, .13)` : config.color) : prejoin ? '#e1e6e9' : isJourney ? '#fffdf8' : '#f5f8fa';
           if (stamped && isHotel) {
             ctx.save();
             const glow = ctx.createLinearGradient(x, y, x, y + cellHeight);
@@ -2141,7 +2259,7 @@
 
           const textColor = isHotel
             ? stamped ? '#571127' : prejoin ? '#703342' : future ? '#c9a3a7' : '#f4dca0'
-            : stamped ? themeText : prejoin ? '#8d979e' : '#52677b';
+            : stamped ? (isJourney ? '#24364a' : themeText) : prejoin ? '#8d979e' : '#52677b';
           ctx.fillStyle = textColor;
           const date = parseLocalDate(day);
           ctx.textAlign = 'center';
@@ -2260,6 +2378,13 @@
           const canvas = await buildCanvas(currentConfig);
           shareBlob = await canvasBlob(canvas);
           $('shareImage').src = URL.createObjectURL(shareBlob);
+          const shareFile = new File([shareBlob], `daily-stamp-${currentConfig.id}.png`, { type: 'image/png' });
+          const canShareImage = Boolean(navigator.share && (!navigator.canShare || navigator.canShare({ files: [shareFile] })));
+          $('nativeShareButton').classList.toggle('hidden', !canShareImage);
+          $('saveImageButton').classList.toggle('hidden', canShareImage);
+          $('shareHelp').textContent = canShareImage
+            ? 'このボタンからSNSへの投稿や「画像を保存」を選べます。'
+            : '画像を長押しして共有するか、画像ファイルを保存してください。';
           $('shareModal').classList.add('show');
           $('shareModal').setAttribute('aria-hidden', 'false');
         } catch (error) {
@@ -2272,7 +2397,7 @@
         if (!shareBlob) return;
         const file = new File([shareBlob], `daily-stamp-${currentConfig.id}.png`, { type: 'image/png' });
         const text = shareText(currentConfig);
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
           try { await navigator.share({ files: [file], text }); } catch (error) { if (error.name !== 'AbortError') toast('共有できませんでした'); }
         } else {
           saveImage();
@@ -2343,7 +2468,6 @@
       }
 
       function init() {
-        renderColorChoices();
         initAdminDefaults();
         let config = configFromParams();
         if (isTestMode && !config) {
@@ -2371,6 +2495,7 @@
 
         $('generateButton').addEventListener('click', () => generate('participant'));
         $('testGenerateButton').addEventListener('click', () => generate('test'));
+        $('adminStamp').addEventListener('change', () => renderAdminStampChoices($('adminStampSet').value));
         const syncDateLimits = () => {
           $('adminRelease').min = $('adminStart').value;
           $('adminEnd').min = $('adminRelease').value;
