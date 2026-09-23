@@ -364,47 +364,6 @@
     .template-hotel .eyebrow,
     .template-hotel .release-line,
     .template-hotel .release-line strong { color: #f3d58d; }
-    .template-hotel::before {
-      background: linear-gradient(90deg, #cba957 0 45%, var(--theme) 45% 55%, #cba957 55% 100%);
-    }
-    .template-hotel .eyebrow::before {
-      content: "";
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      margin: 0 7px 1px 0;
-      border: 1px solid rgba(255,255,255,.65);
-      border-radius: 50%;
-      background: var(--theme);
-      box-shadow: 0 0 0 2px rgba(243,213,141,.24);
-    }
-    .template-hotel .progress-bar {
-      position: relative;
-      background: linear-gradient(90deg, #8f0c31, #d0aa54);
-    }
-    .template-hotel .progress-bar::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      right: 0;
-      width: 8px;
-      height: 8px;
-      border: 2px solid #fff3cb;
-      border-radius: 50%;
-      background: var(--theme);
-      transform: translate(50%, -50%);
-    }
-    .template-hotel .btn-primary {
-      color: #fff3d0;
-      background: #8d0b30;
-      border: 1px solid #cba957;
-    }
-    .template-hotel .btn-soft {
-      color: #5a1728;
-      background: #f5dfae;
-      border: 1px solid rgba(203,169,87,.55);
-    }
-    .template-hotel .today-tag { color: #741029; }
     .template-hotel .stamp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .template-hotel .day {
       aspect-ratio: .86 / 1;
@@ -447,21 +406,6 @@
     .template-hotel .stamp-section .section-head span { color: #dfbd6e; }
     .template-hotel .stage-decoration { color: #c79e45; }
 
-    .test-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin: 0 0 12px;
-      border: 1px solid rgba(255,255,255,.55);
-      border-radius: 999px;
-      padding: 5px 10px;
-      color: #fff7df;
-      background: rgba(48, 14, 24, .35);
-      font-size: 10px;
-      font-weight: 900;
-      letter-spacing: .06em;
-    }
-
     .card.template-journey { --paper: #fffdf8; }
     .template-journey .stamp-grid {
       position: relative;
@@ -494,49 +438,6 @@
     }
 
     .listen-links .btn { min-height: 43px; font-size: 13px; }
-
-    .stamp-picker {
-      margin: 0 24px 16px;
-      padding: 12px 13px;
-      border: 1px solid var(--line);
-      border-radius: 15px;
-      background: rgba(255,255,255,.48);
-    }
-    .stamp-picker-label {
-      margin: 0 0 8px;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-    }
-    .stamp-choices {
-      display: flex;
-      gap: 7px;
-      overflow-x: auto;
-      padding: 3px 2px 6px;
-      scrollbar-width: none;
-    }
-    .stamp-choices::-webkit-scrollbar { display: none; }
-    .stamp-choice {
-      flex: 0 0 42px;
-      width: 42px;
-      height: 42px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: rgba(255,255,255,.74);
-      font-size: 23px;
-      line-height: 1;
-    }
-    .stamp-choice.selected {
-      border-color: #cba957;
-      background: #fff2c4;
-      box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .28);
-      transform: rotate(-5deg);
-    }
-    .template-hotel .stamp-picker {
-      border-color: rgba(203,169,87,.65);
-      background: #f8e8c7;
-    }
-    .template-hotel .stamp-choice { background: #fff8df; }
 
     .test-panel {
       margin: 0 0 12px;
@@ -789,7 +690,6 @@
 
     <section id="participantView" class="card hidden" aria-label="表題曲デイリースタンプカード">
       <header class="hero">
-        <p id="testBadge" class="test-badge hidden">🧪 動作テスト｜仮の今日 <span id="testTodayText"></span></p>
         <p id="templateLabel" class="eyebrow">DAILY LISTENING STAMP</p>
         <h1 id="campaignTitle"></h1>
         <p class="release-line"><strong id="releaseDateText"></strong> CD RELEASE</p>
@@ -807,10 +707,6 @@
       </div>
 
       <div id="listenLinks" class="listen-links"></div>
-      <div id="stampPicker" class="stamp-picker">
-        <p class="stamp-picker-label">今日押すスタンプを選ぶ（途中で変更できます）</p>
-        <div id="stampChoices" class="stamp-choices" role="group" aria-label="今日押すスタンプ"></div>
-      </div>
       <div class="action-row">
         <button id="todayButton" class="btn btn-soft" type="button">スタンプを押す</button>
         <button id="imageButtonTop" class="btn btn-plain" type="button">記録を画像にする</button>
@@ -884,15 +780,7 @@
             <option value="🎵">🎵 音符</option>
             <option value="💿">💿 CD</option>
             <option value="⭐️">⭐️ 星</option>
-            <option value="🍎">🍎 りんご</option>
-            <option value="🥖">🥖 パン</option>
-            <option value="🔑">🔑 ホテルキー</option>
-            <option value="🛎️">🛎️ ベル</option>
-            <option value="🧳">🧳 トランク</option>
-            <option value="☕️">☕️ カップ</option>
-            <option value="🪥">🪥 歯ブラシ</option>
-            <option value="🪮">🪮 コーム</option>
-            <option value="🏨">🏨 ホテル</option>
+            <option value="💙">💙 ハート</option>
           </select>
         </div>
         <div class="field">
@@ -903,9 +791,9 @@
 
       <p id="adminError" class="error" role="alert"></p>
       <div class="admin-actions">
-        <button id="previewButton" class="btn btn-soft" type="button">本番の日付で確認</button>
+        <button id="previewButton" class="btn btn-soft" type="button">本番表示を確認</button>
         <button id="generateButton" class="btn btn-primary" type="button">参加者用URLを作る</button>
-        <button id="testGenerateButton" class="btn btn-plain" type="button">日付を進めて動作テスト</button>
+        <button id="testGenerateButton" class="btn btn-plain" type="button">テストページを開く</button>
       </div>
 
       <div id="urlBox" class="url-box">
@@ -941,10 +829,10 @@
         '#ffcc33', '#7b2cbf', '#f8f9fa', '#4ea8de', '#f97316',
         '#2a9d8f', '#283044', '#e63946', '#ff69b4'
       ];
-      const STAMPS = ['⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🔑', '🛎️', '🧳', '☕️', '🪥', '🪮', '🏨'];
+      const STAMPS = ['⛄️', '🎵', '💿', '⭐️', '💙'];
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
       const params = new URLSearchParams(location.search);
-      const isTestMode = params.get('test') === '1' || params.get('mode') === 'test';
+      const isTestMode = params.get('test') === '1';
       let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(params.get('today') || '') ? params.get('today') : '';
       let selectedColor = '#4ea8de';
       let currentConfig = null;
@@ -1109,7 +997,6 @@
         url.searchParams.set('cid', config.id);
         if (testMode) {
           url.searchParams.set('test', '1');
-          url.searchParams.set('mode', 'test');
           url.searchParams.set('today', config.start);
         }
         return url.href;
@@ -1130,36 +1017,6 @@
 
       function saveStamps(config, stamps) {
         localStorage.setItem(storageKey(config), JSON.stringify([...stamps].sort()));
-      }
-
-      function stampIconsKey(config) {
-        return `${isTestMode ? 'daily_stamp_test_icons_' : 'daily_stamp_icons_'}${config.id}`;
-      }
-
-      function loadStampIcons(config) {
-        try {
-          const saved = JSON.parse(localStorage.getItem(stampIconsKey(config)) || '{}');
-          return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
-        } catch (_) {
-          return {};
-        }
-      }
-
-      function saveStampIcons(config, icons) {
-        localStorage.setItem(stampIconsKey(config), JSON.stringify(icons));
-      }
-
-      function activeStampKey(config) {
-        return `${isTestMode ? 'daily_stamp_test_active_' : 'daily_stamp_active_'}${config.id}`;
-      }
-
-      function loadActiveStamp(config) {
-        const saved = localStorage.getItem(activeStampKey(config));
-        return STAMPS.includes(saved) ? saved : config.stamp;
-      }
-
-      function saveActiveStamp(config, stamp) {
-        localStorage.setItem(activeStampKey(config), stamp);
       }
 
       function metaKey(config) {
@@ -1296,10 +1153,6 @@
           const previous = loadStamps(currentConfig).size;
           const count = Math.max(0, Math.min(campaignDays.length, Number($('testCount').value) || 0));
           saveStamps(currentConfig, new Set(campaignDays.slice(0, count)));
-          const chosen = loadActiveStamp(currentConfig);
-          const icons = {};
-          campaignDays.slice(0, count).forEach((day) => { icons[day] = chosen; });
-          saveStampIcons(currentConfig, icons);
           setTestToday(campaignDays[Math.min(count, campaignDays.length - 1)]);
           renderParticipant();
           if (count > previous && [3, 5, 10, 15, 20, campaignDays.length].includes(count)) launchConfetti();
@@ -1311,8 +1164,6 @@
         $('testReset').addEventListener('click', () => {
           localStorage.removeItem(storageKey(currentConfig));
           localStorage.removeItem(metaKey(currentConfig));
-          localStorage.removeItem(stampIconsKey(currentConfig));
-          localStorage.removeItem(activeStampKey(currentConfig));
           setTestToday(currentConfig.start);
           renderParticipant();
           toast('テスト状態をリセットしました');
@@ -1341,27 +1192,6 @@
         });
       }
 
-      function renderStampPicker(config) {
-        const active = loadActiveStamp(config);
-        const choices = $('stampChoices');
-        choices.innerHTML = '';
-        STAMPS.forEach((stamp) => {
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.className = `stamp-choice${stamp === active ? ' selected' : ''}`;
-          button.textContent = stamp;
-          button.setAttribute('aria-label', `${stamp}を今日のスタンプにする`);
-          button.setAttribute('aria-pressed', stamp === active ? 'true' : 'false');
-          button.addEventListener('click', () => {
-            saveActiveStamp(config, stamp);
-            renderParticipant();
-            toast(`${stamp} を次のスタンプに選びました`);
-          });
-          choices.appendChild(button);
-        });
-        return active;
-      }
-
       function renderParticipant() {
         const config = currentConfig;
         const days = dateRange(config.start, config.release);
@@ -1380,11 +1210,7 @@
         $('campaignTitle').textContent = config.title;
         $('releaseDateText').textContent = formatDate(config.release);
         $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.release, false)}`;
-        $('testBadge').classList.toggle('hidden', !isTestMode);
-        $('testTodayText').textContent = isTestMode ? formatDate(today, false) : '';
         renderListenLinks(config);
-        const activeStamp = renderStampPicker(config);
-        const stampIcons = loadStampIcons(config);
 
         const count = validStamps.size;
         if (isTestMode) {
@@ -1413,7 +1239,7 @@
         $('todayButton').parentElement.classList.remove('test-mode');
         $('todayButton').classList.remove('hidden');
         $('todayButton').disabled = !canStampToday;
-        $('todayButton').textContent = todayStamped ? '今日のスタンプを外す' : `${activeStamp} 聴いたのでスタンプを押す`;
+        $('todayButton').textContent = todayStamped ? '今日のスタンプを外す' : '聴いたのでスタンプを押す';
         $('todayButton').onclick = () => toggleToday(config);
 
         if (isTestMode) $('helperText').textContent = 'テスト中です。TODAYのマスを押すと翌日に進みます。3・5・10個の節目も順番に確認できます。';
@@ -1429,7 +1255,6 @@
           const isStamped = validStamps.has(day);
           const isFuture = day > today;
           const isPrejoin = day < today && !isStamped;
-          const dayStamp = isStamped ? (stampIcons[day] || config.stamp) : (isToday ? activeStamp : config.stamp);
           const isInteractive = isToday;
           const element = document.createElement(isInteractive ? 'button' : 'div');
           if (isInteractive) element.type = 'button';
@@ -1441,7 +1266,7 @@
             ${isToday ? '<span class="today-tag">TODAY</span>' : ''}
             <span class="day-date">${date.getMonth() + 1}/${date.getDate()}</span>
             <span class="day-week">${WEEKDAYS[date.getDay()]}</span>
-            ${isPrejoin ? '<span class="day-state">開催済み</span>' : `<span class="day-stamp" aria-hidden="true">${dayStamp}</span>`}
+            ${isPrejoin ? '<span class="day-state">開催済み</span>' : `<span class="day-stamp" aria-hidden="true">${config.stamp}</span>`}
           `;
           grid.appendChild(element);
         });
@@ -1455,18 +1280,11 @@
         const today = currentDay();
         if (today < config.start || today > config.release) return;
         const stamps = loadStamps(config);
-        const stampIcons = loadStampIcons(config);
         const wasStamped = stamps.has(today);
         if (!isTestMode && !wasStamped && !window.confirm('今日、表題曲を聴きましたか？')) return;
-        if (wasStamped) {
-          stamps.delete(today);
-          delete stampIcons[today];
-        } else {
-          stamps.add(today);
-          stampIcons[today] = loadActiveStamp(config);
-        }
+        if (wasStamped) stamps.delete(today);
+        else stamps.add(today);
         saveStamps(config, stamps);
-        saveStampIcons(config, stampIcons);
         const campaignDays = dateRange(config.start, config.release);
         const todayIndex = campaignDays.indexOf(today);
         const nextDay = todayIndex >= 0 && todayIndex < campaignDays.length - 1 ? campaignDays[todayIndex + 1] : '';
@@ -1475,7 +1293,7 @@
         if (!wasStamped) {
           const total = dateRange(config.start, config.release).length;
           if (isTestMode && nextDay) toast(`${formatDate(today, false)}にスタンプ。次は${formatDate(nextDay, false)}です`);
-          else toast(`${stampIcons[today]} 今日のスタンプを押しました`);
+          else toast(`${config.stamp} 今日のスタンプを押しました`);
           if ([3, 5, 10, 15, 20, total].includes(stamps.size)) launchConfetti();
         } else {
           toast('今日のスタンプを取り消しました');
@@ -1501,17 +1319,15 @@
       function buildCanvas(config) {
         const days = dateRange(config.start, config.release);
         const stamps = loadStamps(config);
-        const stampIcons = loadStampIcons(config);
-        const activeStamp = loadActiveStamp(config);
         const cols = config.template === 'classic' ? 5 : 4;
         const rows = Math.ceil(days.length / cols);
         const width = 1080;
         const cardX = 38;
         const cardWidth = width - cardX * 2;
-        const margin = 55;
-        const gap = 24;
+        const margin = 70;
+        const gap = 16;
         const cell = Math.floor((width - margin * 2 - gap * (cols - 1)) / cols);
-        const cellHeight = config.template === 'hotel' ? Math.round(cell * 1.16) : cell;
+        const cellHeight = config.template === 'hotel' ? Math.round(cell * 1.14) : cell;
         const gridTop = 650;
         const gridHeight = rows * cellHeight + Math.max(0, rows - 1) * gap;
         const height = gridTop + gridHeight + 125;
@@ -1556,13 +1372,9 @@
           ctx.restore();
         }
 
-        ctx.fillStyle = isHotel ? '#cba957' : config.color;
+        ctx.fillStyle = config.color;
         roundRect(ctx, cardX, 38, cardWidth, 16, 8);
         ctx.fill();
-        if (isHotel) {
-          ctx.fillStyle = config.color;
-          ctx.fillRect(width / 2 - 48, 38, 96, 16);
-        }
 
         ctx.textAlign = 'center';
         ctx.fillStyle = isHotel ? '#f3d58d' : config.color;
@@ -1591,23 +1403,8 @@
         ctx.fill();
         if (count) {
           roundRect(ctx, margin, 378, (width - margin * 2) * milestone.progress / 100, 18, 9);
-          if (isHotel) {
-            const progressGradient = ctx.createLinearGradient(margin, 0, width - margin, 0);
-            progressGradient.addColorStop(0, '#8f0c31');
-            progressGradient.addColorStop(1, '#d0aa54');
-            ctx.fillStyle = progressGradient;
-          } else ctx.fillStyle = config.color;
+          ctx.fillStyle = config.color;
           ctx.fill();
-          if (isHotel) {
-            const progressX = margin + (width - margin * 2) * milestone.progress / 100;
-            ctx.beginPath();
-            ctx.arc(progressX, 387, 7, 0, Math.PI * 2);
-            ctx.fillStyle = config.color;
-            ctx.fill();
-            ctx.strokeStyle = '#fff3cb';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-          }
         }
 
         ctx.textAlign = 'right';
@@ -1619,7 +1416,7 @@
         ctx.save();
         ctx.globalAlpha = stageAlpha;
         ctx.textAlign = 'center';
-        ctx.fillStyle = isHotel ? '#c79e45' : config.color;
+        ctx.fillStyle = config.color;
         ctx.font = '700 36px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillText('✦　✦　✦', width / 2, 510);
         ctx.restore();
@@ -1661,11 +1458,10 @@
           const prejoin = day < today && !stamped;
           const future = day > today;
           const isToday = day === today;
-          const dayStamp = stamped ? (stampIcons[day] || config.stamp) : (isToday ? activeStamp : config.stamp);
           const radius = isJourney ? cell / 2 : isHotel ? 16 : 23;
           if (isHotel) archRect(ctx, x, y, cell, cellHeight);
           else roundRect(ctx, x, y, cell, cellHeight, radius);
-          if (isHotel) ctx.fillStyle = stamped ? '#efd17e' : prejoin ? '#bd737c' : future ? '#733044' : '#7e0929';
+          if (isHotel) ctx.fillStyle = stamped ? '#efd17e' : prejoin ? '#ead6bf' : future ? '#733044' : '#7e0929';
           else ctx.fillStyle = stamped ? config.color : prejoin ? '#e1e6e9' : isJourney ? '#fffdf8' : '#f5f8fa';
           if (stamped && isHotel) {
             ctx.save();
@@ -1674,53 +1470,46 @@
             glow.addColorStop(1, '#e8c46f');
             ctx.fillStyle = glow;
             ctx.shadowColor = 'rgba(255, 213, 111, .55)';
-            ctx.shadowBlur = 52;
+            ctx.shadowBlur = 20;
             ctx.fill();
             ctx.restore();
           } else ctx.fill();
           if (isJourney && !stamped) ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, .3)`;
-          else if (isToday) ctx.strokeStyle = isHotel ? '#f1d681' : config.color;
+          else if (isToday) ctx.strokeStyle = config.color;
           else if (isHotel) ctx.strokeStyle = prejoin ? '#cdb78e' : '#cba957';
           else ctx.strokeStyle = stamped ? config.color : '#dce7f0';
-          ctx.lineWidth = isToday ? 9 : 5;
+          ctx.lineWidth = isToday ? 6 : 2;
           ctx.stroke();
           if (isHotel) {
             archRect(ctx, x + 9, y + 9, cell - 18, cellHeight - 18);
             ctx.strokeStyle = stamped ? 'rgba(87, 17, 39, .20)' : 'rgba(244, 220, 160, .24)';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 2;
             ctx.stroke();
           }
 
           const textColor = isHotel
-            ? stamped ? '#571127' : prejoin ? '#703342' : future ? '#c9a3a7' : '#f4dca0'
+            ? stamped ? '#571127' : prejoin ? '#a88579' : future ? '#c9a3a7' : '#f4dca0'
             : stamped ? themeText : prejoin ? '#8d979e' : '#52677b';
           ctx.fillStyle = textColor;
           const date = parseLocalDate(day);
           ctx.textAlign = 'center';
+          ctx.font = '700 24px -apple-system, BlinkMacSystemFont, sans-serif';
+          ctx.fillText(`${date.getMonth() + 1}/${date.getDate()} （${WEEKDAYS[date.getDay()]}）`, x + cell / 2, y + 55);
           if (isToday) {
-            ctx.fillStyle = isHotel ? '#741029' : config.color;
-            ctx.font = '800 21px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText('TODAY', x + cell / 2, y + 32);
+            ctx.fillStyle = stamped && isHotel ? '#571127' : isHotel ? '#fff1bd' : config.color;
+            ctx.font = '700 17px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText('TODAY', x + cell / 2, y + 87);
             ctx.fillStyle = textColor;
-            ctx.font = '800 34px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x + cell / 2, y + 82);
-            ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText(WEEKDAYS[date.getDay()], x + cell / 2, y + 118);
-          } else {
-            ctx.font = '700 33px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x + cell / 2, y + 80);
-            ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText(WEEKDAYS[date.getDay()], x + cell / 2, y + 116);
           }
           if (stamped) {
-            drawTiltedStamp(ctx, dayStamp, x + cell / 2, y + cellHeight * .76, 68, 1);
+            drawTiltedStamp(ctx, config.stamp, x + cell / 2, y + cellHeight * .67, 58, 1);
           } else if (prejoin) {
-            ctx.font = '700 23px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText('開催済み', x + cell / 2, y + cellHeight * .72);
+            ctx.font = '700 19px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText('開催済み', x + cell / 2, y + cellHeight * .64);
           } else {
             ctx.save();
             ctx.globalAlpha = .12;
-            drawTiltedStamp(ctx, dayStamp, x + cell / 2, y + cellHeight * .76, 58, .8);
+            drawTiltedStamp(ctx, config.stamp, x + cell / 2, y + cellHeight * .68, 48, .8);
             ctx.restore();
           }
         });
