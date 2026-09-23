@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- build: 20260924-0815-shared-admin-fix -->
+<!-- build: 20260924-0825-stamp-sets-recovery -->
 <html lang="ja">
 <head>
   <meta charset="utf-8">
@@ -2514,10 +2514,30 @@
         renderWorkspacePanel();
       }
 
+      function collectStampSetsFromCards(cards) {
+        const recovered = {};
+        (Array.isArray(cards) ? cards : []).forEach((card) => {
+          const sets = card && card.config && card.config.stampSets;
+          if (!sets || typeof sets !== 'object' || Array.isArray(sets)) return;
+          Object.entries(sets).forEach(([name, stamps]) => {
+            const cleanName = String(name || '').trim().slice(0, 40);
+            if (!cleanName || Object.prototype.hasOwnProperty.call(recovered, cleanName)) return;
+            const cleanStamps = normalizeStampSet(stamps, '');
+            if (cleanStamps.length) recovered[cleanName] = cleanStamps;
+          });
+        });
+        return recovered;
+      }
+
       function applyWorkspaceResult(result) {
         workspaceCards = Array.isArray(result && result.cards) ? result.cards : [];
         workspaceStampSetsRevision = Number(result && result.settingsRevision || 0);
-        importSharedStampSets(result && result.stampSets);
+        const recoveredStampSets = collectStampSetsFromCards(workspaceCards);
+        const workspaceStampSets = result && result.stampSets
+          && typeof result.stampSets === 'object' && !Array.isArray(result.stampSets)
+          ? result.stampSets
+          : {};
+        importSharedStampSets({ ...recoveredStampSets, ...workspaceStampSets });
         saveWorkspaceCache();
       }
 
