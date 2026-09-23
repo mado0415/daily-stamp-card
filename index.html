@@ -159,6 +159,8 @@
       padding: 0 24px 22px;
     }
 
+    .action-row.test-mode { grid-template-columns: 1fr; }
+
     .btn {
       min-height: 48px;
       border: 0;
@@ -230,7 +232,13 @@
       padding: 5px 2px;
     }
 
-    button.day { cursor: pointer; }
+    button.day {
+      width: 100%;
+      appearance: none;
+      font: inherit;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
     .day.today {
       border: 2px solid var(--theme);
       background: rgba(var(--theme-rgb), .07);
@@ -416,7 +424,7 @@
 
     .test-panel h2 { margin: 0; font-size: 15px; }
     .test-panel p { margin: 5px 0 12px; color: var(--muted); font-size: 11px; line-height: 1.55; }
-    .test-controls { display: grid; grid-template-columns: 1.15fr .8fr 1.25fr auto; gap: 8px; align-items: end; }
+    .test-controls { display: grid; grid-template-columns: .8fr 1.25fr auto; gap: 8px; align-items: end; }
     .test-field label { display: block; margin: 0 0 4px; font-size: 11px; font-weight: 800; }
     .test-field input, .test-field select {
       width: 100%;
@@ -635,12 +643,8 @@
 
     <section id="testPanel" class="test-panel hidden" aria-label="テスト操作">
       <h2>🧪 TEST MODE</h2>
-      <p>本番の記録には影響しません。「スタンプ数」を3・5・10などに変えると、節目の演出を確認できます。</p>
+      <p>本番の記録には影響しません。どの日付も自由にタップでき、3・5・10個などの節目の演出を確認できます。</p>
       <div class="test-controls">
-        <div class="test-field">
-          <label for="testDate">仮の「今日」</label>
-          <input id="testDate" type="date">
-        </div>
         <div class="test-field">
           <label for="testCount">スタンプ数</label>
           <select id="testCount"></select>
@@ -760,9 +764,9 @@
 
       <p id="adminError" class="error" role="alert"></p>
       <div class="admin-actions">
-        <button id="previewButton" class="btn btn-soft" type="button">この設定で確認</button>
+        <button id="previewButton" class="btn btn-soft" type="button">本番表示を確認</button>
         <button id="generateButton" class="btn btn-primary" type="button">参加者用URLを作る</button>
-        <button id="testGenerateButton" class="btn btn-plain" type="button">テスト用URLを作る</button>
+        <button id="testGenerateButton" class="btn btn-plain" type="button">テストページを開く</button>
       </div>
 
       <div id="urlBox" class="url-box">
@@ -802,8 +806,6 @@
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
       const params = new URLSearchParams(location.search);
       const isTestMode = params.get('test') === '1';
-      const incomingTestDate = params.get('today') || '';
-      let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(incomingTestDate) ? incomingTestDate : '2026-10-07';
       let selectedColor = '#4ea8de';
       let currentConfig = null;
       let shareBlob = null;
@@ -824,7 +826,7 @@
       }
 
       function currentDay() {
-        return isTestMode ? simulatedToday : isoLocal();
+        return isoLocal();
       }
 
       function addDays(value, amount) {
@@ -957,7 +959,9 @@
         url.searchParams.set('color', config.color);
         url.searchParams.set('template', config.template);
         url.searchParams.set('cid', config.id);
-        if (testMode) url.searchParams.set('test', '1');
+        if (testMode) {
+          url.searchParams.set('test', '1');
+        }
         return url.href;
       }
 
@@ -1098,11 +1102,7 @@
         if (!isTestMode) return;
         const panel = $('testPanel');
         const days = dateRange(config.start, config.release);
-        if (!days.includes(simulatedToday)) simulatedToday = days[Math.floor((days.length - 1) / 2)];
         panel.classList.remove('hidden');
-        $('testDate').min = config.start;
-        $('testDate').max = config.release;
-        $('testDate').value = simulatedToday;
         const effectLabels = { 3: '（演出1）', 5: '（演出2）', 10: '（演出3）', 15: '（演出4）', 20: '（演出4）' };
         $('testCount').innerHTML = days.map((_, index) => `<option value="${index}">${index}${effectLabels[index] || ''}</option>`).join('')
           + `<option value="${days.length}">${days.length}（全日）</option>`;
@@ -1110,10 +1110,6 @@
 
         if (panel.dataset.ready === '1') return;
         panel.dataset.ready = '1';
-        $('testDate').addEventListener('change', () => {
-          simulatedToday = $('testDate').value;
-          renderParticipant();
-        });
         $('testCount').addEventListener('change', () => {
           const campaignDays = dateRange(currentConfig.start, currentConfig.release);
           const previous = loadStamps(currentConfig).size;
@@ -1129,8 +1125,6 @@
         $('testReset').addEventListener('click', () => {
           localStorage.removeItem(storageKey(currentConfig));
           localStorage.removeItem(metaKey(currentConfig));
-          const campaignDays = dateRange(currentConfig.start, currentConfig.release);
-          simulatedToday = campaignDays[Math.floor((campaignDays.length - 1) / 2)];
           renderParticipant();
           toast('テスト状態をリセットしました');
         });
@@ -1180,7 +1174,6 @@
 
         const count = validStamps.size;
         if (isTestMode) {
-          $('testDate').value = simulatedToday;
           $('testCount').value = String(count);
           $('testTemplate').value = config.template;
         }
@@ -1188,14 +1181,14 @@
         const daysLeft = Math.max(0, Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000));
         $('participantView').dataset.stage = String(milestone.stage);
         $('progressCount').textContent = `${count} STAMP${count === 1 ? '' : 'S'}`;
-        $('daysLeftText').textContent = today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`;
+        $('daysLeftText').textContent = isTestMode ? '全マス操作できます' : today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`;
         $('progressBar').style.width = `${milestone.progress}%`;
         const progressTrack = document.querySelector('.progress-track');
         progressTrack.setAttribute('aria-valuenow', String(milestone.progress));
         $('milestoneNote').textContent = count >= days.length ? '全日達成！' : `次の変化まであと${milestone.next - count}個`;
 
         const perfect = count === days.length && days.length > 0;
-        const eventFinished = today >= config.release;
+        const eventFinished = !isTestMode && today >= config.release;
         $('completion').classList.toggle('show', perfect || eventFinished);
         $('completion').innerHTML = perfect
           ? `PERFECT！<br>発売日まで毎日ありがとう ${config.stamp}✨`
@@ -1203,11 +1196,14 @@
 
         const canStampToday = days.includes(today);
         const todayStamped = validStamps.has(today);
+        $('todayButton').parentElement.classList.toggle('test-mode', isTestMode);
+        $('todayButton').classList.toggle('hidden', isTestMode);
         $('todayButton').disabled = !canStampToday;
         $('todayButton').textContent = todayStamped ? '今日のスタンプを外す' : '聴いたのでスタンプを押す';
         $('todayButton').onclick = () => toggleToday(config);
 
-        if (today < config.start) $('helperText').textContent = `${formatDate(config.start)}からスタートします。未来の日付にはまだスタンプを押せません。`;
+        if (isTestMode) $('helperText').textContent = 'テスト中はどの日付もタップできます。3・5・10個の演出も順番に確認できます。';
+        else if (today < config.start) $('helperText').textContent = `${formatDate(config.start)}からスタートします。未来の日付にはまだスタンプを押せません。`;
         else if (today > config.release) $('helperText').textContent = 'イベントは終了しました。集めたスタンプはこの端末に残ります。';
         else $('helperText').textContent = '今日聴いたら今日のマスへ。空いた日があっても、また今日から続けられます。';
 
@@ -1215,16 +1211,18 @@
         grid.innerHTML = '';
         days.forEach((day) => {
           const date = parseLocalDate(day);
-          const isToday = day === today;
+          const isToday = !isTestMode && day === today;
           const isStamped = validStamps.has(day);
-          const isFuture = day > today;
-          const isPrejoin = day < today && !isStamped;
-          const element = document.createElement(isToday ? 'button' : 'div');
-          if (isToday) element.type = 'button';
+          const isFuture = !isTestMode && day > today;
+          const isPrejoin = !isTestMode && day < today && !isStamped;
+          const isInteractive = isTestMode || isToday;
+          const element = document.createElement(isInteractive ? 'button' : 'div');
+          if (isInteractive) element.type = 'button';
           element.className = `day${isToday ? ' today' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}${isPrejoin ? ' prejoin' : ''}`;
           const state = isPrejoin ? '参加前・開催済み' : isStamped ? 'スタンプ済み' : '未スタンプ';
-          element.setAttribute('aria-label', `${formatDate(day)} ${state}${isToday ? ' 今日' : ''}`);
-          if (isToday) element.addEventListener('click', () => toggleToday(config));
+          element.setAttribute('aria-label', `${formatDate(day)} ${state}${isToday ? ' 今日' : ''}${isTestMode ? ' テスト操作' : ''}`);
+          if (isTestMode) element.addEventListener('click', () => toggleTestDay(config, day));
+          else if (isToday) element.addEventListener('click', () => toggleToday(config));
           element.innerHTML = `
             ${isToday ? '<span class="today-tag">TODAY</span>' : ''}
             <span class="day-date">${date.getMonth() + 1}/${date.getDate()}</span>
@@ -1255,6 +1253,24 @@
           if ([3, 5, 10, 15, 20, total].includes(stamps.size)) launchConfetti();
         } else {
           toast('今日のスタンプを取り消しました');
+        }
+      }
+
+      function toggleTestDay(config, day) {
+        if (!isTestMode) return;
+        const stamps = loadStamps(config);
+        const wasStamped = stamps.has(day);
+        if (wasStamped) stamps.delete(day);
+        else stamps.add(day);
+        saveStamps(config, stamps);
+        renderParticipant();
+        const date = parseLocalDate(day);
+        if (!wasStamped) {
+          const total = dateRange(config.start, config.release).length;
+          toast(`${date.getMonth() + 1}/${date.getDate()}にスタンプを押しました`);
+          if ([3, 5, 10, 15, 20, total].includes(stamps.size)) launchConfetti();
+        } else {
+          toast(`${date.getMonth() + 1}/${date.getDate()}のスタンプを外しました`);
         }
       }
 
@@ -1346,7 +1362,7 @@
         ctx.textAlign = 'right';
         ctx.fillStyle = muted;
         ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`, width - margin, 350);
+        ctx.fillText(isTestMode ? 'TEST MODE' : today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`, width - margin, 350);
         roundRect(ctx, margin, 378, width - margin * 2, 18, 9);
         ctx.fillStyle = '#e8eef3';
         ctx.fill();
@@ -1391,9 +1407,9 @@
           const x = margin + col * (cell + gap);
           const y = gridTop + row * (cellHeight + gap);
           const stamped = stamps.has(day);
-          const prejoin = day < today && !stamped;
-          const future = day > today;
-          const isToday = day === today;
+          const prejoin = !isTestMode && day < today && !stamped;
+          const future = !isTestMode && day > today;
+          const isToday = !isTestMode && day === today;
           const radius = isJourney ? cell / 2 : isHotel ? 16 : 23;
           roundRect(ctx, x, y, cell, cellHeight, radius);
           if (isHotel) ctx.fillStyle = stamped ? '#ffe6a3' : prejoin ? '#dfe3df' : future ? '#718183' : '#294852';
@@ -1539,11 +1555,15 @@
           showParticipant(config);
           return;
         }
+        if (testMode) {
+          location.href = url;
+          return;
+        }
         $('generatedUrl').value = url;
-        $('generatedUrlLabel').textContent = testMode ? '管理者用・テストURL' : '参加者へ共有するURL';
+        $('generatedUrlLabel').textContent = '参加者へ共有するURL';
         $('urlBox').classList.add('show');
         $('generatedUrl').select();
-        toast(testMode ? 'テスト用URLを作りました' : '参加者用URLを作りました');
+        toast('参加者用URLを作りました');
       }
 
       async function copyGeneratedUrl() {
