@@ -494,7 +494,7 @@
 
     .admin-actions {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 10px;
       margin-top: 22px;
     }
@@ -635,7 +635,7 @@
 
     <section id="testPanel" class="test-panel hidden" aria-label="テスト操作">
       <h2>🧪 TEST MODE</h2>
-      <p>実際の日付や本番のスタンプ記録には影響しません。変更するとすぐカードへ反映されます。</p>
+      <p>本番の記録には影響しません。「スタンプ数」を3・5・10などに変えると、節目の演出を確認できます。</p>
       <div class="test-controls">
         <div class="test-field">
           <label for="testDate">仮の「今日」</label>
@@ -762,15 +762,16 @@
       <div class="admin-actions">
         <button id="previewButton" class="btn btn-soft" type="button">この設定で確認</button>
         <button id="generateButton" class="btn btn-primary" type="button">参加者用URLを作る</button>
+        <button id="testGenerateButton" class="btn btn-plain" type="button">テスト用URLを作る</button>
       </div>
 
       <div id="urlBox" class="url-box">
-        <label for="generatedUrl">参加者へ共有するURL</label>
+        <label id="generatedUrlLabel" for="generatedUrl">参加者へ共有するURL</label>
         <div class="url-copy-row">
           <input id="generatedUrl" type="text" readonly>
           <button id="copyButton" class="btn btn-primary" type="button">コピー</button>
         </div>
-        <p class="notice">同じURLを開いた人には、同じ期間・曲名・スタンプ柄のカードが表示されます。記録そのものは各自の端末にだけ保存されます。</p>
+        <p class="notice">参加者用URLは配布用、テストURLは管理者の確認用です。テスト記録は本番のスタンプと分けて保存されます。</p>
       </div>
     </section>
   </main>
@@ -940,7 +941,7 @@
         return { title, start, release, stamp, color, link, apple, spotify, line, youtube, template, id };
       }
 
-      function configUrl(config) {
+      function configUrl(config, testMode = false) {
         const url = new URL(location.href);
         url.search = '';
         url.hash = '';
@@ -956,6 +957,7 @@
         url.searchParams.set('color', config.color);
         url.searchParams.set('template', config.template);
         url.searchParams.set('cid', config.id);
+        if (testMode) url.searchParams.set('test', '1');
         return url.href;
       }
 
@@ -1101,7 +1103,8 @@
         $('testDate').min = config.start;
         $('testDate').max = config.release;
         $('testDate').value = simulatedToday;
-        $('testCount').innerHTML = days.map((_, index) => `<option value="${index}">${index}</option>`).join('')
+        const effectLabels = { 3: '（演出1）', 5: '（演出2）', 10: '（演出3）', 15: '（演出4）', 20: '（演出4）' };
+        $('testCount').innerHTML = days.map((_, index) => `<option value="${index}">${index}${effectLabels[index] || ''}</option>`).join('')
           + `<option value="${days.length}">${days.length}（全日）</option>`;
         $('testTemplate').value = config.template;
 
@@ -1274,93 +1277,174 @@
       function buildCanvas(config) {
         const days = dateRange(config.start, config.release);
         const stamps = loadStamps(config);
-        const meta = loadMeta(config);
         const cols = config.template === 'classic' ? 5 : 4;
         const rows = Math.ceil(days.length / cols);
         const width = 1080;
-        const margin = 74;
+        const cardX = 38;
+        const cardWidth = width - cardX * 2;
+        const margin = 70;
         const gap = 16;
         const cell = Math.floor((width - margin * 2 - gap * (cols - 1)) / cols);
-        const gridHeight = rows * cell + Math.max(0, rows - 1) * gap;
-        const height = 470 + gridHeight + 94;
+        const cellHeight = config.template === 'hotel' ? Math.round(cell * 1.14) : cell;
+        const gridTop = 650;
+        const gridHeight = rows * cellHeight + Math.max(0, rows - 1) * gap;
+        const height = gridTop + gridHeight + 125;
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         const [r, g, b] = colorRgb(config.color);
         const themeText = contrastText(config.color);
+        const isHotel = config.template === 'hotel';
+        const isJourney = config.template === 'journey';
+        const paper = isHotel ? '#fffaf0' : isJourney ? '#fffdf8' : '#ffffff';
+        const sectionPaper = isHotel ? '#f7eedc' : paper;
+        const ink = isHotel ? '#293b45' : '#24364a';
+        const muted = isHotel ? '#7a6b58' : '#718096';
+        const today = currentDay();
 
-        ctx.fillStyle = config.template === 'hotel' ? '#17343d' : config.template === 'journey' ? '#f5efe3' : '#eef5f9';
+        ctx.fillStyle = '#eaf2f8';
         ctx.fillRect(0, 0, width, height);
-        roundRect(ctx, 38, 38, width - 76, height - 76, 36);
-        ctx.fillStyle = '#ffffff';
+        roundRect(ctx, cardX, 38, cardWidth, height - 76, 36);
+        ctx.fillStyle = paper;
         ctx.fill();
+
+        if (isHotel) {
+          ctx.save();
+          roundRect(ctx, cardX, 38, cardWidth, height - 76, 36);
+          ctx.clip();
+          const gradient = ctx.createLinearGradient(cardX, 38, cardX + cardWidth, 300);
+          gradient.addColorStop(0, '#122a34');
+          gradient.addColorStop(1, '#23444a');
+          ctx.fillStyle = gradient;
+          ctx.fillRect(cardX, 38, cardWidth, 255);
+          ctx.restore();
+        }
+
         ctx.fillStyle = config.color;
-        roundRect(ctx, 38, 38, width - 76, 16, 8);
+        roundRect(ctx, cardX, 38, cardWidth, 16, 8);
         ctx.fill();
 
         ctx.textAlign = 'center';
-        ctx.fillStyle = config.template === 'hotel' ? '#f0ce8b' : config.color;
+        ctx.fillStyle = isHotel ? '#f8e7bd' : config.color;
         ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(config.template === 'hotel' ? 'HOTEL LISTENING CHECK-IN' : config.template === 'journey' ? 'RELEASE DAY JOURNEY' : 'DAILY LISTENING STAMP', width / 2, 120);
-        ctx.fillStyle = '#24364a';
+        ctx.fillText(isHotel ? 'HOTEL LISTENING CHECK-IN' : isJourney ? 'RELEASE DAY JOURNEY' : 'DAILY LISTENING STAMP', width / 2, 105);
+        ctx.fillStyle = isHotel ? '#fffaf0' : ink;
         ctx.font = '700 50px -apple-system, BlinkMacSystemFont, sans-serif';
-        drawCenteredText(ctx, config.title, width / 2, 185, width - 190, 56);
-        ctx.fillStyle = '#718096';
+        drawCenteredText(ctx, config.title, width / 2, 170, width - 190, 56);
+        ctx.fillStyle = isHotel ? '#f8e7bd' : muted;
         ctx.font = '500 26px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 240);
+        ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 235);
 
         const count = [...stamps].filter((day) => days.includes(day)).length;
         const milestone = milestoneState(count, days.length);
+        const daysLeft = Math.max(0, Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000));
         ctx.textAlign = 'left';
-        ctx.fillStyle = '#24364a';
+        ctx.fillStyle = ink;
         ctx.font = '700 39px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(`${count} STAMPS`, margin, 330);
+        ctx.fillText(`${count} STAMP${count === 1 ? '' : 'S'}`, margin, 350);
         ctx.textAlign = 'right';
-        ctx.fillStyle = '#718096';
+        ctx.fillStyle = muted;
         ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(count >= days.length ? 'PERFECT!' : `NEXT ${milestone.next}`, width - margin, 330);
-        roundRect(ctx, margin, 354, width - margin * 2, 18, 9);
+        ctx.fillText(today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`, width - margin, 350);
+        roundRect(ctx, margin, 378, width - margin * 2, 18, 9);
         ctx.fillStyle = '#e8eef3';
         ctx.fill();
         if (count) {
-          roundRect(ctx, margin, 354, (width - margin * 2) * milestone.progress / 100, 18, 9);
+          roundRect(ctx, margin, 378, (width - margin * 2) * milestone.progress / 100, 18, 9);
           ctx.fillStyle = config.color;
           ctx.fill();
         }
 
-        const top = 420;
+        ctx.textAlign = 'right';
+        ctx.fillStyle = muted;
+        ctx.font = '500 22px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText(count >= days.length ? '全日達成！' : `次の変化まであと${milestone.next - count}個`, width - margin, 440);
+
+        const stageAlpha = [.22, .42, .62, .82, 1][milestone.stage] || .22;
+        ctx.save();
+        ctx.globalAlpha = stageAlpha;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = config.color;
+        ctx.font = '700 36px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText('✦　✦　✦', width / 2, 510);
+        ctx.restore();
+
+        ctx.save();
+        roundRect(ctx, cardX, 38, cardWidth, height - 76, 36);
+        ctx.clip();
+        ctx.fillStyle = sectionPaper;
+        ctx.fillRect(cardX, 550, cardWidth, height - 588);
+        ctx.restore();
+        ctx.textAlign = 'left';
+        ctx.fillStyle = ink;
+        ctx.font = '700 34px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText('LISTENING CARD', margin, 615);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = muted;
+        ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText(`${formatDate(config.start, false)} — ${formatDate(config.release, false)}`, width - margin, 615);
+
         days.forEach((day, index) => {
           const col = index % cols;
           const row = Math.floor(index / cols);
           const x = margin + col * (cell + gap);
-          const y = top + row * (cell + gap);
+          const y = gridTop + row * (cellHeight + gap);
           const stamped = stamps.has(day);
-          const prejoin = day < currentDay() && !stamped;
-          roundRect(ctx, x, y, cell, cell, 23);
-          ctx.fillStyle = stamped ? config.color : prejoin ? '#e1e6e9' : config.template === 'hotel' ? '#294852' : '#f5f8fa';
-          ctx.fill();
-          ctx.strokeStyle = stamped ? config.color : '#dce7f0';
-          ctx.lineWidth = 2;
+          const prejoin = day < today && !stamped;
+          const future = day > today;
+          const isToday = day === today;
+          const radius = isJourney ? cell / 2 : isHotel ? 16 : 23;
+          roundRect(ctx, x, y, cell, cellHeight, radius);
+          if (isHotel) ctx.fillStyle = stamped ? '#ffe6a3' : prejoin ? '#dfe3df' : future ? '#718183' : '#294852';
+          else ctx.fillStyle = stamped ? config.color : prejoin ? '#e1e6e9' : isJourney ? '#fffdf8' : '#f5f8fa';
+          if (stamped && isHotel) {
+            ctx.save();
+            ctx.shadowColor = 'rgba(255, 202, 92, .45)';
+            ctx.shadowBlur = 20;
+            ctx.fill();
+            ctx.restore();
+          } else ctx.fill();
+          if (isJourney && !stamped) ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, .3)`;
+          else if (isToday) ctx.strokeStyle = config.color;
+          else if (isHotel) ctx.strokeStyle = prejoin ? '#d2d7d3' : '#46646a';
+          else ctx.strokeStyle = stamped ? config.color : '#dce7f0';
+          ctx.lineWidth = isToday ? 6 : 2;
           ctx.stroke();
+
+          const textColor = isHotel
+            ? stamped ? '#2a3540' : prejoin ? '#8f9694' : '#e8dcc6'
+            : stamped ? themeText : prejoin ? '#8d979e' : '#52677b';
+          ctx.fillStyle = textColor;
           const date = parseLocalDate(day);
           ctx.textAlign = 'center';
-          ctx.fillStyle = stamped ? themeText : prejoin ? '#8d979e' : config.template === 'hotel' ? '#e8dcc6' : '#52677b';
           ctx.font = '700 24px -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}（${WEEKDAYS[date.getDay()]}）`, x + cell / 2, y + 48);
+          ctx.fillText(`${date.getMonth() + 1}/${date.getDate()} （${WEEKDAYS[date.getDay()]}）`, x + cell / 2, y + 55);
+          if (isToday) {
+            ctx.fillStyle = stamped && isHotel ? '#2a3540' : config.color;
+            ctx.font = '700 17px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText('TODAY', x + cell / 2, y + 87);
+            ctx.fillStyle = textColor;
+          }
           if (stamped) {
             ctx.font = '58px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
-            ctx.fillText(config.stamp, x + cell / 2, y + 124);
+            ctx.fillText(config.stamp, x + cell / 2, y + cellHeight * .67);
           } else if (prejoin) {
             ctx.font = '700 19px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText('開催済み', x + cell / 2, y + 112);
+            ctx.fillText('開催済み', x + cell / 2, y + cellHeight * .64);
+          } else {
+            ctx.save();
+            ctx.globalAlpha = .12;
+            ctx.font = '48px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+            ctx.fillText(config.stamp, x + cell / 2, y + cellHeight * .68);
+            ctx.restore();
           }
         });
 
         ctx.textAlign = 'center';
         ctx.fillStyle = `rgba(${r}, ${g}, ${b}, .85)`;
         ctx.font = '700 22px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText('ONE LISTEN A DAY, ALL THE WAY TO RELEASE DAY', width / 2, height - 68);
+        ctx.fillText('ONE LISTEN A DAY, ALL THE WAY TO RELEASE DAY', width / 2, height - 75);
         return canvas;
       }
 
@@ -1445,18 +1529,21 @@
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'noopener');
       }
 
-      function generate(showOnly = false) {
+      function generate(mode = 'participant') {
         const config = configFromForm();
         if (!config) return;
-        const url = configUrl(config);
-        if (showOnly) {
+        const testMode = mode === 'test';
+        const url = configUrl(config, testMode);
+        if (mode === 'preview') {
           history.replaceState(null, '', url);
           showParticipant(config);
           return;
         }
         $('generatedUrl').value = url;
+        $('generatedUrlLabel').textContent = testMode ? '管理者用・テストURL' : '参加者へ共有するURL';
         $('urlBox').classList.add('show');
         $('generatedUrl').select();
+        toast(testMode ? 'テスト用URLを作りました' : '参加者用URLを作りました');
       }
 
       async function copyGeneratedUrl() {
@@ -1467,7 +1554,8 @@
           $('generatedUrl').select();
           document.execCommand('copy');
         }
-        toast('参加者用URLをコピーしました');
+        const copiedTestUrl = new URL(value).searchParams.get('test') === '1';
+        toast(copiedTestUrl ? 'テスト用URLをコピーしました' : '参加者用URLをコピーしました');
       }
 
       function init() {
@@ -1494,9 +1582,11 @@
         const forceAdmin = params.get('admin') === '1';
         if (config && !forceAdmin) showParticipant(config);
         else showAdmin();
+        if (isTestMode) requestAnimationFrame(() => window.scrollTo(0, 0));
 
-        $('previewButton').addEventListener('click', () => generate(true));
-        $('generateButton').addEventListener('click', () => generate(false));
+        $('previewButton').addEventListener('click', () => generate('preview'));
+        $('generateButton').addEventListener('click', () => generate('participant'));
+        $('testGenerateButton').addEventListener('click', () => generate('test'));
         $('copyButton').addEventListener('click', copyGeneratedUrl);
         $('nativeShareButton').addEventListener('click', nativeShareImage);
         $('saveImageButton').addEventListener('click', saveImage);
