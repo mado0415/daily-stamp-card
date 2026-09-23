@@ -2574,44 +2574,63 @@
       }
 
       function addConfettiToCanvas(canvas, config) {
-        const ctx = canvas.getContext('2d');
-        const palette = [...COLORS, config.color, '#d4af37'];
-        const amount = Math.min(110, 58 + Math.round(canvas.height / 90));
+        const output = document.createElement('canvas');
+        output.width = canvas.width;
+        output.height = canvas.height;
+        const ctx = output.getContext('2d');
+        ctx.drawImage(canvas, 0, 0);
+        const palette = ['#ffcc33', '#7b2cbf', '#4ea8de', '#f97316', '#2a9d8f', '#283044', '#e63946', '#ff69b4', config.color, '#d4af37'];
+        const amount = Math.min(170, 105 + Math.round(output.height / 75));
         ctx.save();
         for (let i = 0; i < amount; i += 1) {
-          const edgePiece = i >= Math.round(amount * .55);
+          const edgePiece = i >= Math.round(amount * .68);
           const fromLeft = i % 2 === 0;
           const x = edgePiece
-            ? (fromLeft ? Math.random() * canvas.width * .18 : canvas.width * (.82 + Math.random() * .18))
-            : Math.random() * canvas.width;
+            ? (fromLeft ? Math.random() * output.width * .20 : output.width * (.80 + Math.random() * .20))
+            : Math.random() * output.width;
           const y = edgePiece
-            ? Math.random() * canvas.height
-            : Math.random() * canvas.height * .42;
-          const width = 7 + Math.random() * 14;
-          const height = 4 + Math.random() * 10;
+            ? Math.random() * output.height
+            : Math.random() * output.height * .58;
+          const width = 14 + Math.random() * 22;
+          const height = 8 + Math.random() * 14;
           ctx.save();
           ctx.translate(x, y);
           ctx.rotate(Math.random() * Math.PI);
-          ctx.globalAlpha = .72 + Math.random() * .25;
+          ctx.globalAlpha = .82 + Math.random() * .18;
           ctx.fillStyle = palette[i % palette.length];
+          ctx.strokeStyle = 'rgba(255,255,255,.72)';
+          ctx.lineWidth = 2;
           if (i % 4 === 0) {
             ctx.beginPath();
             ctx.arc(0, 0, width * .45, 0, Math.PI * 2);
             ctx.fill();
+            ctx.stroke();
           } else {
             ctx.fillRect(-width / 2, -height / 2, width, height);
+            ctx.strokeRect(-width / 2, -height / 2, width, height);
           }
           ctx.restore();
         }
+        for (let i = 0; i < 8; i += 1) {
+          const startX = output.width * (.08 + i * .12);
+          ctx.beginPath();
+          ctx.moveTo(startX, 0);
+          ctx.bezierCurveTo(startX - 65, 75, startX + 85, 135, startX + (i % 2 ? -45 : 45), 230 + i * 18);
+          ctx.strokeStyle = palette[(i + 2) % palette.length];
+          ctx.globalAlpha = .9;
+          ctx.lineWidth = 7;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+        }
         ctx.restore();
-        return canvas;
+        return output;
       }
 
       async function openShareImage(withConfetti = false) {
         try {
           const canvas = await buildCanvas(currentConfig);
-          if (withConfetti) addConfettiToCanvas(canvas, currentConfig);
-          shareBlob = await canvasBlob(canvas);
+          const finishedCanvas = withConfetti ? addConfettiToCanvas(canvas, currentConfig) : canvas;
+          shareBlob = await canvasBlob(finishedCanvas);
           $('shareImage').src = URL.createObjectURL(shareBlob);
           const shareFile = new File([shareBlob], `daily-stamp-${currentConfig.id}.png`, { type: 'image/png' });
           const canShareImage = Boolean(navigator.share && (!navigator.canShare || navigator.canShare({ files: [shareFile] })));
