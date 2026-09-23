@@ -154,13 +154,12 @@
 
     .action-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 10px;
       padding: 0 24px 22px;
     }
 
     .action-row.test-mode { grid-template-columns: 1fr 1fr; }
-    .action-row.test-mode #imageButtonTop { grid-column: 1 / -1; }
 
     .btn {
       min-height: 48px;
@@ -283,6 +282,32 @@
       filter: none;
       opacity: 1;
       transform: rotate(-8deg) scale(1);
+    }
+
+    .day.today.day-action {
+      justify-content: flex-start;
+      padding-top: 27px;
+    }
+    .day-inline-action {
+      position: relative;
+      z-index: 2;
+      width: calc(100% - 6px);
+      min-height: 25px;
+      margin-top: auto;
+      border: 1px solid rgba(90, 23, 40, .28);
+      border-radius: 9px;
+      padding: 4px 2px;
+      color: #5a1728;
+      background: #fff4d5;
+      box-shadow: 0 2px 7px rgba(55, 13, 25, .14);
+      font-size: 8px;
+      font-weight: 900;
+      line-height: 1.15;
+    }
+    .day-inline-action.stamp-ready {
+      color: #fff4d5;
+      background: #79102d;
+      border-color: #f0d48b;
     }
 
     .today-tag {
@@ -512,6 +537,7 @@
     .listen-links .btn { min-height: 43px; font-size: 13px; }
 
     .stamp-picker {
+      position: relative;
       margin: 0 24px 16px;
       padding: 12px 13px;
       border: 1px solid var(--line);
@@ -528,10 +554,32 @@
       display: flex;
       gap: 7px;
       overflow-x: auto;
-      padding: 3px 2px 6px;
+      padding: 3px 25px 6px 2px;
       scrollbar-width: none;
     }
     .stamp-choices::-webkit-scrollbar { display: none; }
+    .stamp-scroll-hint {
+      position: absolute;
+      z-index: 3;
+      right: 5px;
+      bottom: 25px;
+      width: 22px;
+      height: 32px;
+      border-radius: 10px 0 0 10px;
+      color: #5a1728;
+      background: linear-gradient(90deg, rgba(255,244,213,.28), #fff4d5 48%);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1;
+      pointer-events: none;
+      animation: hintNudge 1.2s ease-in-out infinite;
+    }
+    @keyframes hintNudge {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(2px); }
+    }
     .stamp-choice {
       flex: 0 0 42px;
       width: 42px;
@@ -644,7 +692,7 @@
 
     .admin-actions {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-top: 22px;
     }
@@ -658,9 +706,9 @@
     }
 
     .url-box.show { display: block; }
-    .url-box label { display: block; margin-bottom: 7px; font-size: 12px; font-weight: 800; }
+    .url-box-label { display: block; margin: 0 0 7px; font-size: 12px; font-weight: 800; }
     .url-copy-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-    .url-copy-row input {
+    .generated-url-link {
       width: 100%;
       min-width: 0;
       border: 1px solid #cddae5;
@@ -669,6 +717,9 @@
       color: #52677b;
       background: #fff;
       font-size: 13px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+      text-decoration: underline;
     }
 
     .notice, .error {
@@ -680,6 +731,11 @@
     .notice { color: var(--muted); }
     .error { display: none; color: #c0392b; font-weight: 800; }
     .error.show { display: block; }
+    .field-note { margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+
+    .listen-modal-copy { margin: 0 0 13px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .listen-modal-links { display: grid; gap: 9px; }
+    .listen-modal-links .btn { width: 100%; }
 
     .modal {
       position: fixed;
@@ -822,13 +878,12 @@
         <p id="milestoneNote" class="milestone-note"></p>
       </div>
 
-      <div id="listenLinks" class="listen-links"></div>
       <div id="stampPicker" class="stamp-picker">
         <p class="stamp-picker-label">今日押すスタンプを選ぶ（途中で変更できます）</p>
         <div id="stampChoices" class="stamp-choices" role="group" aria-label="今日押すスタンプ"></div>
+        <span id="stampScrollHint" class="stamp-scroll-hint" aria-hidden="true">›</span>
       </div>
       <div class="action-row">
-        <button id="todayButton" class="btn btn-soft" type="button">スタンプを押す</button>
         <button id="skipTodayButton" class="btn btn-soft hidden" type="button">今日は押さず次の日へ</button>
         <button id="imageButtonTop" class="btn btn-plain" type="button">記録を画像にする</button>
       </div>
@@ -894,6 +949,11 @@
             <option value="journey">🚏 JOURNEY｜発売日への道</option>
           </select>
         </div>
+        <div class="field wide">
+          <label for="adminStampSet">参加者が選べるスタンプ</label>
+          <input id="adminStampSet" type="text" inputmode="text">
+          <p class="field-note">使いたい絵文字を空白で区切って並べます。イベントごとに入れ替えられます。</p>
+        </div>
         <div class="field">
           <label for="adminStamp">スタンプの絵柄</label>
           <select id="adminStamp">
@@ -910,6 +970,19 @@
             <option value="🪥">🪥 歯ブラシ</option>
             <option value="🪮">🪮 コーム</option>
             <option value="🏨">🏨 ホテル</option>
+            <option value="💛">💛 イエロー</option>
+            <option value="💜">💜 パープル</option>
+            <option value="🤍">🤍 ホワイト</option>
+            <option value="🩵">🩵 ブルー</option>
+            <option value="🧡">🧡 オレンジ</option>
+            <option value="💚">💚 グリーン</option>
+            <option value="🖤">🖤 ブラック</option>
+            <option value="❤️">❤️ レッド</option>
+            <option value="🩷">🩷 ピンク</option>
+            <option value="🎈">🎈 風船</option>
+            <option value="🔫">🔫 水鉄砲</option>
+            <option value="🤖">🤖 ロボット</option>
+            <option value="🕺">🕺 ダンス</option>
           </select>
         </div>
         <div class="field">
@@ -920,18 +993,17 @@
 
       <p id="adminError" class="error" role="alert"></p>
       <div class="admin-actions">
-        <button id="previewButton" class="btn btn-soft" type="button">本番の日付で確認</button>
-        <button id="generateButton" class="btn btn-primary" type="button">参加者用URLを作る</button>
         <button id="testGenerateButton" class="btn btn-plain" type="button">日付を進めて動作テスト</button>
+        <button id="generateButton" class="btn btn-primary" type="button">参加者用URLを作る</button>
       </div>
 
       <div id="urlBox" class="url-box">
-        <label id="generatedUrlLabel" for="generatedUrl">参加者へ共有するURL</label>
+        <p id="generatedUrlLabel" class="url-box-label">参加者へ共有するURL</p>
         <div class="url-copy-row">
-          <input id="generatedUrl" type="text" readonly>
+          <a id="generatedUrlLink" class="generated-url-link" href="#" target="_blank" rel="noopener"></a>
           <button id="copyButton" class="btn btn-primary" type="button">コピー</button>
         </div>
-        <p class="notice">参加者用URLは配布用、テストURLは管理者の確認用です。テスト記録は本番のスタンプと分けて保存されます。</p>
+        <p class="notice">URLをタップすると参加者用ページを開けます。確認後、「コピー」から配布できます。</p>
       </div>
     </section>
   </main>
@@ -948,6 +1020,17 @@
     </div>
   </div>
 
+  <div id="listenModal" class="modal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="listenModalTitle">
+      <h2 id="listenModalTitle">曲を聴く</h2>
+      <p class="listen-modal-copy">使うサービスを選んでください。再生ページを開くと、今日の窓からスタンプを押せるようになります。</p>
+      <div id="listenModalLinks" class="listen-modal-links"></div>
+      <div class="modal-actions">
+        <button id="closeListenModalButton" class="btn btn-plain btn-full" type="button">閉じる</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -959,7 +1042,10 @@
         '#ffcc33', '#7b2cbf', '#f8f9fa', '#4ea8de', '#f97316',
         '#2a9d8f', '#283044', '#e63946', '#ff69b4'
       ];
-      const STAMPS = ['⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🔑', '🛎️', '🧳', '☕️', '🪥', '🪮', '🏨'];
+      const STAMPS = [
+        '⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🔑', '🛎️', '🧳', '☕️', '🪥', '🪮', '🏨',
+        '💛', '💜', '🤍', '🩵', '🧡', '💚', '🖤', '❤️', '🩷', '🎈', '🔫', '🤖', '🕺'
+      ];
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
       const params = new URLSearchParams(location.search);
       const isTestMode = params.get('test') === '1' || params.get('mode') === 'test';
@@ -1059,12 +1145,21 @@
         }
       }
 
+      function normalizeStampSet(value, defaultStamp = '⛄️') {
+        const requested = Array.isArray(value) ? value : String(value || '').trim().split(/\s+/);
+        const stamps = [...new Set(requested.filter((stamp) => STAMPS.includes(stamp)))];
+        const result = stamps.length ? stamps : [...STAMPS];
+        if (STAMPS.includes(defaultStamp) && !result.includes(defaultStamp)) result.unshift(defaultStamp);
+        return result;
+      }
+
       function configFromParams(source = params) {
         const title = (source.get('title') || '').trim();
         const start = source.get('start') || '';
         const release = source.get('release') || '';
         const incomingStamp = source.get('stamp') || '⛄️';
         const stamp = STAMPS.includes(incomingStamp) ? incomingStamp : '⛄️';
+        const stamps = normalizeStampSet(source.get('icons') || '', stamp);
         const color = /^#[0-9a-f]{6}$/i.test(source.get('color') || '') ? source.get('color') : '#4ea8de';
         const link = safeUrl(source.get('link') || '');
         const apple = safeUrl(source.get('apple') || '');
@@ -1075,7 +1170,7 @@
         const seed = `${title}|${start}|${release}`;
         const id = (source.get('cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
         if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(release) || release < start) return null;
-        return { title, start, release, stamp, color, link, apple, spotify, line, youtube, template, id };
+        return { title, start, release, stamp, stamps, color, link, apple, spotify, line, youtube, template, id };
       }
 
       function configFromForm() {
@@ -1094,6 +1189,7 @@
         const youtube = safeUrl(rawYoutube);
         const template = $('adminTemplate').value;
         const stamp = $('adminStamp').value;
+        const stamps = normalizeStampSet($('adminStampSet').value, stamp);
         const color = selectedColor;
         let error = '';
         if (!title) error = '表題曲名／カードタイトルを入力してください。';
@@ -1106,7 +1202,7 @@
         const id = currentConfig && currentConfig.title === title && currentConfig.start === start && currentConfig.release === release
           ? currentConfig.id
           : hashText(`${title}|${start}|${release}`);
-        return { title, start, release, stamp, color, link, apple, spotify, line, youtube, template, id };
+        return { title, start, release, stamp, stamps, color, link, apple, spotify, line, youtube, template, id };
       }
 
       function configUrl(config, testMode = false) {
@@ -1122,6 +1218,7 @@
         if (config.line) url.searchParams.set('line', config.line);
         if (config.youtube) url.searchParams.set('youtube', config.youtube);
         url.searchParams.set('stamp', config.stamp);
+        url.searchParams.set('icons', normalizeStampSet(config.stamps, config.stamp).join(' '));
         url.searchParams.set('color', config.color);
         url.searchParams.set('template', config.template);
         url.searchParams.set('cid', config.id);
@@ -1173,7 +1270,8 @@
 
       function loadActiveStamp(config) {
         const saved = localStorage.getItem(activeStampKey(config));
-        return STAMPS.includes(saved) ? saved : config.stamp;
+        const available = normalizeStampSet(config.stamps, config.stamp);
+        return available.includes(saved) ? saved : config.stamp;
       }
 
       function saveActiveStamp(config, stamp) {
@@ -1249,6 +1347,7 @@
         $('adminYoutube').value = params.get('youtube') || '';
         $('adminTemplate').value = ['classic', 'hotel', 'journey'].includes(params.get('template')) ? params.get('template') : 'hotel';
         $('adminStamp').value = params.get('stamp') || '⛄️';
+        $('adminStampSet').value = normalizeStampSet(params.get('icons') || '', $('adminStamp').value).join(' ');
         const incoming = params.get('color');
         if (incoming && COLORS.includes(incoming)) {
           selectedColor = incoming;
@@ -1292,6 +1391,7 @@
         $('adminYoutube').value = config.youtube || '';
         $('adminTemplate').value = config.template || 'hotel';
         $('adminStamp').value = config.stamp;
+        $('adminStampSet').value = normalizeStampSet(config.stamps, config.stamp).join(' ');
         selectedColor = config.color;
         [...$('colorList').children].forEach((item, index) => item.classList.toggle('selected', COLORS[index] === config.color));
       }
@@ -1331,23 +1431,35 @@
           localStorage.removeItem(metaKey(currentConfig));
           localStorage.removeItem(stampIconsKey(currentConfig));
           localStorage.removeItem(activeStampKey(currentConfig));
+          dateRange(currentConfig.start, currentConfig.release).forEach((day) => localStorage.removeItem(listenReadyKey(currentConfig, day)));
           setTestToday(currentConfig.start);
           renderParticipant();
           toast('テスト状態をリセットしました');
         });
       }
 
-      function renderListenLinks(config) {
-        const links = [
+      function getListenLinks(config) {
+        return [
           ['まとめて選ぶ', config.link],
           ['Apple Music', config.apple],
           ['Spotify', config.spotify],
           ['LINE MUSIC', config.line],
           ['YouTube', config.youtube]
         ].filter((item) => item[1]);
-        const wrap = $('listenLinks');
+      }
+
+      function listenReadyKey(config, day) {
+        return `${isTestMode ? 'daily_stamp_test_listened_' : 'daily_stamp_listened_'}${config.id}_${day}`;
+      }
+
+      function hasOpenedListenPage(config, day) {
+        return localStorage.getItem(listenReadyKey(config, day)) === '1';
+      }
+
+      function openListenModal(config, day) {
+        const links = getListenLinks(config);
+        const wrap = $('listenModalLinks');
         wrap.innerHTML = '';
-        wrap.classList.toggle('hidden', links.length === 0);
         links.forEach(([label, href], index) => {
           const link = document.createElement('a');
           link.className = `btn ${index === 0 ? 'btn-primary' : 'btn-soft'}`;
@@ -1355,8 +1467,20 @@
           link.target = '_blank';
           link.rel = 'noopener';
           link.textContent = `▶ ${label}`;
+          link.addEventListener('click', () => {
+            localStorage.setItem(listenReadyKey(config, day), '1');
+            closeListenModal();
+            requestAnimationFrame(renderParticipant);
+          });
           wrap.appendChild(link);
         });
+        $('listenModal').classList.add('show');
+        $('listenModal').setAttribute('aria-hidden', 'false');
+      }
+
+      function closeListenModal() {
+        $('listenModal').classList.remove('show');
+        $('listenModal').setAttribute('aria-hidden', 'true');
       }
 
       function renderStampPicker(config) {
@@ -1365,7 +1489,7 @@
         $('stampPicker').removeAttribute('hidden');
         const choices = $('stampChoices');
         choices.innerHTML = '';
-        STAMPS.forEach((stamp) => {
+        normalizeStampSet(config.stamps, config.stamp).forEach((stamp) => {
           const button = document.createElement('button');
           button.type = 'button';
           button.className = `stamp-choice${stamp === active ? ' selected' : ''}`;
@@ -1379,6 +1503,14 @@
           });
           choices.appendChild(button);
         });
+        const hint = $('stampScrollHint');
+        const updateScrollHint = () => {
+          const hasMore = choices.scrollWidth > choices.clientWidth + 4
+            && choices.scrollLeft + choices.clientWidth < choices.scrollWidth - 4;
+          hint.classList.toggle('hidden', !hasMore);
+        };
+        choices.onscroll = updateScrollHint;
+        requestAnimationFrame(updateScrollHint);
         return active;
       }
 
@@ -1402,7 +1534,6 @@
         $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.release, false)}`;
         $('testBadge').classList.toggle('hidden', !isTestMode);
         $('testTodayText').textContent = isTestMode ? formatDate(today, false) : '';
-        renderListenLinks(config);
         const activeStamp = renderStampPicker(config);
         const stampIcons = loadStampIcons(config);
 
@@ -1430,13 +1561,8 @@
 
         const canStampToday = days.includes(today);
         const todayStamped = validStamps.has(today);
-        $('todayButton').parentElement.classList.toggle('test-mode', isTestMode);
-        $('todayButton').classList.remove('hidden');
-        $('todayButton').disabled = !canStampToday;
-        $('todayButton').textContent = todayStamped ? '今日のスタンプを外す' : `${activeStamp} 聴いたのでスタンプを押す`;
-        $('todayButton').onclick = () => toggleToday(config);
-
         const todayIndex = days.indexOf(today);
+        $('skipTodayButton').parentElement.classList.toggle('test-mode', isTestMode);
         $('skipTodayButton').classList.toggle('hidden', !isTestMode);
         $('skipTodayButton').disabled = !isTestMode || todayIndex < 0 || todayIndex >= days.length - 1;
         $('skipTodayButton').onclick = () => skipTestDay(config);
@@ -1455,19 +1581,29 @@
           const isFuture = day > today;
           const isPrejoin = day < today && !isStamped;
           const dayStamp = isStamped ? (stampIcons[day] || config.stamp) : (isToday ? activeStamp : config.stamp);
-          const isInteractive = isToday;
-          const element = document.createElement(isInteractive ? 'button' : 'div');
-          if (isInteractive) element.type = 'button';
-          element.className = `day${isToday ? ' today' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}${isPrejoin ? ' prejoin' : ''}`;
+          const needsAction = isToday && !isStamped;
+          const listenReady = getListenLinks(config).length === 0 || hasOpenedListenPage(config, day);
+          const element = document.createElement(isToday && isStamped ? 'button' : 'div');
+          if (isToday && isStamped) element.type = 'button';
+          element.className = `day${isToday ? ' today' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}${isPrejoin ? ' prejoin' : ''}${needsAction ? ' day-action' : ''}`;
           const state = isPrejoin ? '参加前・開催済み' : isStamped ? 'スタンプ済み' : '未スタンプ';
           element.setAttribute('aria-label', `${formatDate(day)} ${state}${isToday ? ' 今日' : ''}${isTestMode ? ' テスト操作' : ''}`);
-          if (isToday) element.addEventListener('click', () => toggleToday(config));
+          if (isToday && isStamped) element.addEventListener('click', () => toggleToday(config));
+          const dayAction = needsAction
+            ? `<button class="day-inline-action${listenReady ? ' stamp-ready' : ''}" type="button" data-action="${listenReady ? 'stamp' : 'listen'}" data-stamp="${activeStamp}">${listenReady ? `${activeStamp} スタンプ` : '▶ 曲を聴く'}</button>`
+            : `<span class="day-stamp" aria-hidden="true">${dayStamp}</span>`;
           element.innerHTML = `
             ${isToday ? '<span class="today-tag">TODAY</span>' : ''}
             <span class="day-date">${date.getMonth() + 1}/${date.getDate()}</span>
             <span class="day-week">${WEEKDAYS[date.getDay()]}</span>
-            ${isPrejoin ? '<span class="day-state">開催済み</span>' : `<span class="day-stamp" aria-hidden="true">${dayStamp}</span>`}
+            ${isPrejoin ? '<span class="day-state">開催済み</span>' : dayAction}
           `;
+          const inlineAction = element.querySelector('.day-inline-action');
+          if (inlineAction) inlineAction.addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (inlineAction.dataset.action === 'stamp') toggleToday(config);
+            else openListenModal(config, day);
+          });
           grid.appendChild(element);
         });
 
@@ -1557,6 +1693,13 @@
         const clone = source.cloneNode(true);
         clone.removeAttribute('id');
         clone.classList.remove('hidden');
+        clone.querySelectorAll('.day-inline-action').forEach((button) => {
+          const stamp = document.createElement('span');
+          stamp.className = 'day-stamp';
+          stamp.setAttribute('aria-hidden', 'true');
+          stamp.textContent = button.dataset.stamp || currentConfig.stamp;
+          button.replaceWith(stamp);
+        });
         clone.querySelectorAll('.listen-links, .stamp-picker, .action-row, .share-row').forEach((element) => element.remove());
         clone.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
         clone.style.width = `${sourceWidth}px`;
@@ -1998,29 +2141,31 @@
         if (!config) return;
         const testMode = mode === 'test';
         const url = configUrl(config, testMode);
-        if (mode === 'preview') {
-          history.replaceState(null, '', url);
-          showParticipant(config);
-          return;
-        }
         if (testMode) {
           location.href = url;
           return;
         }
-        $('generatedUrl').value = url;
+        $('generatedUrlLink').href = url;
+        $('generatedUrlLink').textContent = url;
         $('generatedUrlLabel').textContent = '参加者へ共有するURL';
         $('urlBox').classList.add('show');
-        $('generatedUrl').select();
         toast('参加者用URLを作りました');
       }
 
       async function copyGeneratedUrl() {
-        const value = $('generatedUrl').value;
+        const value = $('generatedUrlLink').href;
         try {
           await navigator.clipboard.writeText(value);
         } catch (_) {
-          $('generatedUrl').select();
+          const temporary = document.createElement('textarea');
+          temporary.value = value;
+          temporary.setAttribute('readonly', '');
+          temporary.style.position = 'fixed';
+          temporary.style.opacity = '0';
+          document.body.appendChild(temporary);
+          temporary.select();
           document.execCommand('copy');
+          temporary.remove();
         }
         const copiedTestUrl = new URL(value).searchParams.get('test') === '1';
         toast(copiedTestUrl ? 'テスト用URLをコピーしました' : '参加者用URLをコピーしました');
@@ -2052,7 +2197,6 @@
         else showAdmin();
         if (isTestMode) requestAnimationFrame(() => window.scrollTo(0, 0));
 
-        $('previewButton').addEventListener('click', () => generate('preview'));
         $('generateButton').addEventListener('click', () => generate('participant'));
         $('testGenerateButton').addEventListener('click', () => generate('test'));
         $('copyButton').addEventListener('click', copyGeneratedUrl);
@@ -2060,7 +2204,14 @@
         $('saveImageButton').addEventListener('click', saveImage);
         $('closeModalButton').addEventListener('click', closeModal);
         $('shareModal').addEventListener('click', (event) => { if (event.target === $('shareModal')) closeModal(); });
-        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeModal(); });
+        $('closeListenModalButton').addEventListener('click', closeListenModal);
+        $('listenModal').addEventListener('click', (event) => { if (event.target === $('listenModal')) closeListenModal(); });
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') {
+            closeModal();
+            closeListenModal();
+          }
+        });
       }
 
       init();
