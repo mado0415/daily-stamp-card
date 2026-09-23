@@ -287,6 +287,8 @@
     .day.today.day-action {
       justify-content: flex-start;
       padding-top: 27px;
+      cursor: pointer;
+      touch-action: manipulation;
     }
     .day-inline-action {
       position: relative;
@@ -303,12 +305,64 @@
       font-size: 8px;
       font-weight: 900;
       line-height: 1.15;
+      pointer-events: none;
     }
     .day-inline-action.stamp-ready {
       color: #fff4d5;
       background: #79102d;
       border-color: #f0d48b;
     }
+    .listen-reset {
+      position: relative;
+      z-index: 3;
+      margin-top: 3px;
+      border: 0;
+      padding: 2px 1px;
+      color: inherit;
+      background: transparent;
+      font: inherit;
+      font-size: 6.5px;
+      font-weight: 800;
+      line-height: 1.1;
+      text-decoration: underline;
+      opacity: .88;
+      cursor: pointer;
+    }
+
+    .participant-identity {
+      margin: 0 24px 14px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 9px;
+    }
+    .participant-identity label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .05em;
+    }
+    .participant-identity input {
+      min-width: 0;
+      height: 38px;
+      border: 1px solid #d9e4ec;
+      border-radius: 12px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: rgba(255,255,255,.78);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .participant-name-card {
+      margin: -5px 0 12px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .03em;
+    }
+    .template-hotel .participant-name-card { color: #dfbd6e; }
 
     .today-tag {
       position: absolute;
@@ -327,6 +381,39 @@
       font-weight: 900;
       line-height: 1;
       letter-spacing: .05em;
+    }
+    .release-tag {
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      z-index: 3;
+      transform: translateX(-50%);
+      width: max-content;
+      max-width: calc(100% - 8px);
+      border: 1px solid #b68d36;
+      border-radius: 999px;
+      padding: 2px 5px;
+      color: #5a1728;
+      background: #fff1ad;
+      box-shadow: 0 0 10px rgba(255, 217, 111, .65);
+      font-size: 6.5px;
+      font-weight: 950;
+      line-height: 1;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+    .day.release-day {
+      padding-top: 27px;
+      border-color: #d7aa3d;
+      box-shadow: 0 0 0 3px rgba(230, 181, 58, .25), 0 0 18px rgba(255, 205, 72, .32);
+    }
+    .day.release-day::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border: 1px solid rgba(255, 223, 131, .75);
+      border-radius: inherit;
+      pointer-events: none;
     }
 
     .stamped .today-tag { color: #5a1728; }
@@ -445,6 +532,13 @@
       color: #5a1728;
       background: #fff4d5;
       border-color: #cba957;
+    }
+    .template-hotel .day.release-day {
+      border-color: #ffe18d;
+      box-shadow: 0 0 0 3px rgba(255, 225, 141, .38), 0 0 24px rgba(255, 213, 111, .48), inset 0 0 0 5px rgba(255, 232, 177, .11);
+    }
+    .template-hotel .day.release-day.stamped {
+      box-shadow: 0 0 0 3px rgba(255, 225, 141, .48), 0 0 30px rgba(255, 213, 111, .72), inset 0 0 0 5px rgba(255,255,255,.28);
     }
     .template-hotel .stamp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .template-hotel .day {
@@ -875,7 +969,11 @@
         <div class="progress-track" role="progressbar" aria-label="次のマイルストーンまでの進み具合" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div id="progressBar" class="progress-bar"></div>
         </div>
-        <p id="milestoneNote" class="milestone-note"></p>
+      </div>
+
+      <div class="participant-identity">
+        <label for="participantName">NAME / @ACCOUNT</label>
+        <input id="participantName" type="text" maxlength="32" autocomplete="nickname" placeholder="@username または名前（任意）">
       </div>
 
       <div id="stampPicker" class="stamp-picker">
@@ -897,8 +995,8 @@
           <h2>LISTENING CARD</h2>
           <span id="periodText"></span>
         </div>
+        <p id="participantNameCard" class="participant-name-card hidden"></p>
         <div id="stampGrid" class="stamp-grid"></div>
-        <p id="helperText" class="helper"></p>
       </section>
 
       <div class="share-row">
@@ -910,7 +1008,7 @@
     <section id="adminView" class="card admin-card hidden" aria-label="スタンプカード管理設定">
       <p class="eyebrow">CARD SETUP</p>
       <h1>スタンプカードを作る</h1>
-      <p class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のマスも自動で含まれます。</p>
+      <p class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日以降まで続ける場合は、カード終了日を発売日より後に設定できます。</p>
 
       <div class="form-grid">
         <div class="field wide">
@@ -924,6 +1022,10 @@
         <div class="field">
           <label for="adminRelease">CD発売日（この日を含む）</label>
           <input id="adminRelease" type="date">
+        </div>
+        <div class="field">
+          <label for="adminEnd">カード終了日（発売日以降）</label>
+          <input id="adminEnd" type="date">
         </div>
         <div class="field wide">
           <label for="adminLink">共通の再生ページURL（任意）</label>
@@ -1048,8 +1150,9 @@
       ];
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
       const params = new URLSearchParams(location.search);
-      const isTestMode = params.get('test') === '1' || params.get('mode') === 'test';
-      let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(params.get('today') || '') ? params.get('today') : '';
+      const isTestMode = params.get('z') === '1' || params.get('test') === '1' || params.get('mode') === 'test';
+      const incomingTestDay = params.get('d') || params.get('today') || '';
+      let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(incomingTestDay) ? incomingTestDay : '';
       let selectedColor = '#4ea8de';
       let currentConfig = null;
       let shareBlob = null;
@@ -1077,7 +1180,7 @@
         if (!isTestMode) return;
         simulatedToday = day;
         const url = new URL(location.href);
-        url.searchParams.set('today', day);
+        url.searchParams.set(url.searchParams.has('z') ? 'd' : 'today', day);
         history.replaceState(null, '', url);
       }
 
@@ -1146,37 +1249,50 @@
       }
 
       function normalizeStampSet(value, defaultStamp = '⛄️') {
-        const requested = Array.isArray(value) ? value : String(value || '').trim().split(/\s+/);
+        const requested = Array.isArray(value) ? value : String(value || '').trim().split(/[\s,]+/);
         const stamps = [...new Set(requested.filter((stamp) => STAMPS.includes(stamp)))];
         const result = stamps.length ? stamps : [...STAMPS];
         if (STAMPS.includes(defaultStamp) && !result.includes(defaultStamp)) result.unshift(defaultStamp);
         return result;
       }
 
+      function firstParam(source, ...keys) {
+        for (const key of keys) {
+          if (source.has(key)) return source.get(key) || '';
+        }
+        return '';
+      }
+
       function configFromParams(source = params) {
-        const title = (source.get('title') || '').trim();
-        const start = source.get('start') || '';
-        const release = source.get('release') || '';
-        const incomingStamp = source.get('stamp') || '⛄️';
+        const title = firstParam(source, 't', 'title').trim();
+        const start = firstParam(source, 's', 'start');
+        const release = firstParam(source, 'r', 'release');
+        const end = firstParam(source, 'f', 'end') || release;
+        const incomingStamp = firstParam(source, 'e', 'stamp') || '⛄️';
         const stamp = STAMPS.includes(incomingStamp) ? incomingStamp : '⛄️';
-        const stamps = normalizeStampSet(source.get('icons') || '', stamp);
-        const color = /^#[0-9a-f]{6}$/i.test(source.get('color') || '') ? source.get('color') : '#4ea8de';
-        const link = safeUrl(source.get('link') || '');
-        const apple = safeUrl(source.get('apple') || '');
-        const spotify = safeUrl(source.get('spotify') || '');
-        const line = safeUrl(source.get('line') || '');
-        const youtube = safeUrl(source.get('youtube') || '');
-        const template = ['classic', 'hotel', 'journey'].includes(source.get('template')) ? source.get('template') : 'hotel';
-        const seed = `${title}|${start}|${release}`;
-        const id = (source.get('cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
-        if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(release) || release < start) return null;
-        return { title, start, release, stamp, stamps, color, link, apple, spotify, line, youtube, template, id };
+        const stamps = normalizeStampSet(firstParam(source, 'x', 'icons'), stamp);
+        const colorRaw = firstParam(source, 'c', 'color');
+        const colorCandidate = /^[0-9a-f]{6}$/i.test(colorRaw) ? `#${colorRaw}` : colorRaw;
+        const color = /^#[0-9a-f]{6}$/i.test(colorCandidate) ? colorCandidate : '#4ea8de';
+        const link = safeUrl(firstParam(source, 'u', 'link'));
+        const apple = safeUrl(firstParam(source, 'a', 'apple'));
+        const spotify = safeUrl(firstParam(source, 'p', 'spotify'));
+        const line = safeUrl(firstParam(source, 'n', 'line'));
+        const youtube = safeUrl(firstParam(source, 'y', 'youtube'));
+        const templateRaw = firstParam(source, 'v', 'template');
+        const templateAlias = { h: 'hotel', c: 'classic', j: 'journey' }[templateRaw] || templateRaw;
+        const template = ['classic', 'hotel', 'journey'].includes(templateAlias) ? templateAlias : 'hotel';
+        const seed = `${title}|${start}|${release}|${end}`;
+        const id = (firstParam(source, 'i', 'cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
+        if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(release) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || release < start || end < release) return null;
+        return { title, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, template, id };
       }
 
       function configFromForm() {
         const title = $('adminTitle').value.trim();
         const start = $('adminStart').value;
         const release = $('adminRelease').value;
+        const end = $('adminEnd').value || release;
         const rawLink = $('adminLink').value.trim();
         const link = safeUrl(rawLink);
         const rawApple = $('adminApple').value.trim();
@@ -1193,39 +1309,41 @@
         const color = selectedColor;
         let error = '';
         if (!title) error = '表題曲名／カードタイトルを入力してください。';
-        else if (!start || !release) error = '開始日とCD発売日を入力してください。';
+        else if (!start || !release || !end) error = '開始日・CD発売日・カード終了日を入力してください。';
         else if (release < start) error = 'CD発売日は開始日以降にしてください。';
-        else if (dateRange(start, release).length > 366) error = '期間は366日以内にしてください。';
+        else if (end < release) error = 'カード終了日はCD発売日以降にしてください。';
+        else if (dateRange(start, end).length > 366) error = '期間は366日以内にしてください。';
         else if ([rawLink && !link, rawApple && !apple, rawSpotify && !spotify, rawLine && !line, rawYoutube && !youtube].some(Boolean)) error = '再生先は http:// または https:// で始まるURLにしてください。';
         showError(error);
         if (error) return null;
-        const id = currentConfig && currentConfig.title === title && currentConfig.start === start && currentConfig.release === release
+        const id = currentConfig && currentConfig.title === title && currentConfig.start === start && currentConfig.release === release && currentConfig.end === end
           ? currentConfig.id
-          : hashText(`${title}|${start}|${release}`);
-        return { title, start, release, stamp, stamps, color, link, apple, spotify, line, youtube, template, id };
+          : hashText(`${title}|${start}|${release}|${end}`);
+        return { title, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, template, id };
       }
 
       function configUrl(config, testMode = false) {
         const url = new URL(location.href);
         url.search = '';
         url.hash = '';
-        url.searchParams.set('title', config.title);
-        url.searchParams.set('start', config.start);
-        url.searchParams.set('release', config.release);
-        if (config.link) url.searchParams.set('link', config.link);
-        if (config.apple) url.searchParams.set('apple', config.apple);
-        if (config.spotify) url.searchParams.set('spotify', config.spotify);
-        if (config.line) url.searchParams.set('line', config.line);
-        if (config.youtube) url.searchParams.set('youtube', config.youtube);
-        url.searchParams.set('stamp', config.stamp);
-        url.searchParams.set('icons', normalizeStampSet(config.stamps, config.stamp).join(' '));
-        url.searchParams.set('color', config.color);
-        url.searchParams.set('template', config.template);
-        url.searchParams.set('cid', config.id);
+        url.searchParams.set('t', config.title);
+        url.searchParams.set('s', config.start);
+        url.searchParams.set('r', config.release);
+        if (config.end !== config.release) url.searchParams.set('f', config.end);
+        if (config.link) url.searchParams.set('u', config.link);
+        if (config.apple) url.searchParams.set('a', config.apple);
+        if (config.spotify) url.searchParams.set('p', config.spotify);
+        if (config.line) url.searchParams.set('n', config.line);
+        if (config.youtube) url.searchParams.set('y', config.youtube);
+        url.searchParams.set('e', config.stamp);
+        const stampSet = normalizeStampSet(config.stamps, config.stamp);
+        if (stampSet.join('|') !== STAMPS.join('|')) url.searchParams.set('x', stampSet.join(','));
+        url.searchParams.set('c', config.color.replace('#', ''));
+        url.searchParams.set('v', { hotel: 'h', classic: 'c', journey: 'j' }[config.template] || 'h');
+        url.searchParams.set('i', config.id);
         if (testMode) {
-          url.searchParams.set('test', '1');
-          url.searchParams.set('mode', 'test');
-          url.searchParams.set('today', config.start);
+          url.searchParams.set('z', '1');
+          url.searchParams.set('d', config.start);
         }
         return url.href;
       }
@@ -1278,6 +1396,21 @@
         localStorage.setItem(activeStampKey(config), stamp);
       }
 
+      function participantNameKey(config) {
+        return `${isTestMode ? 'daily_stamp_test_name_' : 'daily_stamp_name_'}${config.id}`;
+      }
+
+      function loadParticipantName(config) {
+        return (localStorage.getItem(participantNameKey(config)) || '').slice(0, 32);
+      }
+
+      function renderParticipantName(config) {
+        const name = loadParticipantName(config);
+        if (document.activeElement !== $('participantName')) $('participantName').value = name;
+        $('participantNameCard').textContent = name;
+        $('participantNameCard').classList.toggle('hidden', !name);
+      }
+
       function metaKey(config) {
         return `${isTestMode ? 'daily_stamp_test_meta_' : 'daily_stamp_meta_'}${config.id}`;
       }
@@ -1287,7 +1420,7 @@
         let meta = null;
         try { meta = JSON.parse(localStorage.getItem(metaKey(config)) || 'null'); } catch (_) { meta = null; }
         if (!meta || !/^\d{4}-\d{2}-\d{2}$/.test(meta.joinedOn || '')) {
-          const joinedOn = today < config.start ? config.start : (today > config.release ? config.release : today);
+          const joinedOn = today < config.start ? config.start : (today > config.end ? config.end : today);
           meta = { joinedOn };
           localStorage.setItem(metaKey(config), JSON.stringify(meta));
         }
@@ -1337,18 +1470,22 @@
 
       function initAdminDefaults() {
         const today = isoLocal();
-        $('adminStart').value = params.get('start') || today;
-        $('adminRelease').value = params.get('release') || addDays(today, 13);
-        $('adminTitle').value = params.get('title') || '';
-        $('adminLink').value = params.get('link') || '';
-        $('adminApple').value = params.get('apple') || '';
-        $('adminSpotify').value = params.get('spotify') || '';
-        $('adminLine').value = params.get('line') || '';
-        $('adminYoutube').value = params.get('youtube') || '';
-        $('adminTemplate').value = ['classic', 'hotel', 'journey'].includes(params.get('template')) ? params.get('template') : 'hotel';
-        $('adminStamp').value = params.get('stamp') || '⛄️';
-        $('adminStampSet').value = normalizeStampSet(params.get('icons') || '', $('adminStamp').value).join(' ');
-        const incoming = params.get('color');
+        $('adminStart').value = firstParam(params, 's', 'start') || today;
+        $('adminRelease').value = firstParam(params, 'r', 'release') || addDays(today, 13);
+        $('adminEnd').value = firstParam(params, 'f', 'end') || $('adminRelease').value;
+        $('adminTitle').value = firstParam(params, 't', 'title');
+        $('adminLink').value = firstParam(params, 'u', 'link');
+        $('adminApple').value = firstParam(params, 'a', 'apple');
+        $('adminSpotify').value = firstParam(params, 'p', 'spotify');
+        $('adminLine').value = firstParam(params, 'n', 'line');
+        $('adminYoutube').value = firstParam(params, 'y', 'youtube');
+        const templateRaw = firstParam(params, 'v', 'template');
+        const template = { h: 'hotel', c: 'classic', j: 'journey' }[templateRaw] || templateRaw;
+        $('adminTemplate').value = ['classic', 'hotel', 'journey'].includes(template) ? template : 'hotel';
+        $('adminStamp').value = firstParam(params, 'e', 'stamp') || '⛄️';
+        $('adminStampSet').value = normalizeStampSet(firstParam(params, 'x', 'icons'), $('adminStamp').value).join(' ');
+        const colorRaw = firstParam(params, 'c', 'color');
+        const incoming = /^[0-9a-f]{6}$/i.test(colorRaw) ? `#${colorRaw}` : colorRaw;
         if (incoming && COLORS.includes(incoming)) {
           selectedColor = incoming;
           [...$('colorList').children].forEach((item, index) => item.classList.toggle('selected', COLORS[index] === incoming));
@@ -1384,6 +1521,7 @@
         $('adminTitle').value = config.title;
         $('adminStart').value = config.start;
         $('adminRelease').value = config.release;
+        $('adminEnd').value = config.end || config.release;
         $('adminLink').value = config.link;
         $('adminApple').value = config.apple || '';
         $('adminSpotify').value = config.spotify || '';
@@ -1399,18 +1537,18 @@
       function setupTestPanel(config) {
         if (!isTestMode) return;
         const panel = $('testPanel');
-        const days = dateRange(config.start, config.release);
+        const days = dateRange(config.start, config.end);
         if (!days.includes(simulatedToday)) setTestToday(config.start);
         panel.classList.remove('hidden');
         const effectLabels = { 3: '（演出1）', 5: '（演出2）', 10: '（演出3）', 15: '（演出4）', 20: '（演出4）' };
-        $('testCount').innerHTML = days.map((_, index) => `<option value="${index}">${index}${effectLabels[index] || ''}</option>`).join('')
+        $('testCount').innerHTML = days.map((day, index) => `<option value="${index}">${index}${day === config.release ? '（発売日）' : effectLabels[index] || ''}</option>`).join('')
           + `<option value="${days.length}">${days.length}（全日）</option>`;
         $('testTemplate').value = config.template;
 
         if (panel.dataset.ready === '1') return;
         panel.dataset.ready = '1';
         $('testCount').addEventListener('change', () => {
-          const campaignDays = dateRange(currentConfig.start, currentConfig.release);
+          const campaignDays = dateRange(currentConfig.start, currentConfig.end);
           const previous = loadStamps(currentConfig).size;
           const count = Math.max(0, Math.min(campaignDays.length, Number($('testCount').value) || 0));
           saveStamps(currentConfig, new Set(campaignDays.slice(0, count)));
@@ -1431,7 +1569,8 @@
           localStorage.removeItem(metaKey(currentConfig));
           localStorage.removeItem(stampIconsKey(currentConfig));
           localStorage.removeItem(activeStampKey(currentConfig));
-          dateRange(currentConfig.start, currentConfig.release).forEach((day) => localStorage.removeItem(listenReadyKey(currentConfig, day)));
+          localStorage.removeItem(participantNameKey(currentConfig));
+          dateRange(currentConfig.start, currentConfig.end).forEach((day) => localStorage.removeItem(listenReadyKey(currentConfig, day)));
           setTestToday(currentConfig.start);
           renderParticipant();
           toast('テスト状態をリセットしました');
@@ -1516,7 +1655,7 @@
 
       function renderParticipant() {
         const config = currentConfig;
-        const days = dateRange(config.start, config.release);
+        const days = dateRange(config.start, config.end);
         const today = currentDay();
         const meta = loadMeta(config);
         const stamps = loadStamps(config);
@@ -1531,10 +1670,11 @@
         $('templateLabel').textContent = templateLabels[config.template] || templateLabels.classic;
         $('campaignTitle').textContent = config.title;
         $('releaseDateText').textContent = formatDate(config.release);
-        $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.release, false)}`;
+        $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.end, false)}`;
         $('testBadge').classList.toggle('hidden', !isTestMode);
         $('testTodayText').textContent = isTestMode ? formatDate(today, false) : '';
         const activeStamp = renderStampPicker(config);
+        renderParticipantName(config);
         const stampIcons = loadStampIcons(config);
 
         const count = validStamps.size;
@@ -1543,21 +1683,26 @@
           $('testTemplate').value = config.template;
         }
         const milestone = milestoneState(count, days.length);
-        const daysLeft = Math.max(0, Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000));
+        const releaseDistance = Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000);
         $('participantView').dataset.stage = String(milestone.stage);
         $('progressCount').textContent = `${count} STAMP${count === 1 ? '' : 'S'}`;
-        $('daysLeftText').textContent = today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`;
+        $('daysLeftText').textContent = today > config.end
+          ? 'イベント終了'
+          : today === config.release
+            ? '本日発売！'
+            : today < config.release
+              ? `発売日まであと${releaseDistance}日`
+              : `発売から${Math.abs(releaseDistance)}日`;
         $('progressBar').style.width = `${milestone.progress}%`;
         const progressTrack = document.querySelector('.progress-track');
         progressTrack.setAttribute('aria-valuenow', String(milestone.progress));
-        $('milestoneNote').textContent = count >= days.length ? '全日達成！' : `次の変化まであと${milestone.next - count}個`;
 
         const perfect = count === days.length && days.length > 0;
-        const eventFinished = today >= config.release;
+        const eventFinished = today >= config.end;
         $('completion').classList.toggle('show', perfect || eventFinished);
         $('completion').innerHTML = perfect
-          ? `PERFECT！<br>発売日まで毎日ありがとう ${config.stamp}✨`
-          : eventFinished ? `RELEASE DAY！<br>${count}日間の参加、ありがとう ${config.stamp}` : '';
+          ? `PERFECT！<br>期間中毎日ありがとう ${config.stamp}✨`
+          : eventFinished ? `FINISH！<br>${count}日間の参加、ありがとう ${config.stamp}` : '';
 
         const canStampToday = days.includes(today);
         const todayStamped = validStamps.has(today);
@@ -1567,16 +1712,12 @@
         $('skipTodayButton').disabled = !isTestMode || todayIndex < 0 || todayIndex >= days.length - 1;
         $('skipTodayButton').onclick = () => skipTestDay(config);
 
-        if (isTestMode) $('helperText').textContent = 'テスト中です。スタンプを押すか「今日は押さず次の日へ」を選ぶと翌日に進みます。空欄の日や、3・5・10個の節目も確認できます。';
-        else if (today < config.start) $('helperText').textContent = `${formatDate(config.start)}からスタートします。未来の日付にはまだスタンプを押せません。`;
-        else if (today > config.release) $('helperText').textContent = 'イベントは終了しました。集めたスタンプはこの端末に残ります。';
-        else $('helperText').textContent = '今日聴いたら今日のマスへ。空いた日があっても、また今日から続けられます。';
-
         const grid = $('stampGrid');
         grid.innerHTML = '';
         days.forEach((day) => {
           const date = parseLocalDate(day);
           const isToday = day === today;
+          const isRelease = day === config.release;
           const isStamped = validStamps.has(day);
           const isFuture = day > today;
           const isPrejoin = day < today && !isStamped;
@@ -1585,24 +1726,37 @@
           const listenReady = getListenLinks(config).length === 0 || hasOpenedListenPage(config, day);
           const element = document.createElement(isToday && isStamped ? 'button' : 'div');
           if (isToday && isStamped) element.type = 'button';
-          element.className = `day${isToday ? ' today' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}${isPrejoin ? ' prejoin' : ''}${needsAction ? ' day-action' : ''}`;
+          element.className = `day${isToday ? ' today' : ''}${isRelease ? ' release-day' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}${isPrejoin ? ' prejoin' : ''}${needsAction ? ' day-action' : ''}`;
           const state = isPrejoin ? '参加前・開催済み' : isStamped ? 'スタンプ済み' : '未スタンプ';
-          element.setAttribute('aria-label', `${formatDate(day)} ${state}${isToday ? ' 今日' : ''}${isTestMode ? ' テスト操作' : ''}`);
+          element.setAttribute('aria-label', `${formatDate(day)} ${state}${isRelease ? ' CD発売日' : ''}${isToday ? ' 今日' : ''}${isTestMode ? ' テスト操作' : ''}`);
           if (isToday && isStamped) element.addEventListener('click', () => toggleToday(config));
+          if (needsAction) {
+            element.setAttribute('role', 'button');
+            element.tabIndex = 0;
+            const activate = () => listenReady ? toggleToday(config) : openListenModal(config, day);
+            element.addEventListener('click', activate);
+            element.addEventListener('keydown', (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                activate();
+              }
+            });
+          }
           const dayAction = needsAction
-            ? `<button class="day-inline-action${listenReady ? ' stamp-ready' : ''}" type="button" data-action="${listenReady ? 'stamp' : 'listen'}" data-stamp="${activeStamp}">${listenReady ? `${activeStamp} スタンプ` : '▶ 曲を聴く'}</button>`
+            ? `<span class="day-inline-action${listenReady ? ' stamp-ready' : ''}" data-stamp="${activeStamp}">${listenReady ? `${activeStamp} スタンプ` : '▶ 曲を聴く'}</span>${listenReady && getListenLinks(config).length ? '<button class="listen-reset" type="button">↩ まだ聴いていない</button>' : ''}`
             : `<span class="day-stamp" aria-hidden="true">${dayStamp}</span>`;
           element.innerHTML = `
-            ${isToday ? '<span class="today-tag">TODAY</span>' : ''}
+            ${isRelease ? `<span class="release-tag">${isToday ? 'TODAY · RELEASE DAY' : 'RELEASE DAY'}</span>` : isToday ? '<span class="today-tag">TODAY</span>' : ''}
             <span class="day-date">${date.getMonth() + 1}/${date.getDate()}</span>
             <span class="day-week">${WEEKDAYS[date.getDay()]}</span>
             ${isPrejoin ? '<span class="day-state">開催済み</span>' : dayAction}
           `;
-          const inlineAction = element.querySelector('.day-inline-action');
-          if (inlineAction) inlineAction.addEventListener('click', (event) => {
+          const resetListen = element.querySelector('.listen-reset');
+          if (resetListen) resetListen.addEventListener('click', (event) => {
             event.stopPropagation();
-            if (inlineAction.dataset.action === 'stamp') toggleToday(config);
-            else openListenModal(config, day);
+            localStorage.removeItem(listenReadyKey(config, day));
+            renderParticipant();
+            toast('再生前の状態に戻しました');
           });
           grid.appendChild(element);
         });
@@ -1614,7 +1768,7 @@
 
       function toggleToday(config) {
         const today = currentDay();
-        if (today < config.start || today > config.release) return;
+        if (today < config.start || today > config.end) return;
         const stamps = loadStamps(config);
         const stampIcons = loadStampIcons(config);
         const wasStamped = stamps.has(today);
@@ -1628,13 +1782,13 @@
         }
         saveStamps(config, stamps);
         saveStampIcons(config, stampIcons);
-        const campaignDays = dateRange(config.start, config.release);
+        const campaignDays = dateRange(config.start, config.end);
         const todayIndex = campaignDays.indexOf(today);
         const nextDay = todayIndex >= 0 && todayIndex < campaignDays.length - 1 ? campaignDays[todayIndex + 1] : '';
         if (isTestMode && !wasStamped && nextDay) setTestToday(nextDay);
         renderParticipant();
         if (!wasStamped) {
-          const total = dateRange(config.start, config.release).length;
+          const total = dateRange(config.start, config.end).length;
           if (isTestMode && nextDay) toast(`${formatDate(today, false)}にスタンプ。次は${formatDate(nextDay, false)}です`);
           else toast(`${stampIcons[today]} 今日のスタンプを押しました`);
           if ([3, 5, 10, 15, 20, total].includes(stamps.size)) launchConfetti();
@@ -1645,7 +1799,7 @@
 
       function skipTestDay(config) {
         if (!isTestMode) return;
-        const days = dateRange(config.start, config.release);
+        const days = dateRange(config.start, config.end);
         const today = currentDay();
         const todayIndex = days.indexOf(today);
         if (todayIndex < 0 || todayIndex >= days.length - 1) {
@@ -1700,7 +1854,7 @@
           stamp.textContent = button.dataset.stamp || currentConfig.stamp;
           button.replaceWith(stamp);
         });
-        clone.querySelectorAll('.listen-links, .stamp-picker, .action-row, .share-row').forEach((element) => element.remove());
+        clone.querySelectorAll('.listen-reset, .participant-identity, .listen-links, .stamp-picker, .action-row, .share-row').forEach((element) => element.remove());
         clone.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
         clone.style.width = `${sourceWidth}px`;
         clone.style.maxWidth = 'none';
@@ -1780,7 +1934,7 @@
       }
 
       function buildFallbackCanvas(config) {
-        const days = dateRange(config.start, config.release);
+        const days = dateRange(config.start, config.end);
         const stamps = loadStamps(config);
         const stampIcons = loadStampIcons(config);
         const activeStamp = loadActiveStamp(config);
@@ -1855,10 +2009,17 @@
         ctx.fillStyle = isHotel ? '#f3d58d' : muted;
         ctx.font = '500 26px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 235);
+        const participantName = loadParticipantName(config);
+        if (participantName) {
+          ctx.textAlign = 'right';
+          ctx.fillStyle = isHotel ? '#f3d58d' : muted;
+          ctx.font = '700 20px -apple-system, BlinkMacSystemFont, sans-serif';
+          ctx.fillText(participantName, width - margin, 275);
+        }
 
         const count = [...stamps].filter((day) => days.includes(day)).length;
         const milestone = milestoneState(count, days.length);
-        const daysLeft = Math.max(0, Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000));
+        const releaseDistance = Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000);
         ctx.textAlign = 'left';
         ctx.fillStyle = ink;
         ctx.font = '700 39px -apple-system, BlinkMacSystemFont, sans-serif';
@@ -1866,7 +2027,7 @@
         ctx.textAlign = 'right';
         ctx.fillStyle = muted;
         ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`, width - margin, 350);
+        ctx.fillText(today > config.end ? 'イベント終了' : today === config.release ? '本日発売！' : today < config.release ? `発売日まであと${releaseDistance}日` : `発売から${Math.abs(releaseDistance)}日`, width - margin, 350);
         roundRect(ctx, margin, 378, width - margin * 2, 18, 9);
         ctx.fillStyle = '#e8eef3';
         ctx.fill();
@@ -1891,18 +2052,13 @@
           }
         }
 
-        ctx.textAlign = 'right';
-        ctx.fillStyle = muted;
-        ctx.font = '500 22px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(count >= days.length ? '全日達成！' : `次の変化まであと${milestone.next - count}個`, width - margin, 440);
-
         const stageAlpha = [.22, .42, .62, .82, 1][milestone.stage] || .22;
         ctx.save();
         ctx.globalAlpha = stageAlpha;
         ctx.textAlign = 'center';
         ctx.fillStyle = isHotel ? '#c79e45' : config.color;
         ctx.font = '700 36px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText('✦　✦　✦', width / 2, 510);
+        ctx.fillText('✦　✦　✦', width / 2, 475);
         ctx.restore();
 
         ctx.save();
@@ -1931,7 +2087,7 @@
         ctx.textAlign = 'right';
         ctx.fillStyle = isHotel ? '#dfbd6e' : muted;
         ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(`${formatDate(config.start, false)} — ${formatDate(config.release, false)}`, width - margin, 615);
+        ctx.fillText(`${formatDate(config.start, false)} — ${formatDate(config.end, false)}`, width - margin, 615);
 
         days.forEach((day, index) => {
           const col = index % cols;
@@ -1942,6 +2098,7 @@
           const prejoin = day < today && !stamped;
           const future = day > today;
           const isToday = day === today;
+          const isRelease = day === config.release;
           const dayStamp = stamped ? (stampIcons[day] || config.stamp) : (isToday ? activeStamp : config.stamp);
           const radius = isJourney ? cell / 2 : isHotel ? 16 : 23;
           if (isHotel) archRect(ctx, x, y, cell, cellHeight);
@@ -1959,11 +2116,21 @@
             ctx.fill();
             ctx.restore();
           } else ctx.fill();
+          if (isRelease) {
+            ctx.save();
+            ctx.shadowColor = 'rgba(255, 205, 72, .55)';
+            ctx.shadowBlur = 28;
+            ctx.strokeStyle = '#ffe18d';
+            ctx.lineWidth = 9;
+            ctx.stroke();
+            ctx.restore();
+          }
           if (isJourney && !stamped) ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, .3)`;
+          else if (isRelease) ctx.strokeStyle = '#e4b743';
           else if (isToday) ctx.strokeStyle = isHotel ? '#f1d681' : config.color;
           else if (isHotel) ctx.strokeStyle = prejoin ? '#cdb78e' : '#cba957';
           else ctx.strokeStyle = stamped ? config.color : '#dce7f0';
-          ctx.lineWidth = isToday ? 9 : 5;
+          ctx.lineWidth = isToday || isRelease ? 9 : 5;
           ctx.stroke();
           if (isHotel) {
             archRect(ctx, x + 9, y + 9, cell - 18, cellHeight - 18);
@@ -1978,8 +2145,10 @@
           ctx.fillStyle = textColor;
           const date = parseLocalDate(day);
           ctx.textAlign = 'center';
-          if (isToday) {
-            roundRect(ctx, x + cell / 2 - 46, y + 13, 92, 29, 15);
+          if (isToday || isRelease) {
+            const tagText = isRelease ? (isToday ? 'TODAY · RELEASE DAY' : 'RELEASE DAY') : 'TODAY';
+            const tagWidth = isRelease ? Math.min(cell - 20, 154) : 92;
+            roundRect(ctx, x + cell / 2 - tagWidth / 2, y + 13, tagWidth, 29, 15);
             ctx.fillStyle = '#fff4d5';
             ctx.fill();
             ctx.strokeStyle = '#cba957';
@@ -1987,7 +2156,8 @@
             ctx.stroke();
             ctx.fillStyle = '#5a1728';
             ctx.font = '800 16px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText('TODAY', x + cell / 2, y + 34);
+            ctx.font = `${isRelease ? '800 13px' : '800 16px'} -apple-system, BlinkMacSystemFont, sans-serif`;
+            ctx.fillText(tagText, x + cell / 2, y + 34);
             ctx.fillStyle = textColor;
             ctx.font = '800 34px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x + cell / 2, y + 82);
@@ -2015,7 +2185,7 @@
         ctx.textAlign = 'center';
         ctx.fillStyle = isHotel ? '#dfbd6e' : `rgba(${r}, ${g}, ${b}, .85)`;
         ctx.font = '700 22px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText('ONE LISTEN A DAY, ALL THE WAY TO RELEASE DAY', width / 2, height - 75);
+        ctx.fillText('ONE LISTEN A DAY, KEEP THE MUSIC PLAYING', width / 2, height - 75);
         return canvas;
       }
 
@@ -2125,9 +2295,9 @@
       }
 
       function shareText(config) {
-        const days = dateRange(config.start, config.release);
+        const days = dateRange(config.start, config.end);
         const count = [...loadStamps(config)].filter((day) => days.includes(day)).length;
-        return `${config.stamp} ${config.title}\n発売日まで1日1回聴いています！\n【${count} STAMPS】\n#SnowMan`;
+        return `${config.stamp} ${config.title}\n1日1回聴いています！\n【${count} STAMPS】\n#SnowMan`;
       }
 
       function shareToX(config) {
@@ -2167,7 +2337,8 @@
           document.execCommand('copy');
           temporary.remove();
         }
-        const copiedTestUrl = new URL(value).searchParams.get('test') === '1';
+        const copiedParams = new URL(value).searchParams;
+        const copiedTestUrl = copiedParams.get('z') === '1' || copiedParams.get('test') === '1';
         toast(copiedTestUrl ? 'テスト用URLをコピーしました' : '参加者用URLをコピーしました');
       }
 
@@ -2180,6 +2351,7 @@
             title: '動作確認用テストカード',
             start: '2026-10-01',
             release: '2026-10-14',
+            end: '2026-10-20',
             stamp: '⛄️',
             color: '#4ea8de',
             link: '',
@@ -2199,7 +2371,22 @@
 
         $('generateButton').addEventListener('click', () => generate('participant'));
         $('testGenerateButton').addEventListener('click', () => generate('test'));
+        const syncDateLimits = () => {
+          $('adminRelease').min = $('adminStart').value;
+          $('adminEnd').min = $('adminRelease').value;
+          if (!$('adminEnd').value || $('adminEnd').value < $('adminRelease').value) $('adminEnd').value = $('adminRelease').value;
+        };
+        $('adminStart').addEventListener('change', syncDateLimits);
+        $('adminRelease').addEventListener('change', syncDateLimits);
+        syncDateLimits();
         $('copyButton').addEventListener('click', copyGeneratedUrl);
+        $('participantName').addEventListener('input', () => {
+          if (!currentConfig) return;
+          const name = $('participantName').value.slice(0, 32);
+          localStorage.setItem(participantNameKey(currentConfig), name);
+          $('participantNameCard').textContent = name;
+          $('participantNameCard').classList.toggle('hidden', !name.trim());
+        });
         $('nativeShareButton').addEventListener('click', nativeShareImage);
         $('saveImageButton').addEventListener('click', saveImage);
         $('closeModalButton').addEventListener('click', closeModal);
