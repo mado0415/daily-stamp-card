@@ -344,40 +344,67 @@
     .card[data-stage="4"] .stage-decoration { opacity: 1; transform: scale(1.1); }
 
     .card.template-hotel {
-      --paper: #fffaf0;
-      --ink: #293b45;
-      --muted: #7a6b58;
-      --line: #e7d8be;
-      --wash: #faf1df;
+      --paper: #f8ead2;
+      --ink: #35171d;
+      --muted: #85565a;
+      --line: #d2ad5d;
+      --wash: #f1d9bb;
+      border: 1px solid rgba(201, 164, 82, .72);
+      box-shadow: 0 20px 55px rgba(92, 5, 28, .17);
     }
 
     .template-hotel .hero {
-      color: #fffaf0;
+      color: #fff4d5;
       background:
-        linear-gradient(135deg, rgba(18, 42, 52, .96), rgba(35, 68, 74, .94)),
-        radial-gradient(circle at 30% 20%, rgba(var(--theme-rgb), .25), transparent 36%);
+        radial-gradient(circle at 9px 9px, rgba(255, 227, 158, .18) 0 2px, transparent 2.5px) 0 0 / 18px 18px,
+        linear-gradient(135deg, rgba(183, 12, 53, .98), rgba(111, 4, 31, .98));
+      border-bottom: 3px solid #d2ad5d;
     }
 
     .template-hotel .eyebrow,
     .template-hotel .release-line,
-    .template-hotel .release-line strong { color: #f8e7bd; }
+    .template-hotel .release-line strong { color: #f3d58d; }
     .template-hotel .stamp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .template-hotel .day {
       aspect-ratio: .86 / 1;
-      border-radius: 7px 7px 14px 14px;
-      color: #e8dcc6;
-      background: #294852;
-      border-color: #46646a;
-      box-shadow: inset 0 5px 0 rgba(255,255,255,.04);
+      border-radius: 48% 48% 13px 13px / 34% 34% 13px 13px;
+      color: #f4dca0;
+      background: linear-gradient(180deg, #941038, #69051f);
+      border: 2px solid #cba957;
+      box-shadow: inset 0 0 0 5px rgba(255, 232, 177, .07), inset 0 -12px 25px rgba(45, 0, 12, .2);
+    }
+    .template-hotel .day::before {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border: 1px solid rgba(244, 220, 160, .25);
+      border-radius: 48% 48% 8px 8px / 31% 31% 8px 8px;
+      pointer-events: none;
+    }
+    .template-hotel .day > * { position: relative; z-index: 1; }
+    .template-hotel .day.today {
+      border-color: #fff1bd;
+      box-shadow: 0 0 0 3px rgba(203, 169, 87, .42), inset 0 0 0 5px rgba(255, 232, 177, .11);
     }
     .template-hotel .day.stamped {
-      color: #2a3540;
-      background: #ffe6a3;
-      box-shadow: 0 0 20px rgba(255, 202, 92, .45);
+      color: #571127;
+      background: linear-gradient(180deg, #fff4c9, #e8c46f);
+      border-color: #b68d36;
+      box-shadow: 0 0 22px rgba(255, 213, 111, .55), inset 0 0 0 5px rgba(255,255,255,.24);
     }
-    .template-hotel .day.prejoin { color: #8f9694; background: #dfe3df; border-color: #d2d7d3; }
-    .template-hotel .day.future { opacity: .68; }
-    .template-hotel .stamp-section { background: #f7eedc; }
+    .template-hotel .day.prejoin { color: #a88579; background: #ead6bf; border-color: #cdb78e; }
+    .template-hotel .day.future { opacity: .62; }
+    .template-hotel .stamp-section {
+      color: #fff0c8;
+      background:
+        linear-gradient(45deg, rgba(244, 216, 151, .055) 25%, transparent 25%, transparent 75%, rgba(244, 216, 151, .055) 75%) 0 0 / 24px 24px,
+        linear-gradient(-45deg, rgba(244, 216, 151, .055) 25%, transparent 25%, transparent 75%, rgba(244, 216, 151, .055) 75%) 0 0 / 24px 24px,
+        #7a0826;
+    }
+    .template-hotel .stamp-section .section-head,
+    .template-hotel .stamp-section .helper { color: #f5dfaa; }
+    .template-hotel .stamp-section .section-head span { color: #dfbd6e; }
+    .template-hotel .stage-decoration { color: #c79e45; }
 
     .card.template-journey { --paper: #fffdf8; }
     .template-journey .stamp-grid {
@@ -643,7 +670,7 @@
 
     <section id="testPanel" class="test-panel hidden" aria-label="テスト操作">
       <h2>🧪 TEST MODE</h2>
-      <p>本番の記録には影響しません。どの日付も自由にタップでき、3・5・10個などの節目の演出を確認できます。</p>
+      <p>本番の記録には影響しません。「今日」を押すたび翌日へ進み、3・5・10個などの節目の演出を順番に確認できます。</p>
       <div class="test-controls">
         <div class="test-field">
           <label for="testCount">スタンプ数</label>
@@ -652,7 +679,7 @@
         <div class="test-field">
           <label for="testTemplate">テンプレート</label>
           <select id="testTemplate">
-            <option value="hotel">🏨 HOTEL</option>
+            <option value="hotel">🏨 AMENITY HOTEL</option>
             <option value="classic">◯ STAMP</option>
             <option value="journey">🚏 JOURNEY</option>
           </select>
@@ -741,7 +768,7 @@
         <div class="field">
           <label for="adminTemplate">カードテンプレート</label>
           <select id="adminTemplate">
-            <option value="hotel">🏨 HOTEL｜ホテル</option>
+            <option value="hotel">🏨 AMENITY HOTEL｜ホテル</option>
             <option value="classic">◯ STAMP｜ポイントカード</option>
             <option value="journey">🚏 JOURNEY｜発売日への道</option>
           </select>
@@ -806,6 +833,7 @@
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
       const params = new URLSearchParams(location.search);
       const isTestMode = params.get('test') === '1';
+      let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(params.get('today') || '') ? params.get('today') : '';
       let selectedColor = '#4ea8de';
       let currentConfig = null;
       let shareBlob = null;
@@ -826,7 +854,15 @@
       }
 
       function currentDay() {
-        return isoLocal();
+        return isTestMode && simulatedToday ? simulatedToday : isoLocal();
+      }
+
+      function setTestToday(day) {
+        if (!isTestMode) return;
+        simulatedToday = day;
+        const url = new URL(location.href);
+        url.searchParams.set('today', day);
+        history.replaceState(null, '', url);
       }
 
       function addDays(value, amount) {
@@ -961,6 +997,7 @@
         url.searchParams.set('cid', config.id);
         if (testMode) {
           url.searchParams.set('test', '1');
+          url.searchParams.set('today', config.start);
         }
         return url.href;
       }
@@ -1102,6 +1139,7 @@
         if (!isTestMode) return;
         const panel = $('testPanel');
         const days = dateRange(config.start, config.release);
+        if (!days.includes(simulatedToday)) setTestToday(config.start);
         panel.classList.remove('hidden');
         const effectLabels = { 3: '（演出1）', 5: '（演出2）', 10: '（演出3）', 15: '（演出4）', 20: '（演出4）' };
         $('testCount').innerHTML = days.map((_, index) => `<option value="${index}">${index}${effectLabels[index] || ''}</option>`).join('')
@@ -1115,6 +1153,7 @@
           const previous = loadStamps(currentConfig).size;
           const count = Math.max(0, Math.min(campaignDays.length, Number($('testCount').value) || 0));
           saveStamps(currentConfig, new Set(campaignDays.slice(0, count)));
+          setTestToday(campaignDays[Math.min(count, campaignDays.length - 1)]);
           renderParticipant();
           if (count > previous && [3, 5, 10, 15, 20, campaignDays.length].includes(count)) launchConfetti();
         });
@@ -1125,6 +1164,7 @@
         $('testReset').addEventListener('click', () => {
           localStorage.removeItem(storageKey(currentConfig));
           localStorage.removeItem(metaKey(currentConfig));
+          setTestToday(currentConfig.start);
           renderParticipant();
           toast('テスト状態をリセットしました');
         });
@@ -1162,7 +1202,7 @@
         if (validStamps.size !== stamps.size) saveStamps(config, validStamps);
 
         const templateLabels = {
-          hotel: 'HOTEL LISTENING CHECK-IN',
+          hotel: 'AMENITY LISTENING CHECK-IN',
           classic: 'DAILY LISTENING STAMP',
           journey: 'RELEASE DAY JOURNEY'
         };
@@ -1181,14 +1221,14 @@
         const daysLeft = Math.max(0, Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000));
         $('participantView').dataset.stage = String(milestone.stage);
         $('progressCount').textContent = `${count} STAMP${count === 1 ? '' : 'S'}`;
-        $('daysLeftText').textContent = isTestMode ? '全マス操作できます' : today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`;
+        $('daysLeftText').textContent = today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`;
         $('progressBar').style.width = `${milestone.progress}%`;
         const progressTrack = document.querySelector('.progress-track');
         progressTrack.setAttribute('aria-valuenow', String(milestone.progress));
         $('milestoneNote').textContent = count >= days.length ? '全日達成！' : `次の変化まであと${milestone.next - count}個`;
 
         const perfect = count === days.length && days.length > 0;
-        const eventFinished = !isTestMode && today >= config.release;
+        const eventFinished = today >= config.release;
         $('completion').classList.toggle('show', perfect || eventFinished);
         $('completion').innerHTML = perfect
           ? `PERFECT！<br>発売日まで毎日ありがとう ${config.stamp}✨`
@@ -1196,13 +1236,13 @@
 
         const canStampToday = days.includes(today);
         const todayStamped = validStamps.has(today);
-        $('todayButton').parentElement.classList.toggle('test-mode', isTestMode);
-        $('todayButton').classList.toggle('hidden', isTestMode);
+        $('todayButton').parentElement.classList.remove('test-mode');
+        $('todayButton').classList.remove('hidden');
         $('todayButton').disabled = !canStampToday;
         $('todayButton').textContent = todayStamped ? '今日のスタンプを外す' : '聴いたのでスタンプを押す';
         $('todayButton').onclick = () => toggleToday(config);
 
-        if (isTestMode) $('helperText').textContent = 'テスト中はどの日付もタップできます。3・5・10個の演出も順番に確認できます。';
+        if (isTestMode) $('helperText').textContent = 'テスト中です。TODAYのマスを押すと翌日に進みます。3・5・10個の節目も順番に確認できます。';
         else if (today < config.start) $('helperText').textContent = `${formatDate(config.start)}からスタートします。未来の日付にはまだスタンプを押せません。`;
         else if (today > config.release) $('helperText').textContent = 'イベントは終了しました。集めたスタンプはこの端末に残ります。';
         else $('helperText').textContent = '今日聴いたら今日のマスへ。空いた日があっても、また今日から続けられます。';
@@ -1211,18 +1251,17 @@
         grid.innerHTML = '';
         days.forEach((day) => {
           const date = parseLocalDate(day);
-          const isToday = !isTestMode && day === today;
+          const isToday = day === today;
           const isStamped = validStamps.has(day);
-          const isFuture = !isTestMode && day > today;
-          const isPrejoin = !isTestMode && day < today && !isStamped;
-          const isInteractive = isTestMode || isToday;
+          const isFuture = day > today;
+          const isPrejoin = day < today && !isStamped;
+          const isInteractive = isToday;
           const element = document.createElement(isInteractive ? 'button' : 'div');
           if (isInteractive) element.type = 'button';
           element.className = `day${isToday ? ' today' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}${isPrejoin ? ' prejoin' : ''}`;
           const state = isPrejoin ? '参加前・開催済み' : isStamped ? 'スタンプ済み' : '未スタンプ';
           element.setAttribute('aria-label', `${formatDate(day)} ${state}${isToday ? ' 今日' : ''}${isTestMode ? ' テスト操作' : ''}`);
-          if (isTestMode) element.addEventListener('click', () => toggleTestDay(config, day));
-          else if (isToday) element.addEventListener('click', () => toggleToday(config));
+          if (isToday) element.addEventListener('click', () => toggleToday(config));
           element.innerHTML = `
             ${isToday ? '<span class="today-tag">TODAY</span>' : ''}
             <span class="day-date">${date.getMonth() + 1}/${date.getDate()}</span>
@@ -1246,31 +1285,18 @@
         if (wasStamped) stamps.delete(today);
         else stamps.add(today);
         saveStamps(config, stamps);
+        const campaignDays = dateRange(config.start, config.release);
+        const todayIndex = campaignDays.indexOf(today);
+        const nextDay = todayIndex >= 0 && todayIndex < campaignDays.length - 1 ? campaignDays[todayIndex + 1] : '';
+        if (isTestMode && !wasStamped && nextDay) setTestToday(nextDay);
         renderParticipant();
         if (!wasStamped) {
           const total = dateRange(config.start, config.release).length;
-          toast(`${config.stamp} 今日のスタンプを押しました`);
+          if (isTestMode && nextDay) toast(`${formatDate(today, false)}にスタンプ。次は${formatDate(nextDay, false)}です`);
+          else toast(`${config.stamp} 今日のスタンプを押しました`);
           if ([3, 5, 10, 15, 20, total].includes(stamps.size)) launchConfetti();
         } else {
           toast('今日のスタンプを取り消しました');
-        }
-      }
-
-      function toggleTestDay(config, day) {
-        if (!isTestMode) return;
-        const stamps = loadStamps(config);
-        const wasStamped = stamps.has(day);
-        if (wasStamped) stamps.delete(day);
-        else stamps.add(day);
-        saveStamps(config, stamps);
-        renderParticipant();
-        const date = parseLocalDate(day);
-        if (!wasStamped) {
-          const total = dateRange(config.start, config.release).length;
-          toast(`${date.getMonth() + 1}/${date.getDate()}にスタンプを押しました`);
-          if ([3, 5, 10, 15, 20, total].includes(stamps.size)) launchConfetti();
-        } else {
-          toast(`${date.getMonth() + 1}/${date.getDate()}のスタンプを外しました`);
         }
       }
 
@@ -1313,10 +1339,10 @@
         const themeText = contrastText(config.color);
         const isHotel = config.template === 'hotel';
         const isJourney = config.template === 'journey';
-        const paper = isHotel ? '#fffaf0' : isJourney ? '#fffdf8' : '#ffffff';
-        const sectionPaper = isHotel ? '#f7eedc' : paper;
-        const ink = isHotel ? '#293b45' : '#24364a';
-        const muted = isHotel ? '#7a6b58' : '#718096';
+        const paper = isHotel ? '#f8ead2' : isJourney ? '#fffdf8' : '#ffffff';
+        const sectionPaper = isHotel ? '#7a0826' : paper;
+        const ink = isHotel ? '#35171d' : '#24364a';
+        const muted = isHotel ? '#85565a' : '#718096';
         const today = currentDay();
 
         ctx.fillStyle = '#eaf2f8';
@@ -1330,10 +1356,19 @@
           roundRect(ctx, cardX, 38, cardWidth, height - 76, 36);
           ctx.clip();
           const gradient = ctx.createLinearGradient(cardX, 38, cardX + cardWidth, 300);
-          gradient.addColorStop(0, '#122a34');
-          gradient.addColorStop(1, '#23444a');
+          gradient.addColorStop(0, '#b70c35');
+          gradient.addColorStop(1, '#6f041f');
           ctx.fillStyle = gradient;
           ctx.fillRect(cardX, 38, cardWidth, 255);
+          ctx.globalAlpha = .15;
+          ctx.fillStyle = '#f3d58d';
+          for (let py = 58; py < 285; py += 22) {
+            for (let px = cardX + 12; px < cardX + cardWidth; px += 22) {
+              ctx.beginPath();
+              ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
           ctx.restore();
         }
 
@@ -1342,13 +1377,13 @@
         ctx.fill();
 
         ctx.textAlign = 'center';
-        ctx.fillStyle = isHotel ? '#f8e7bd' : config.color;
+        ctx.fillStyle = isHotel ? '#f3d58d' : config.color;
         ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(isHotel ? 'HOTEL LISTENING CHECK-IN' : isJourney ? 'RELEASE DAY JOURNEY' : 'DAILY LISTENING STAMP', width / 2, 105);
-        ctx.fillStyle = isHotel ? '#fffaf0' : ink;
+        ctx.fillText(isHotel ? 'AMENITY LISTENING CHECK-IN' : isJourney ? 'RELEASE DAY JOURNEY' : 'DAILY LISTENING STAMP', width / 2, 105);
+        ctx.fillStyle = isHotel ? '#fff4d5' : ink;
         ctx.font = '700 50px -apple-system, BlinkMacSystemFont, sans-serif';
         drawCenteredText(ctx, config.title, width / 2, 170, width - 190, 56);
-        ctx.fillStyle = isHotel ? '#f8e7bd' : muted;
+        ctx.fillStyle = isHotel ? '#f3d58d' : muted;
         ctx.font = '500 26px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 235);
 
@@ -1362,7 +1397,7 @@
         ctx.textAlign = 'right';
         ctx.fillStyle = muted;
         ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(isTestMode ? 'TEST MODE' : today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`, width - margin, 350);
+        ctx.fillText(today > config.release ? 'イベント終了' : today === config.release ? '今日は発売日！' : `発売日まであと${daysLeft}日`, width - margin, 350);
         roundRect(ctx, margin, 378, width - margin * 2, 18, 9);
         ctx.fillStyle = '#e8eef3';
         ctx.fill();
@@ -1391,13 +1426,26 @@
         ctx.clip();
         ctx.fillStyle = sectionPaper;
         ctx.fillRect(cardX, 550, cardWidth, height - 588);
+        if (isHotel) {
+          ctx.globalAlpha = .08;
+          ctx.fillStyle = '#f4d897';
+          for (let py = 564; py < height - 45; py += 24) {
+            for (let px = cardX + 12; px < cardX + cardWidth; px += 24) {
+              ctx.save();
+              ctx.translate(px, py);
+              ctx.rotate(Math.PI / 4);
+              ctx.fillRect(-3, -3, 6, 6);
+              ctx.restore();
+            }
+          }
+        }
         ctx.restore();
         ctx.textAlign = 'left';
-        ctx.fillStyle = ink;
+        ctx.fillStyle = isHotel ? '#f5dfaa' : ink;
         ctx.font = '700 34px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillText('LISTENING CARD', margin, 615);
         ctx.textAlign = 'right';
-        ctx.fillStyle = muted;
+        ctx.fillStyle = isHotel ? '#dfbd6e' : muted;
         ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillText(`${formatDate(config.start, false)} — ${formatDate(config.release, false)}`, width - margin, 615);
 
@@ -1407,29 +1455,40 @@
           const x = margin + col * (cell + gap);
           const y = gridTop + row * (cellHeight + gap);
           const stamped = stamps.has(day);
-          const prejoin = !isTestMode && day < today && !stamped;
-          const future = !isTestMode && day > today;
-          const isToday = !isTestMode && day === today;
+          const prejoin = day < today && !stamped;
+          const future = day > today;
+          const isToday = day === today;
           const radius = isJourney ? cell / 2 : isHotel ? 16 : 23;
-          roundRect(ctx, x, y, cell, cellHeight, radius);
-          if (isHotel) ctx.fillStyle = stamped ? '#ffe6a3' : prejoin ? '#dfe3df' : future ? '#718183' : '#294852';
+          if (isHotel) archRect(ctx, x, y, cell, cellHeight);
+          else roundRect(ctx, x, y, cell, cellHeight, radius);
+          if (isHotel) ctx.fillStyle = stamped ? '#efd17e' : prejoin ? '#ead6bf' : future ? '#733044' : '#7e0929';
           else ctx.fillStyle = stamped ? config.color : prejoin ? '#e1e6e9' : isJourney ? '#fffdf8' : '#f5f8fa';
           if (stamped && isHotel) {
             ctx.save();
-            ctx.shadowColor = 'rgba(255, 202, 92, .45)';
+            const glow = ctx.createLinearGradient(x, y, x, y + cellHeight);
+            glow.addColorStop(0, '#fff4c9');
+            glow.addColorStop(1, '#e8c46f');
+            ctx.fillStyle = glow;
+            ctx.shadowColor = 'rgba(255, 213, 111, .55)';
             ctx.shadowBlur = 20;
             ctx.fill();
             ctx.restore();
           } else ctx.fill();
           if (isJourney && !stamped) ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, .3)`;
           else if (isToday) ctx.strokeStyle = config.color;
-          else if (isHotel) ctx.strokeStyle = prejoin ? '#d2d7d3' : '#46646a';
+          else if (isHotel) ctx.strokeStyle = prejoin ? '#cdb78e' : '#cba957';
           else ctx.strokeStyle = stamped ? config.color : '#dce7f0';
           ctx.lineWidth = isToday ? 6 : 2;
           ctx.stroke();
+          if (isHotel) {
+            archRect(ctx, x + 9, y + 9, cell - 18, cellHeight - 18);
+            ctx.strokeStyle = stamped ? 'rgba(87, 17, 39, .20)' : 'rgba(244, 220, 160, .24)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
 
           const textColor = isHotel
-            ? stamped ? '#2a3540' : prejoin ? '#8f9694' : '#e8dcc6'
+            ? stamped ? '#571127' : prejoin ? '#a88579' : future ? '#c9a3a7' : '#f4dca0'
             : stamped ? themeText : prejoin ? '#8d979e' : '#52677b';
           ctx.fillStyle = textColor;
           const date = parseLocalDate(day);
@@ -1437,28 +1496,26 @@
           ctx.font = '700 24px -apple-system, BlinkMacSystemFont, sans-serif';
           ctx.fillText(`${date.getMonth() + 1}/${date.getDate()} （${WEEKDAYS[date.getDay()]}）`, x + cell / 2, y + 55);
           if (isToday) {
-            ctx.fillStyle = stamped && isHotel ? '#2a3540' : config.color;
+            ctx.fillStyle = stamped && isHotel ? '#571127' : isHotel ? '#fff1bd' : config.color;
             ctx.font = '700 17px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillText('TODAY', x + cell / 2, y + 87);
             ctx.fillStyle = textColor;
           }
           if (stamped) {
-            ctx.font = '58px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
-            ctx.fillText(config.stamp, x + cell / 2, y + cellHeight * .67);
+            drawTiltedStamp(ctx, config.stamp, x + cell / 2, y + cellHeight * .67, 58, 1);
           } else if (prejoin) {
             ctx.font = '700 19px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillText('開催済み', x + cell / 2, y + cellHeight * .64);
           } else {
             ctx.save();
             ctx.globalAlpha = .12;
-            ctx.font = '48px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
-            ctx.fillText(config.stamp, x + cell / 2, y + cellHeight * .68);
+            drawTiltedStamp(ctx, config.stamp, x + cell / 2, y + cellHeight * .68, 48, .8);
             ctx.restore();
           }
         });
 
         ctx.textAlign = 'center';
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, .85)`;
+        ctx.fillStyle = isHotel ? '#dfbd6e' : `rgba(${r}, ${g}, ${b}, .85)`;
         ctx.font = '700 22px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillText('ONE LISTEN A DAY, ALL THE WAY TO RELEASE DAY', width / 2, height - 75);
         return canvas;
@@ -1473,6 +1530,31 @@
         ctx.arcTo(x, y + height, x, y, r);
         ctx.arcTo(x, y, x + width, y, r);
         ctx.closePath();
+      }
+
+      function archRect(ctx, x, y, width, height) {
+        const shoulder = Math.min(width * .47, height * .33);
+        const bottom = 14;
+        ctx.beginPath();
+        ctx.moveTo(x, y + shoulder);
+        ctx.bezierCurveTo(x, y + shoulder * .35, x + width * .2, y, x + width / 2, y);
+        ctx.bezierCurveTo(x + width * .8, y, x + width, y + shoulder * .35, x + width, y + shoulder);
+        ctx.lineTo(x + width, y + height - bottom);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - bottom, y + height);
+        ctx.lineTo(x + bottom, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - bottom);
+        ctx.closePath();
+      }
+
+      function drawTiltedStamp(ctx, stamp, x, y, size, scale = 1) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(-8 * Math.PI / 180);
+        ctx.scale(scale, scale);
+        ctx.textAlign = 'center';
+        ctx.font = `${size}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+        ctx.fillText(stamp, 0, 0);
+        ctx.restore();
       }
 
       function drawCenteredText(ctx, text, x, y, maxWidth, lineHeight) {
