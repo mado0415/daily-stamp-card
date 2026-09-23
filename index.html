@@ -920,6 +920,36 @@
       padding: 8px 12px;
       font-size: 12px;
     }
+    .shared-settings {
+      padding: 13px;
+      border: 1px solid #d7e3ec;
+      border-radius: 14px;
+      background: #f7fafc;
+    }
+    .shared-settings .field-note { margin-top: 8px; }
+    .shared-status {
+      display: none;
+      margin: 9px 0 0;
+      padding: 8px 10px;
+      border-radius: 10px;
+      color: #2f5d49;
+      background: #e8f6ef;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+    .shared-status.show { display: block; }
+    .url-entry + .url-entry {
+      margin-top: 13px;
+      padding-top: 13px;
+      border-top: 1px solid #dce6ee;
+    }
+    .url-entry-label {
+      margin: 0 0 7px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 900;
+    }
 
     .field input:focus, .field select:focus, .field textarea:focus {
       border-color: var(--theme);
@@ -1294,6 +1324,12 @@
           </div>
           <p class="field-note">保存すると、次回この端末で管理画面を開いたときに自動で読み込みます。</p>
         </div>
+        <div class="field wide shared-settings">
+          <label for="adminApiUrl">共同編集サーバーURL（Apps Script）</label>
+          <input id="adminApiUrl" type="url" inputmode="url" placeholder="https://script.google.com/macros/s/.../exec">
+          <p class="field-note">入力すると、設定を共有保存して共同管理URLを発行します。空欄なら、これまでどおりURL内に設定を入れたカードを作ります。</p>
+          <p id="sharedStatus" class="shared-status"></p>
+        </div>
       </div>
 
       <p id="adminError" class="error" role="alert"></p>
@@ -1304,12 +1340,29 @@
 
       <div id="urlBox" class="url-box">
         <p id="generatedUrlLabel" class="url-box-label">参加者へ共有するURL</p>
-        <div class="url-copy-row">
-          <a id="generatedUrlLink" class="generated-url-link" href="#" target="_blank" rel="noopener"></a>
-          <button id="copyButton" class="btn btn-primary" type="button">コピー</button>
+        <div class="url-entry">
+          <p class="url-entry-label">参加者用URL</p>
+          <div class="url-copy-row">
+            <a id="generatedUrlLink" class="generated-url-link" href="#" target="_blank" rel="noopener"></a>
+            <button id="copyButton" class="btn btn-primary" type="button">コピー</button>
+          </div>
         </div>
-        <p class="notice">URLをタップすると参加者用ページを開けます。確認後、「コピー」から配布できます。</p>
+        <div id="adminUrlEntry" class="url-entry hidden">
+          <p class="url-entry-label">共同管理URL（編集できる人だけに共有）</p>
+          <div class="url-copy-row">
+            <a id="generatedAdminUrlLink" class="generated-url-link" href="#" target="_blank" rel="noopener"></a>
+            <button id="copyAdminButton" class="btn btn-soft" type="button">コピー</button>
+          </div>
+        </div>
+        <p id="urlBoxNotice" class="notice">URLをタップすると参加者用ページを開けます。確認後、「コピー」から配布できます。</p>
       </div>
+    </section>
+
+    <section id="sharedErrorView" class="card admin-card hidden" aria-label="共有カード読み込みエラー">
+      <p class="eyebrow">SHARED CARD</p>
+      <h1>共有カードを読み込めませんでした</h1>
+      <p id="sharedErrorText" class="admin-lead"></p>
+      <button id="sharedReloadButton" class="btn btn-primary btn-full" type="button">もう一度読み込む</button>
     </section>
   </main>
 
@@ -1380,14 +1433,19 @@
       const DEFAULT_SHARE_TEMPLATE = '⛄️ {カードタイトル}\n「{曲名}」を1日1回聴いています！\n【{スタンプ数} STAMPS】\n{参加者用URL}\n#SnowMan';
       const SAVED_SHARE_TEMPLATE_KEY = 'daily_stamp_saved_share_template_v1';
       const SAVED_STAMP_SETS_KEY = 'daily_stamp_saved_stamp_sets_v1';
+      const SAVED_SHARED_API_URL_KEY = 'daily_stamp_shared_api_url_v1';
       const params = new URLSearchParams(location.search);
       const isTestMode = params.get('z') === '1' || params.get('test') === '1' || params.get('mode') === 'test';
       const incomingTestDay = params.get('d') || params.get('today') || '';
+      const incomingSharedCardId = params.get('card') || '';
+      const incomingSharedEditKey = params.get('edit') || '';
+      const incomingSharedApiUrl = params.get('api') || '';
       let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(incomingTestDay) ? incomingTestDay : '';
       let currentConfig = null;
       let adminSelectedStamps = [];
       let shareBlob = null;
       let toastTimer = null;
+      let sharedSaveBusy = false;
 
       const $ = (id) => document.getElementById(id);
 
@@ -1479,6 +1537,160 @@
         }
       }
 
+      function safeSharedApiUrl(value) {
+        if (!value) return '';
+        try {
+          const url = new URL(value);
+          const validHost = url.hostname === 'script.google.com';
+          const validPath = /^\/macros\/s\/[^/]+\/exec\/?$/.test(url.pathname);
+          return url.protocol === 'https:' && validHost && validPath ? url.href : '';
+        } catch (_) {
+          return '';
+        }
+      }
+
+      function loadSavedSharedApiUrl() {
+        try { return safeSharedApiUrl(localStorage.getItem(SAVED_SHARED_API_URL_KEY) || ''); }
+        catch (_) { return ''; }
+      }
+
+      function randomToken(bytes = 24) {
+        const values = new Uint8Array(bytes);
+        crypto.getRandomValues(values);
+        return [...values].map((value) => value.toString(16).padStart(2, '0')).join('');
+      }
+
+      function sharedConfigPayload(config) {
+        return {
+          title: config.title,
+          song: config.song || config.title,
+          start: config.start,
+          release: config.release,
+          end: config.end,
+          stamp: config.stamp,
+          stamps: [...config.stamps],
+          color: config.color || '#4ea8de',
+          link: config.link || '',
+          apple: config.apple || '',
+          spotify: config.spotify || '',
+          line: config.line || '',
+          youtube: config.youtube || '',
+          shareTemplate: config.shareTemplate || DEFAULT_SHARE_TEMPLATE,
+          template: config.template || 'hotel',
+          stampSets: config.stampSets || loadSavedStampSets()
+        };
+      }
+
+      function sharedConfigSignature(config) {
+        return JSON.stringify(sharedConfigPayload(config));
+      }
+
+      function loadSharedConfig(apiUrl, cardId, editKey = '') {
+        return new Promise((resolve, reject) => {
+          const api = safeSharedApiUrl(apiUrl);
+          if (!api || !/^[a-zA-Z0-9_-]{16,80}$/.test(cardId)) {
+            reject(new Error('共同編集URLが正しくありません。'));
+            return;
+          }
+          const callback = `sharedCardCallback_${randomToken(8)}`;
+          const script = document.createElement('script');
+          let finished = false;
+          const cleanup = () => {
+            if (finished) return;
+            finished = true;
+            clearTimeout(timer);
+            script.remove();
+            try { delete window[callback]; } catch (_) { window[callback] = undefined; }
+          };
+          window[callback] = (result) => {
+            cleanup();
+            if (!result || !result.ok || !result.config) {
+              reject(new Error(result && result.error ? result.error : '共有カードを読み込めませんでした。'));
+              return;
+            }
+            resolve(result);
+          };
+          const url = new URL(api);
+          url.searchParams.set('action', 'load');
+          url.searchParams.set('id', cardId);
+          if (editKey) url.searchParams.set('edit', editKey);
+          url.searchParams.set('callback', callback);
+          script.src = url.href;
+          script.async = true;
+          script.onerror = () => {
+            cleanup();
+            reject(new Error('共同編集サーバーへ接続できませんでした。'));
+          };
+          const timer = setTimeout(() => {
+            cleanup();
+            reject(new Error('共同編集サーバーの応答に時間がかかっています。'));
+          }, 15000);
+          document.head.appendChild(script);
+        });
+      }
+
+      function sharedCardUrl(cardId, apiUrl, editKey = '') {
+        const url = new URL(location.href);
+        url.search = '';
+        url.hash = '';
+        url.searchParams.set('card', cardId);
+        url.searchParams.set('api', apiUrl);
+        if (editKey) {
+          url.searchParams.set('edit', editKey);
+          url.searchParams.set('admin', '1');
+        }
+        return url.href;
+      }
+
+      async function saveSharedConfig(config, apiUrl) {
+        if (sharedSaveBusy) throw new Error('保存中です。少し待ってからもう一度お試しください。');
+        sharedSaveBusy = true;
+        const sameSharedCard = currentConfig && currentConfig.sharedCardId
+          && currentConfig.sharedEditKey && currentConfig.apiUrl === apiUrl;
+        const cardId = sameSharedCard ? currentConfig.sharedCardId : randomToken(12);
+        const editKey = sameSharedCard ? currentConfig.sharedEditKey : randomToken(32);
+        const expectedRevision = sameSharedCard ? Number(currentConfig.sharedRevision || 0) : 0;
+        const storedConfig = sharedConfigPayload(config);
+        try {
+          await fetch(apiUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'save',
+              id: cardId,
+              editKey,
+              expectedRevision,
+              config: storedConfig
+            })
+          });
+          let loaded = null;
+          let lastError = null;
+          for (let attempt = 0; attempt < 5; attempt += 1) {
+            await new Promise((resolve) => setTimeout(resolve, 500 + attempt * 350));
+            try {
+              loaded = await loadSharedConfig(apiUrl, cardId, editKey);
+              if (loaded.canEdit && sharedConfigSignature(loaded.config) === sharedConfigSignature(storedConfig)) break;
+            } catch (error) {
+              lastError = error;
+            }
+            loaded = null;
+          }
+          if (!loaded) throw lastError || new Error('保存結果を確認できませんでした。他の人が先に更新した可能性があります。ページを再読み込みしてください。');
+          try { localStorage.setItem(SAVED_SHARED_API_URL_KEY, apiUrl); } catch (_) {}
+          return {
+            ...loaded.config,
+            id: cardId,
+            sharedCardId: cardId,
+            sharedEditKey: editKey,
+            sharedRevision: Number(loaded.revision || 0),
+            apiUrl
+          };
+        } finally {
+          sharedSaveBusy = false;
+        }
+      }
+
       function loadSavedShareTemplate() {
         try {
           return (localStorage.getItem(SAVED_SHARE_TEMPLATE_KEY) || '').slice(0, 500);
@@ -1525,6 +1737,20 @@
         } catch (_) {
           return {};
         }
+      }
+
+      function importSharedStampSets(stampSets) {
+        if (!stampSets || typeof stampSets !== 'object' || Array.isArray(stampSets)) return;
+        const merged = loadSavedStampSets();
+        Object.entries(stampSets).slice(0, 30).forEach(([name, stamps]) => {
+          const cleanName = String(name || '').trim().slice(0, 40);
+          const cleanStamps = normalizeStampSet(stamps, '');
+          if (cleanName && cleanStamps.length) merged[cleanName] = cleanStamps;
+        });
+        try {
+          localStorage.setItem(SAVED_STAMP_SETS_KEY, JSON.stringify(merged));
+          refreshSavedStampSets();
+        } catch (_) {}
       }
 
       function refreshSavedStampSets(selectedName = '') {
@@ -1724,9 +1950,12 @@
         const youtube = safeUrl(rawYoutube);
         const shareTemplate = $('adminShareTemplate').value.trim() || DEFAULT_SHARE_TEMPLATE;
         const template = $('adminTemplate').value;
+        const rawApiUrl = $('adminApiUrl').value.trim();
+        const apiUrl = safeSharedApiUrl(rawApiUrl);
         const availableStamps = adminSelectedStamps.length ? [...adminSelectedStamps] : stampsForTemplate(template);
         const stamp = availableStamps.includes($('adminStamp').value) ? $('adminStamp').value : availableStamps[0];
         const stamps = availableStamps;
+        const stampSets = loadSavedStampSets();
         const color = '#4ea8de';
         let error = '';
         if (!title) error = 'カードタイトルを入力してください。';
@@ -1737,15 +1966,19 @@
         else if (dateRange(start, end).length > 366) error = '期間は366日以内にしてください。';
         else if ([rawLink && !link, rawApple && !apple, rawSpotify && !spotify, rawLine && !line, rawYoutube && !youtube].some(Boolean)) error = '再生先は http:// または https:// で始まるURLにしてください。';
         else if (![link, apple, spotify, line, youtube].some(Boolean)) error = '曲を聴くためのURLを1つ以上入力してください。';
+        else if (rawApiUrl && !apiUrl) error = '共同編集サーバーURLは、Apps Scriptでデプロイした /exec のURLを入力してください。';
         showError(error);
         if (error) return null;
         const id = currentConfig && currentConfig.title === title && currentConfig.song === song && currentConfig.start === start && currentConfig.release === release && currentConfig.end === end
           ? currentConfig.id
           : hashText(`${title}|${song}|${start}|${release}|${end}`);
-        return { title, song, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, shareTemplate, template, id };
+        return { title, song, start, release, end, stamp, stamps, stampSets, color, link, apple, spotify, line, youtube, shareTemplate, template, id, apiUrl };
       }
 
       function configUrl(config, testMode = false) {
+        if (!testMode && config.sharedCardId && config.apiUrl) {
+          return sharedCardUrl(config.sharedCardId, config.apiUrl);
+        }
         const url = new URL(location.href);
         url.search = '';
         url.hash = '';
@@ -1925,6 +2158,7 @@
         $('adminLine').value = firstParam(params, 'n', 'line');
         $('adminYoutube').value = firstParam(params, 'y', 'youtube');
         $('adminShareTemplate').value = firstParam(params, 'm', 'message') || loadSavedShareTemplate() || DEFAULT_SHARE_TEMPLATE;
+        $('adminApiUrl').value = safeSharedApiUrl(incomingSharedApiUrl) || loadSavedSharedApiUrl();
         const templateRaw = firstParam(params, 'v', 'template');
         const template = { h: 'hotel', c: 'classic', j: 'journey' }[templateRaw] || templateRaw;
         $('adminTemplate').value = ['classic', 'hotel', 'journey'].includes(template) ? template : 'hotel';
@@ -1945,10 +2179,24 @@
       function showAdmin() {
         $('testPanel').classList.add('hidden');
         $('participantView').classList.add('hidden');
+        $('sharedErrorView').classList.add('hidden');
         $('adminView').classList.remove('hidden');
         $('modeLink').textContent = currentConfig ? 'カードに戻る' : '';
         $('modeLink').classList.toggle('hidden', !currentConfig);
         $('modeLink').onclick = currentConfig ? () => showParticipant(currentConfig) : null;
+        updateSharedAdminUi(currentConfig);
+      }
+
+      function updateSharedAdminUi(config = currentConfig) {
+        const activeApi = safeSharedApiUrl($('adminApiUrl').value);
+        const shared = config && config.sharedCardId && config.sharedEditKey && config.apiUrl === activeApi;
+        const hasApi = Boolean(activeApi);
+        $('generateButton').textContent = shared ? '変更を共有保存' : hasApi ? '共同編集カードを作る' : '参加者用URLを作る';
+        const status = $('sharedStatus');
+        status.classList.toggle('show', Boolean(shared));
+        status.textContent = shared
+          ? `共同編集中｜更新 ${Number(config.sharedRevision || 0)}回目。保存すると参加者ページにも反映されます。`
+          : '';
       }
 
       function showParticipant(config) {
@@ -1964,9 +2212,10 @@
         $('adminView').classList.add('hidden');
         $('participantView').classList.remove('hidden');
         setupTestPanel(config);
-        $('modeLink').textContent = isTestMode ? '管理用設定' : '';
-        $('modeLink').classList.toggle('hidden', !isTestMode);
-        $('modeLink').onclick = isTestMode ? () => {
+        const canManageHere = isTestMode || Boolean(config.sharedEditKey);
+        $('modeLink').textContent = canManageHere ? '管理用設定' : '';
+        $('modeLink').classList.toggle('hidden', !canManageHere);
+        $('modeLink').onclick = canManageHere ? () => {
           fillForm(config);
           showAdmin();
         } : null;
@@ -1986,7 +2235,10 @@
         $('adminYoutube').value = config.youtube || '';
         $('adminShareTemplate').value = config.shareTemplate || DEFAULT_SHARE_TEMPLATE;
         $('adminTemplate').value = config.template || 'hotel';
+        $('adminApiUrl').value = config.apiUrl || loadSavedSharedApiUrl();
+        importSharedStampSets(config.stampSets);
         renderAdminStampChoices($('adminTemplate').value, config.stamps, config.stamp);
+        updateSharedAdminUi(config);
       }
 
       function setupTestPanel(config) {
@@ -2893,24 +3145,59 @@
         return text;
       }
 
-      function generate(mode = 'participant') {
+      function showGeneratedUrls(participantUrl, adminUrl = '') {
+        $('generatedUrlLink').href = participantUrl;
+        $('generatedUrlLink').textContent = participantUrl;
+        $('generatedUrlLabel').textContent = adminUrl ? '共有カードのURL' : '参加者へ共有するURL';
+        $('adminUrlEntry').classList.toggle('hidden', !adminUrl);
+        if (adminUrl) {
+          $('generatedAdminUrlLink').href = adminUrl;
+          $('generatedAdminUrlLink').textContent = adminUrl;
+          $('urlBoxNotice').textContent = '参加者には参加者用URLだけを配布してください。共同管理URLは設定を編集する人だけに共有します。';
+        } else {
+          $('generatedAdminUrlLink').href = '#';
+          $('generatedAdminUrlLink').textContent = '';
+          $('urlBoxNotice').textContent = 'URLをタップすると参加者用ページを開けます。確認後、「コピー」から配布できます。';
+        }
+        $('urlBox').classList.add('show');
+      }
+
+      async function generate(mode = 'participant') {
         const config = configFromForm();
         if (!config) return;
         const testMode = mode === 'test';
-        const url = configUrl(config, testMode);
         if (testMode) {
-          location.href = url;
+          location.href = configUrl(config, true);
           return;
         }
-        $('generatedUrlLink').href = url;
-        $('generatedUrlLink').textContent = url;
-        $('generatedUrlLabel').textContent = '参加者へ共有するURL';
-        $('urlBox').classList.add('show');
-        toast('参加者用URLを作りました');
+        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
+        if (!apiUrl) {
+          showGeneratedUrls(configUrl(config));
+          toast('参加者用URLを作りました');
+          return;
+        }
+        $('generateButton').disabled = true;
+        $('generateButton').textContent = '共有保存中…';
+        try {
+          const saved = await saveSharedConfig(config, apiUrl);
+          currentConfig = saved;
+          importSharedStampSets(saved.stampSets);
+          showGeneratedUrls(
+            sharedCardUrl(saved.sharedCardId, saved.apiUrl),
+            sharedCardUrl(saved.sharedCardId, saved.apiUrl, saved.sharedEditKey)
+          );
+          updateSharedAdminUi(saved);
+          toast('共有カードを保存しました');
+        } catch (error) {
+          showError(error && error.message ? error.message : '共同編集カードを保存できませんでした。');
+          toast('共有保存に失敗しました');
+        } finally {
+          $('generateButton').disabled = false;
+          updateSharedAdminUi(currentConfig);
+        }
       }
 
-      async function copyGeneratedUrl() {
-        const value = $('generatedUrlLink').href;
+      async function copyUrl(value, message) {
         try {
           await navigator.clipboard.writeText(value);
         } catch (_) {
@@ -2924,14 +3211,52 @@
           document.execCommand('copy');
           temporary.remove();
         }
-        const copiedParams = new URL(value).searchParams;
-        const copiedTestUrl = copiedParams.get('z') === '1' || copiedParams.get('test') === '1';
-        toast(copiedTestUrl ? 'テスト用URLをコピーしました' : '参加者用URLをコピーしました');
+        toast(message);
       }
 
-      function init() {
+      function copyGeneratedUrl() {
+        return copyUrl($('generatedUrlLink').href, '参加者用URLをコピーしました');
+      }
+
+      function copyGeneratedAdminUrl() {
+        return copyUrl($('generatedAdminUrlLink').href, '共同管理URLをコピーしました');
+      }
+
+      function showSharedError(message) {
+        $('participantView').classList.add('hidden');
+        $('adminView').classList.add('hidden');
+        $('sharedErrorView').classList.remove('hidden');
+        $('sharedErrorText').textContent = message || '通信状態を確認して、もう一度読み込んでください。';
+        $('modeLink').classList.add('hidden');
+      }
+
+      async function init() {
         initAdminDefaults();
-        let config = configFromParams();
+        let config = null;
+        let sharedLoadError = '';
+        const requestedAdmin = params.get('admin') === '1';
+        const sharedApi = safeSharedApiUrl(incomingSharedApiUrl);
+        if (incomingSharedCardId || incomingSharedApiUrl) {
+          try {
+            const result = await loadSharedConfig(sharedApi, incomingSharedCardId, incomingSharedEditKey);
+            if (requestedAdmin && (!incomingSharedEditKey || !result.canEdit)) {
+              throw new Error('共同管理URLの編集キーを確認してください。参加者用URLからは管理画面を開けません。');
+            }
+            config = {
+              ...result.config,
+              id: incomingSharedCardId,
+              sharedCardId: incomingSharedCardId,
+              sharedEditKey: result.canEdit ? incomingSharedEditKey : '',
+              sharedRevision: Number(result.revision || 0),
+              apiUrl: sharedApi
+            };
+            if (result.canEdit) importSharedStampSets(result.config.stampSets);
+          } catch (error) {
+            sharedLoadError = error && error.message ? error.message : '共有カードを読み込めませんでした。';
+          }
+        } else {
+          config = configFromParams();
+        }
         if (isTestMode && !config) {
           config = {
             title: '動作確認用テストカード',
@@ -2952,9 +3277,13 @@
           };
         }
         currentConfig = config;
-        const forceAdmin = params.get('admin') === '1';
-        if (config && !forceAdmin) showParticipant(config);
-        else showAdmin();
+        const forceAdmin = requestedAdmin;
+        if (sharedLoadError) showSharedError(sharedLoadError);
+        else if (config && !forceAdmin) showParticipant(config);
+        else {
+          if (config) fillForm(config);
+          showAdmin();
+        }
         if (isTestMode) requestAnimationFrame(() => window.scrollTo(0, 0));
 
         $('generateButton').addEventListener('click', () => generate('participant'));
@@ -2973,6 +3302,9 @@
         $('adminRelease').addEventListener('change', syncDateLimits);
         syncDateLimits();
         $('copyButton').addEventListener('click', copyGeneratedUrl);
+        $('copyAdminButton').addEventListener('click', copyGeneratedAdminUrl);
+        $('adminApiUrl').addEventListener('input', () => updateSharedAdminUi(currentConfig));
+        $('sharedReloadButton').addEventListener('click', () => location.reload());
         $('saveShareTemplateButton').addEventListener('click', saveShareTemplate);
         $('resetShareTemplateButton').addEventListener('click', resetShareTemplate);
         $('addCustomStampButton').addEventListener('click', addCustomStamps);
