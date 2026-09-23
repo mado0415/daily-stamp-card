@@ -803,9 +803,11 @@
     .stamp-set-editor {
       display: grid;
       gap: 8px;
-      margin-top: 11px;
-      padding-top: 11px;
-      border-top: 1px solid #e3ebf1;
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid #d9e4ec;
+      border-radius: 14px;
+      background: #f8fbfd;
     }
     .stamp-set-row {
       display: grid;
@@ -814,6 +816,9 @@
     }
     .stamp-set-row.triple {
       grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+    .stamp-set-row.actions {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
     .stamp-set-row input,
     .stamp-set-row select {
@@ -831,6 +836,9 @@
       min-height: 40px;
       padding: 8px 11px;
       font-size: 11px;
+    }
+    .stamp-set-row.actions .btn {
+      padding-inline: 6px;
     }
 
     .share-help {
@@ -1303,59 +1311,28 @@
           </select>
         </div>
         <div class="field wide">
-          <label>参加者が選べるスタンプ（タップで登録・解除）</label>
-          <div id="adminStampChoices" class="admin-stamp-choices" role="group" aria-label="参加者が選べるスタンプ"></div>
-          <p class="admin-stamp-help">テンプレートを選ぶとおすすめセットが入ります。色が付いた絵柄だけが参加者に表示されます。下から好きな絵文字も追加できます。</p>
+          <label for="adminSavedStampSet">参加者が選べる絵文字セット</label>
           <div class="stamp-set-editor">
             <div class="stamp-set-row">
-              <input id="adminCustomStamp" type="text" inputmode="text" maxlength="80" placeholder="追加する絵文字（例：🎂 🐶）" aria-label="追加する絵文字">
-              <button id="addCustomStampButton" class="btn btn-soft" type="button">絵文字を追加</button>
-            </div>
-            <div class="stamp-set-row triple">
-              <input id="adminStampSetName" type="text" maxlength="40" placeholder="セット名（例：ALL SUITE用）" aria-label="スタンプセット名">
-              <button id="saveStampSetButton" class="btn btn-soft" type="button">保存／上書き</button>
-              <button id="deleteStampSetButton" class="btn btn-plain" type="button">削除</button>
-            </div>
-            <div class="stamp-set-row">
-              <select id="adminSavedStampSet" aria-label="保存済みスタンプセット">
-                <option value="">このカードのセットを選ぶ</option>
-              </select>
+              <select id="adminSavedStampSet" aria-label="保存済み絵文字セット"></select>
               <button id="newStampSetButton" class="btn btn-plain" type="button">新しいセット</button>
             </div>
-            <p class="field-note">名前付きセットも共同編集カードに保存され、共同管理者と共有されます。</p>
+            <input id="adminStampSetName" type="text" maxlength="40" placeholder="セット名" aria-label="絵文字セット名">
+            <p class="admin-stamp-help">選んだセットの名前と内容を、この下でそのまま編集できます。</p>
+            <div id="adminStampChoices" class="admin-stamp-choices" role="group" aria-label="参加者が選べる絵文字"></div>
+            <p class="admin-stamp-help">色が付いた絵文字だけが参加者に表示されます。タップで登録・解除できます。</p>
+            <div class="stamp-set-row">
+              <input id="adminCustomStamp" type="text" inputmode="text" maxlength="80" placeholder="絵文字を追加（例：🎂 🐶）" aria-label="追加する絵文字">
+              <button id="addCustomStampButton" class="btn btn-soft" type="button">追加</button>
+            </div>
+            <div class="stamp-set-row actions">
+              <button id="saveStampSetButton" class="btn btn-soft" type="button">変更を保存</button>
+              <button id="duplicateStampSetButton" class="btn btn-soft" type="button">別名で保存</button>
+              <button id="deleteStampSetButton" class="btn btn-plain" type="button">削除</button>
+            </div>
+            <p class="field-note">保存したセットは共同管理者にも共有されます。</p>
           </div>
-        </div>
-        <div class="field">
-          <label for="adminStamp">最初に選ばれているスタンプ</label>
-          <select id="adminStamp">
-            <option value="⛄️">⛄️ 雪だるま</option>
-            <option value="🎵">🎵 音符</option>
-            <option value="💿">💿 CD</option>
-            <option value="⭐️">⭐️ 星</option>
-            <option value="🍎">🍎 りんご</option>
-            <option value="🥖">🥖 パン</option>
-            <option value="🔑">🔑 ホテルキー</option>
-            <option value="🛎️">🛎️ ベル</option>
-            <option value="🧳">🧳 トランク</option>
-            <option value="☕️">☕️ カップ</option>
-            <option value="🪥">🪥 歯ブラシ</option>
-            <option value="🪮">🪮 コーム</option>
-            <option value="🏨">🏨 ホテル</option>
-            <option value="💛">💛 イエロー</option>
-            <option value="💜">💜 パープル</option>
-            <option value="🤍">🤍 ホワイト</option>
-            <option value="💙">💙 ブルー</option>
-            <option value="🧡">🧡 オレンジ</option>
-            <option value="💚">💚 グリーン</option>
-            <option value="🖤">🖤 ブラック</option>
-            <option value="❤️">❤️ レッド</option>
-            <option value="🩷">🩷 ピンク</option>
-            <option value="🎈">🎈 風船</option>
-            <option value="🔫">🔫 水鉄砲</option>
-            <option value="🤖">🤖 ロボット</option>
-            <option value="🕺">🕺 ダンス</option>
-          </select>
-          <p class="field-note">上で登録したセットのうち、参加者画面で最初に選ぶ絵柄です。</p>
+          <input id="adminStamp" type="hidden" value="⛄️">
         </div>
         <div class="field wide">
           <label for="adminShareTemplate">SNS投稿テンプレート</label>
@@ -1459,6 +1436,7 @@
         '⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🔑', '🛎️', '🧳', '☕️', '🪥', '🪮', '🏨',
         '💛', '💜', '🤍', '💙', '🧡', '💚', '🖤', '❤️', '🩷', '🎈', '🔫', '🤖', '🕺'
       ];
+      const AMENITY_STAMPS = [...STAMPS];
       const HEART_STAMPS = ['💛', '💜', '🤍', '💙', '🧡', '💚', '🖤', '❤️', '🩷'];
       const TEMPLATE_STAMPS = {
         hotel: ['⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🔑', '🛎️', '🧳', '☕️', '🪥', '🪮', '🏨', '🎈', '🔫', '🤖', '🕺', ...HEART_STAMPS],
@@ -1487,7 +1465,8 @@
       let shareBlob = null;
       let toastTimer = null;
       let sharedSaveBusy = false;
-      let sharedStampSets = {};
+      let sharedStampSets = { AMENITY: [...AMENITY_STAMPS] };
+      let editingStampSetOriginalName = 'AMENITY';
       let workspaceEditKey = /^[a-zA-Z0-9_-]{32,160}$/.test(incomingSharedEditKey) ? incomingSharedEditKey : '';
       let workspaceCards = [];
 
@@ -1621,6 +1600,7 @@
           youtube: config.youtube || '',
           shareTemplate: config.shareTemplate || DEFAULT_SHARE_TEMPLATE,
           template: config.template || 'hotel',
+          stampSetName: config.stampSetName || $('adminSavedStampSet').value || editingStampSetOriginalName || 'AMENITY',
           stampSets: config.stampSets || loadSavedStampSets()
         };
       }
@@ -1841,32 +1821,28 @@
       }
 
       function importSharedStampSets(stampSets) {
-        if (!stampSets || typeof stampSets !== 'object' || Array.isArray(stampSets)) return;
         const imported = {};
-        Object.entries(stampSets).slice(0, 30).forEach(([name, stamps]) => {
+        Object.entries(stampSets && typeof stampSets === 'object' && !Array.isArray(stampSets) ? stampSets : {}).slice(0, 30).forEach(([name, stamps]) => {
           const cleanName = String(name || '').trim().slice(0, 40);
           const cleanStamps = normalizeStampSet(stamps, '');
           if (cleanName && cleanStamps.length) imported[cleanName] = cleanStamps;
         });
-        sharedStampSets = imported;
-        refreshSavedStampSets();
+        sharedStampSets = { AMENITY: [...AMENITY_STAMPS], ...imported };
+        refreshSavedStampSets('AMENITY');
       }
 
       function refreshSavedStampSets(selectedName = '') {
         const select = $('adminSavedStampSet');
         const saved = loadSavedStampSets();
         select.innerHTML = '';
-        const placeholder = document.createElement('option');
-        placeholder.value = '';
-        placeholder.textContent = 'このカードのセットを選ぶ';
-        select.appendChild(placeholder);
         Object.keys(saved).sort((a, b) => a.localeCompare(b, 'ja')).forEach((name) => {
           const option = document.createElement('option');
           option.value = name;
           option.textContent = `${name}（${saved[name].length}個）`;
           select.appendChild(option);
         });
-        select.value = saved[selectedName] ? selectedName : '';
+        const nextName = saved[selectedName] ? selectedName : (saved.AMENITY ? 'AMENITY' : Object.keys(saved)[0] || '');
+        select.value = nextName;
       }
 
       function addCustomStamps() {
@@ -1878,30 +1854,36 @@
         toast('スタンプを追加しました');
       }
 
-      function saveStampSet() {
+      function saveStampSet(asCopy = false) {
         const name = $('adminStampSetName').value.trim().slice(0, 40);
         if (!name) return toast('セット名を入力してください');
+        if (asCopy && name === editingStampSetOriginalName) return toast('別のセット名を入力してください');
+        if (!asCopy && editingStampSetOriginalName && editingStampSetOriginalName !== name) {
+          delete sharedStampSets[editingStampSetOriginalName];
+        }
         sharedStampSets[name] = [...adminSelectedStamps];
+        editingStampSetOriginalName = name;
         refreshSavedStampSets(name);
-        toast(`「${name}」をこのカードに反映しました。共同編集カードを保存すると共有されます`);
+        toast(`「${name}」を保存しました。カードを保存すると共同管理者にも共有されます`);
       }
 
       function loadStampSet(name) {
         const saved = loadSavedStampSets();
         if (!name || !saved[name]) return;
+        editingStampSetOriginalName = name;
         $('adminStampSetName').value = name;
         renderAdminStampChoices($('adminTemplate').value, saved[name], saved[name][0]);
-        toast(`「${name}」を読み込みました`);
       }
 
       function deleteStampSet() {
         const name = $('adminSavedStampSet').value || $('adminStampSetName').value.trim();
         const saved = loadSavedStampSets();
         if (!name || !saved[name]) return toast('削除する保存済みセットを選んでください');
+        if (name === 'AMENITY') return toast('AMENITYセットは削除せず、内容を編集して使えます');
         delete sharedStampSets[name];
-        $('adminStampSetName').value = '';
-        refreshSavedStampSets();
-        toast(`「${name}」をこのカードから削除しました。共同編集カードを保存すると共有されます`);
+        refreshSavedStampSets('AMENITY');
+        loadStampSet($('adminSavedStampSet').value);
+        toast(`「${name}」を削除しました。カードを保存すると共同管理者にも反映されます`);
       }
 
       function normalizeStampSet(value, defaultStamp = '⛄️') {
@@ -1977,7 +1959,6 @@
       function syncAdminStampOptions(template, preferred = '⛄️', selected = adminSelectedStamps) {
         const available = selected && selected.length ? selected : stampsForTemplate(template, preferred);
         const selectedStamp = available.includes(preferred) ? preferred : available[0];
-        $('adminStamp').innerHTML = available.map((stamp) => `<option value="${stamp}">${stamp} ${STAMP_NAMES[stamp] || ''}</option>`).join('');
         $('adminStamp').value = selectedStamp;
       }
 
@@ -2060,7 +2041,8 @@
         const id = currentConfig && currentConfig.title === title && currentConfig.song === song && currentConfig.start === start && currentConfig.release === release && currentConfig.end === end
           ? currentConfig.id
           : hashText(`${title}|${song}|${start}|${release}|${end}`);
-        return { title, song, start, release, end, stamp, stamps, stampSets, color, link, apple, spotify, line, youtube, shareTemplate, template, id, apiUrl };
+        const stampSetName = $('adminSavedStampSet').value || editingStampSetOriginalName || 'AMENITY';
+        return { title, song, start, release, end, stamp, stamps, stampSets, stampSetName, color, link, apple, spotify, line, youtube, shareTemplate, template, id, apiUrl };
       }
 
       function configUrl(config, testMode = false) {
@@ -2255,8 +2237,10 @@
         const incomingStamps = directStampSet
           ? normalizeStampSet(directStampSet, incomingStamp)
           : decodeStampSet(firstParam(params, 'x', 'stamps'), stampsForTemplate($('adminTemplate').value));
+        refreshSavedStampSets('AMENITY');
+        $('adminStampSetName').value = 'AMENITY';
+        editingStampSetOriginalName = 'AMENITY';
         renderAdminStampChoices($('adminTemplate').value, incomingStamps, incomingStamp === '🩵' ? '💙' : incomingStamp);
-        refreshSavedStampSets();
         const colorRaw = firstParam(params, 'c', 'color');
         const incoming = /^[0-9a-f]{6}$/i.test(colorRaw) ? `#${colorRaw}` : colorRaw;
         if (incoming && COLORS.includes(incoming)) {
@@ -2403,6 +2387,13 @@
         $('adminTemplate').value = config.template || 'hotel';
         $('adminApiUrl').value = config.apiUrl || loadSavedSharedApiUrl();
         importSharedStampSets(config.stampSets);
+        const savedSets = loadSavedStampSets();
+        const selectedSetName = savedSets[config.stampSetName]
+          ? config.stampSetName
+          : Object.keys(savedSets).find((name) => JSON.stringify(savedSets[name]) === JSON.stringify(config.stamps || [])) || 'AMENITY';
+        refreshSavedStampSets(selectedSetName);
+        editingStampSetOriginalName = selectedSetName;
+        $('adminStampSetName').value = selectedSetName;
         renderAdminStampChoices($('adminTemplate').value, config.stamps, config.stamp);
         updateSharedAdminUi(config);
       }
@@ -3474,9 +3465,7 @@
         $('generateButton').addEventListener('click', () => generate('participant'));
         $('testGenerateButton').addEventListener('click', () => generate('test'));
         $('adminTemplate').addEventListener('change', () => {
-          const template = $('adminTemplate').value;
-          const defaults = stampsForTemplate(template);
-          renderAdminStampChoices(template, defaults, defaults[0]);
+          renderAdminStampChoices($('adminTemplate').value, adminSelectedStamps, adminSelectedStamps[0]);
         });
         const syncDateLimits = () => {
           $('adminRelease').min = $('adminStart').value;
@@ -3501,14 +3490,14 @@
             addCustomStamps();
           }
         });
-        $('saveStampSetButton').addEventListener('click', saveStampSet);
+        $('saveStampSetButton').addEventListener('click', () => saveStampSet(false));
+        $('duplicateStampSetButton').addEventListener('click', () => saveStampSet(true));
         $('deleteStampSetButton').addEventListener('click', deleteStampSet);
         $('newStampSetButton').addEventListener('click', () => {
           $('adminStampSetName').value = '';
-          $('adminSavedStampSet').value = '';
-          const defaults = stampsForTemplate($('adminTemplate').value);
-          renderAdminStampChoices($('adminTemplate').value, defaults, defaults[0]);
-          toast('新しいセットを編集できます');
+          editingStampSetOriginalName = '';
+          $('adminStampSetName').focus();
+          toast('名前と内容を編集して「変更を保存」を押してください');
         });
         $('adminSavedStampSet').addEventListener('change', () => loadStampSet($('adminSavedStampSet').value));
         $('participantName').addEventListener('input', () => {
