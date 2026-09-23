@@ -1653,6 +1653,33 @@
         return `daily_stamp_workspace_edit_key_v1_${hashText(apiUrl || '')}`;
       }
 
+      function workspaceCacheStorageName(apiUrl, editKey) {
+        return `daily_stamp_workspace_cache_v1_${hashText(`${apiUrl || ''}|${editKey || ''}`)}`;
+      }
+
+      function saveWorkspaceCache() {
+        const apiUrl = safeSharedApiUrl($('adminApiUrl').value) || safeSharedApiUrl(incomingSharedApiUrl);
+        if (!apiUrl || !workspaceEditKey) return;
+        try {
+          localStorage.setItem(workspaceCacheStorageName(apiUrl, workspaceEditKey), JSON.stringify({
+            cards: workspaceCards,
+            stampSets: loadSavedStampSets(),
+            settingsRevision: workspaceStampSetsRevision,
+            cachedAt: Date.now()
+          }));
+        } catch (_) {}
+      }
+
+      function loadWorkspaceCache(apiUrl, editKey) {
+        try {
+          const cached = JSON.parse(localStorage.getItem(workspaceCacheStorageName(apiUrl, editKey)) || 'null');
+          if (!cached || !Array.isArray(cached.cards)) return null;
+          return cached;
+        } catch (_) {
+          return null;
+        }
+      }
+
       function saveWorkspaceEditKey(apiUrl, editKey) {
         if (!apiUrl || !/^[a-zA-Z0-9_-]{32,160}$/.test(editKey || '')) return;
         try { localStorage.setItem(workspaceKeyStorageName(apiUrl), editKey); } catch (_) {}
@@ -1708,20 +1735,18 @@
           }
           const requestId = `shared_${randomToken(8)}`;
           const callbackName = `dailyStampCallback_${randomToken(8)}`;
-          const frame = document.createElement('iframe');
           const script = document.createElement('script');
-          const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-          frame.hidden = true;
-          frame.setAttribute('aria-hidden', 'true');
+          let frame = null;
+          let fallbackStarted = false;
           let finished = false;
           const cleanup = () => {
             if (finished) return;
             finished = true;
             clearTimeout(timer);
+            clearTimeout(fallbackTimer);
             window.removeEventListener('message', receive);
-            frame.remove();
+            if (frame) frame.remove();
             script.remove();
-            if (controller) controller.abort();
             try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
           };
           const finish = (result) => {
@@ -1746,34 +1771,32 @@
             if (value) plainUrl.searchParams.set(name, value);
           });
 
-          const frameUrl = new URL(plainUrl.href);
-          frameUrl.searchParams.set('action', `${action}frame`);
-          frameUrl.searchParams.set('requestId', requestId);
-          frame.src = frameUrl.href;
-
           window[callbackName] = finish;
           const scriptUrl = new URL(plainUrl.href);
           scriptUrl.searchParams.set('callback', callbackName);
           script.src = scriptUrl.href;
           script.async = true;
 
-          fetch(plainUrl.href, {
-            method: 'GET',
-            mode: 'cors',
-            cache: 'no-store',
-            credentials: 'omit',
-            signal: controller ? controller.signal : undefined
-          })
-            .then((response) => response.json())
-            .then(finish)
-            .catch(() => {});
+          const startFrameFallback = () => {
+            if (finished || fallbackStarted) return;
+            fallbackStarted = true;
+            frame = document.createElement('iframe');
+            frame.hidden = true;
+            frame.setAttribute('aria-hidden', 'true');
+            const frameUrl = new URL(plainUrl.href);
+            frameUrl.searchParams.set('action', `${action}frame`);
+            frameUrl.searchParams.set('requestId', requestId);
+            frame.src = frameUrl.href;
+            document.body.appendChild(frame);
+          };
+          script.onerror = startFrameFallback;
+          const fallbackTimer = setTimeout(startFrameFallback, 8000);
 
           const timer = setTimeout(() => {
             cleanup();
             reject(new Error('共同編集サーバーの応答に時間がかかっています。'));
-          }, 15000);
+          }, 22000);
 
-          document.body.appendChild(frame);
           document.head.appendChild(script);
         });
       }
@@ -1824,6 +1847,7 @@
           const frame = document.createElement('iframe');
           const form = document.createElement('form');
           frame.name = frameName;
+          frame.srcdoc = '<!doctype html><html><body></body></html>';
           frame.hidden = true;
           frame.setAttribute('aria-hidden', 'true');
           form.method = 'POST';
@@ -1838,6 +1862,7 @@
             form.appendChild(input);
           });
           let finished = false;
+          let submitted = false;
           const cleanup = () => {
             if (finished) return;
             finished = true;
@@ -1856,14 +1881,30 @@
             }
             resolve(message.result);
           };
+          frame.addEventListener('load', () => {
+            if (finished) return;
+            if (!submitted) {
+              submitted = true;
+              form.submit();
+              return;
+            }
+            setTimeout(() => {
+              if (finished) return;
+              cleanup();
+              resolve({
+                ok: true,
+                revision: Number(payload.expectedRevision || 0) + 1,
+                responseFallback: true
+              });
+            }, 350);
+          });
           window.addEventListener('message', receive);
           const timer = setTimeout(() => {
             cleanup();
             reject(new Error('共同編集サーバーの応答に時間がかかっています。'));
-          }, 15000);
-          document.body.appendChild(frame);
+          }, 22000);
           document.body.appendChild(form);
-          form.submit();
+          document.body.appendChild(frame);
         });
       }
 
@@ -1948,6 +1989,7 @@
           stampSets: loadSavedStampSets()
         });
         workspaceStampSetsRevision = Number(result.revision || workspaceStampSetsRevision + 1);
+        saveWorkspaceCache();
       }
 
       function importSharedStampSets(stampSets) {
@@ -2465,6 +2507,7 @@
         workspaceCards = Array.isArray(result && result.cards) ? result.cards : [];
         workspaceStampSetsRevision = Number(result && result.settingsRevision || 0);
         importSharedStampSets(result && result.stampSets);
+        saveWorkspaceCache();
       }
 
       function upsertWorkspaceCard(config) {
@@ -2477,6 +2520,7 @@
           revision: Number(config.sharedRevision || 0)
         };
         workspaceCards = [item, ...workspaceCards.filter((card) => card.id !== item.id)];
+        saveWorkspaceCache();
         renderWorkspacePanel();
       }
 
@@ -2510,6 +2554,7 @@
             expectedRevision: Number(item.revision || 0)
           });
           workspaceCards = workspaceCards.filter((card) => card.id !== cardId);
+          saveWorkspaceCache();
           if (currentConfig && currentConfig.sharedCardId === cardId) {
             editingWorkspaceCardId = '';
             currentConfig = null;
@@ -3685,6 +3730,7 @@
         initAdminDefaults();
         let config = null;
         let sharedLoadError = '';
+        let usedWorkspaceCache = false;
         const requestedAdmin = params.get('admin') === '1';
         const sharedApi = safeSharedApiUrl(incomingSharedApiUrl);
         if (requestedAdmin && sharedApi && !workspaceEditKey) {
@@ -3697,7 +3743,24 @@
             history.replaceState(null, '', sharedAdminUrl(sharedApi, workspaceEditKey));
           }
         }
-        if (incomingSharedCardId) {
+        if (requestedAdmin && sharedApi && workspaceEditKey) {
+          const cachedWorkspace = loadWorkspaceCache(sharedApi, workspaceEditKey);
+          if (cachedWorkspace) {
+            const cachedItem = incomingSharedCardId
+              ? cachedWorkspace.cards.find((card) => card.id === incomingSharedCardId)
+              : cachedWorkspace.cards[0];
+            if (!incomingSharedCardId || cachedItem) {
+              applyWorkspaceResult(cachedWorkspace);
+              if (cachedItem) config = workspaceItemConfig(cachedItem, sharedApi);
+              usedWorkspaceCache = true;
+            }
+          }
+        }
+        if (usedWorkspaceCache) {
+          setTimeout(() => {
+            refreshWorkspaceCards(sharedApi).catch(() => {});
+          }, 50);
+        } else if (incomingSharedCardId) {
           try {
             const result = await loadSharedConfig(sharedApi, incomingSharedCardId, incomingSharedEditKey);
             if (requestedAdmin && (!incomingSharedEditKey || !result.canEdit)) {
