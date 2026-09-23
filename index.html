@@ -621,13 +621,33 @@
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 16px 11px;
     }
-    .template-journey .stamp-grid::before {
-      content: "";
-      position: absolute;
-      inset: 50% 5%;
-      height: 3px;
-      background: repeating-linear-gradient(90deg, rgba(var(--theme-rgb), .28) 0 10px, transparent 10px 17px);
-      transform: translateY(-50%);
+    .journey-route { display: none; }
+    .template-journey .journey-route {
+      display: grid;
+      grid-template-columns: 9px minmax(0, 1fr) 15px;
+      align-items: center;
+      gap: 7px;
+      height: 15px;
+      margin: -3px 10px 13px;
+      color: var(--theme);
+    }
+    .journey-route-start {
+      width: 8px;
+      height: 8px;
+      border: 2px solid #fffdf8;
+      border-radius: 50%;
+      background: var(--theme);
+      box-shadow: 0 0 0 2px rgba(var(--theme-rgb), .28);
+    }
+    .journey-route-line {
+      height: 2px;
+      background: repeating-linear-gradient(90deg, rgba(var(--theme-rgb), .48) 0 7px, transparent 7px 12px);
+    }
+    .journey-route-goal {
+      font-size: 14px;
+      line-height: 1;
+      text-align: center;
+      transform: rotate(8deg);
     }
     .template-journey .day {
       aspect-ratio: 1;
@@ -779,6 +799,38 @@
       color: var(--muted);
       font-size: 11px;
       line-height: 1.55;
+    }
+    .stamp-set-editor {
+      display: grid;
+      gap: 8px;
+      margin-top: 11px;
+      padding-top: 11px;
+      border-top: 1px solid #e3ebf1;
+    }
+    .stamp-set-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+    }
+    .stamp-set-row.triple {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+    .stamp-set-row input,
+    .stamp-set-row select {
+      min-width: 0;
+      min-height: 40px;
+      border: 1px solid #cddae5;
+      border-radius: 11px;
+      padding: 8px 10px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+      font-size: 14px;
+    }
+    .stamp-set-row .btn {
+      min-height: 40px;
+      padding: 8px 11px;
+      font-size: 11px;
     }
 
     .share-help {
@@ -1115,6 +1167,11 @@
           <span id="periodText"></span>
         </div>
         <p id="participantNameCard" class="participant-name-card hidden"></p>
+        <div class="journey-route" aria-hidden="true">
+          <span class="journey-route-start"></span>
+          <span class="journey-route-line"></span>
+          <span class="journey-route-goal">✦</span>
+        </div>
         <div id="stampGrid" class="stamp-grid"></div>
       </section>
 
@@ -1176,7 +1233,24 @@
         <div class="field wide">
           <label>参加者が選べるスタンプ（タップで登録・解除）</label>
           <div id="adminStampChoices" class="admin-stamp-choices" role="group" aria-label="参加者が選べるスタンプ"></div>
-          <p class="admin-stamp-help">テンプレートを選ぶとおすすめセットが入ります。色が付いた絵柄だけが参加者に表示されます。</p>
+          <p class="admin-stamp-help">テンプレートを選ぶとおすすめセットが入ります。色が付いた絵柄だけが参加者に表示されます。下から好きな絵文字も追加できます。</p>
+          <div class="stamp-set-editor">
+            <div class="stamp-set-row">
+              <input id="adminCustomStamp" type="text" inputmode="text" maxlength="80" placeholder="追加する絵文字（例：🎂 🐶）" aria-label="追加する絵文字">
+              <button id="addCustomStampButton" class="btn btn-soft" type="button">絵文字を追加</button>
+            </div>
+            <div class="stamp-set-row triple">
+              <input id="adminStampSetName" type="text" maxlength="40" placeholder="セット名（例：ALL SUITE用）" aria-label="スタンプセット名">
+              <button id="saveStampSetButton" class="btn btn-soft" type="button">保存／上書き</button>
+              <button id="deleteStampSetButton" class="btn btn-plain" type="button">削除</button>
+            </div>
+            <div class="stamp-set-row">
+              <select id="adminSavedStampSet" aria-label="保存済みスタンプセット">
+                <option value="">保存済みセットを選ぶ</option>
+              </select>
+              <button id="newStampSetButton" class="btn btn-plain" type="button">新しいセット</button>
+            </div>
+          </div>
         </div>
         <div class="field">
           <label for="adminStamp">最初に選ばれているスタンプ</label>
@@ -1208,7 +1282,7 @@
             <option value="🤖">🤖 ロボット</option>
             <option value="🕺">🕺 ダンス</option>
           </select>
-          <p class="field-note">選べる絵柄はテンプレートごとに自動で切り替わります。</p>
+          <p class="field-note">上で登録したセットのうち、参加者画面で最初に選ぶ絵柄です。</p>
         </div>
         <div class="field wide">
           <label for="adminShareTemplate">SNS投稿テンプレート</label>
@@ -1305,6 +1379,7 @@
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
       const DEFAULT_SHARE_TEMPLATE = '⛄️ {カードタイトル}\n「{曲名}」を1日1回聴いています！\n【{スタンプ数} STAMPS】\n{参加者用URL}\n#SnowMan';
       const SAVED_SHARE_TEMPLATE_KEY = 'daily_stamp_saved_share_template_v1';
+      const SAVED_STAMP_SETS_KEY = 'daily_stamp_saved_stamp_sets_v1';
       const params = new URLSearchParams(location.search);
       const isTestMode = params.get('z') === '1' || params.get('test') === '1' || params.get('mode') === 'test';
       const incomingTestDay = params.get('d') || params.get('today') || '';
@@ -1429,13 +1504,99 @@
         toast('投稿テンプレートを初期文に戻しました');
       }
 
+      function splitEmojiInput(value) {
+        const chunks = String(value || '').trim().split(/[\s,、]+/).filter(Boolean);
+        const segmenter = typeof Intl !== 'undefined' && Intl.Segmenter
+          ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
+          : null;
+        const pieces = chunks.flatMap((chunk) => segmenter
+          ? [...segmenter.segment(chunk)].map((entry) => entry.segment)
+          : [chunk]);
+        return pieces.filter((piece) => /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(piece));
+      }
+
+      function loadSavedStampSets() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(SAVED_STAMP_SETS_KEY) || '{}');
+          if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return {};
+          return Object.fromEntries(Object.entries(saved)
+            .map(([name, stamps]) => [String(name).slice(0, 40), normalizeStampSet(stamps, '')])
+            .filter(([name, stamps]) => name && stamps.length));
+        } catch (_) {
+          return {};
+        }
+      }
+
+      function refreshSavedStampSets(selectedName = '') {
+        const select = $('adminSavedStampSet');
+        const saved = loadSavedStampSets();
+        select.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = '保存済みセットを選ぶ';
+        select.appendChild(placeholder);
+        Object.keys(saved).sort((a, b) => a.localeCompare(b, 'ja')).forEach((name) => {
+          const option = document.createElement('option');
+          option.value = name;
+          option.textContent = `${name}（${saved[name].length}個）`;
+          select.appendChild(option);
+        });
+        select.value = saved[selectedName] ? selectedName : '';
+      }
+
+      function addCustomStamps() {
+        const additions = splitEmojiInput($('adminCustomStamp').value);
+        if (!additions.length) return toast('追加する絵文字を入力してください');
+        adminSelectedStamps = [...new Set([...adminSelectedStamps, ...additions])].slice(0, 40);
+        $('adminCustomStamp').value = '';
+        renderAdminStampChoices($('adminTemplate').value, adminSelectedStamps, $('adminStamp').value);
+        toast('スタンプを追加しました');
+      }
+
+      function saveStampSet() {
+        const name = $('adminStampSetName').value.trim().slice(0, 40);
+        if (!name) return toast('セット名を入力してください');
+        const saved = loadSavedStampSets();
+        saved[name] = [...adminSelectedStamps];
+        try {
+          localStorage.setItem(SAVED_STAMP_SETS_KEY, JSON.stringify(saved));
+          refreshSavedStampSets(name);
+          toast(`「${name}」をこの端末に保存しました`);
+        } catch (_) {
+          toast('セットを保存できませんでした');
+        }
+      }
+
+      function loadStampSet(name) {
+        const saved = loadSavedStampSets();
+        if (!name || !saved[name]) return;
+        $('adminStampSetName').value = name;
+        renderAdminStampChoices($('adminTemplate').value, saved[name], saved[name][0]);
+        toast(`「${name}」を読み込みました`);
+      }
+
+      function deleteStampSet() {
+        const name = $('adminSavedStampSet').value || $('adminStampSetName').value.trim();
+        const saved = loadSavedStampSets();
+        if (!name || !saved[name]) return toast('削除する保存済みセットを選んでください');
+        delete saved[name];
+        try {
+          localStorage.setItem(SAVED_STAMP_SETS_KEY, JSON.stringify(saved));
+          $('adminStampSetName').value = '';
+          refreshSavedStampSets();
+          toast(`「${name}」を削除しました`);
+        } catch (_) {
+          toast('削除できませんでした');
+        }
+      }
+
       function normalizeStampSet(value, defaultStamp = '⛄️') {
-        const requested = (Array.isArray(value) ? value : String(value || '').trim().split(/[\s,]+/))
+        const requested = (Array.isArray(value) ? value : splitEmojiInput(value))
           .map((stamp) => stamp === '🩵' ? '💙' : stamp);
         if (defaultStamp === '🩵') defaultStamp = '💙';
-        const stamps = [...new Set(requested.filter((stamp) => STAMPS.includes(stamp)))];
+        const stamps = [...new Set(requested.filter((stamp) => typeof stamp === 'string' && /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(stamp)))].slice(0, 40);
         const result = stamps.length ? stamps : [...STAMPS];
-        if (STAMPS.includes(defaultStamp) && !result.includes(defaultStamp)) result.unshift(defaultStamp);
+        if (defaultStamp && /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(defaultStamp) && !result.includes(defaultStamp)) result.unshift(defaultStamp);
         return result;
       }
 
@@ -1474,10 +1635,11 @@
 
       function renderAdminStampChoices(template, selected = null, preferred = '') {
         const defaults = stampsForTemplate(template);
-        adminSelectedStamps = normalizeStampSet(selected && selected.length ? selected : defaults, preferred || defaults[0]);
+        adminSelectedStamps = normalizeStampSet(selected && selected.length ? selected : defaults, '');
         const list = $('adminStampChoices');
         list.innerHTML = '';
-        STAMPS.forEach((stamp) => {
+        const catalog = [...new Set([...adminSelectedStamps.filter((stamp) => !STAMPS.includes(stamp)), ...STAMPS])];
+        catalog.forEach((stamp) => {
           const button = document.createElement('button');
           button.type = 'button';
           button.className = `admin-stamp-choice${adminSelectedStamps.includes(stamp) ? ' selected' : ''}`;
@@ -1491,9 +1653,8 @@
             } else {
               adminSelectedStamps.push(stamp);
             }
-            button.classList.toggle('selected', adminSelectedStamps.includes(stamp));
-            button.setAttribute('aria-pressed', adminSelectedStamps.includes(stamp) ? 'true' : 'false');
-            syncAdminStampOptions(template, $('adminStamp').value, adminSelectedStamps);
+            const nextPreferred = adminSelectedStamps.includes($('adminStamp').value) ? $('adminStamp').value : adminSelectedStamps[0];
+            renderAdminStampChoices(template, adminSelectedStamps, nextPreferred);
           });
         });
         syncAdminStampOptions(template, preferred, adminSelectedStamps);
@@ -1524,7 +1685,10 @@
         const template = ['classic', 'hotel', 'journey'].includes(templateAlias) ? templateAlias : 'hotel';
         const incomingStampRaw = firstParam(source, 'e', 'stamp') || '⛄️';
         const incomingStamp = incomingStampRaw === '🩵' ? '💙' : incomingStampRaw;
-        const availableStamps = decodeStampSet(firstParam(source, 'x', 'stamps'), stampsForTemplate(template));
+        const directStampSet = firstParam(source, 'g', 'stampSet');
+        const availableStamps = directStampSet
+          ? normalizeStampSet(directStampSet, incomingStamp)
+          : decodeStampSet(firstParam(source, 'x', 'stamps'), stampsForTemplate(template));
         const stamp = availableStamps.includes(incomingStamp) ? incomingStamp : availableStamps[0];
         const stamps = availableStamps;
         const colorRaw = firstParam(source, 'c', 'color');
@@ -1598,6 +1762,7 @@
         if (config.shareTemplate && config.shareTemplate !== DEFAULT_SHARE_TEMPLATE) url.searchParams.set('m', config.shareTemplate);
         url.searchParams.set('e', config.stamp);
         url.searchParams.set('x', encodeStampSet(config.stamps));
+        url.searchParams.set('g', config.stamps.join(' '));
         url.searchParams.set('v', { hotel: 'h', classic: 'c', journey: 'j' }[config.template] || 'h');
         url.searchParams.set('i', config.id);
         if (testMode) {
@@ -1764,8 +1929,12 @@
         const template = { h: 'hotel', c: 'classic', j: 'journey' }[templateRaw] || templateRaw;
         $('adminTemplate').value = ['classic', 'hotel', 'journey'].includes(template) ? template : 'hotel';
         const incomingStamp = firstParam(params, 'e', 'stamp') || '⛄️';
-        const incomingStamps = decodeStampSet(firstParam(params, 'x', 'stamps'), stampsForTemplate($('adminTemplate').value));
+        const directStampSet = firstParam(params, 'g', 'stampSet');
+        const incomingStamps = directStampSet
+          ? normalizeStampSet(directStampSet, incomingStamp)
+          : decodeStampSet(firstParam(params, 'x', 'stamps'), stampsForTemplate($('adminTemplate').value));
         renderAdminStampChoices($('adminTemplate').value, incomingStamps, incomingStamp === '🩵' ? '💙' : incomingStamp);
+        refreshSavedStampSets();
         const colorRaw = firstParam(params, 'c', 'color');
         const incoming = /^[0-9a-f]{6}$/i.test(colorRaw) ? `#${colorRaw}` : colorRaw;
         if (incoming && COLORS.includes(incoming)) {
@@ -2242,7 +2411,7 @@
         const gap = 24;
         const cell = Math.floor((width - margin * 2 - gap * (cols - 1)) / cols);
         const cellHeight = config.template === 'hotel' ? Math.round(cell * 1.16) : cell;
-        const gridTop = 650;
+        const gridTop = config.template === 'journey' ? 680 : 650;
         const gridHeight = rows * cellHeight + Math.max(0, rows - 1) * gap;
         const height = gridTop + gridHeight + 125;
         const canvas = document.createElement('canvas');
@@ -2381,6 +2550,36 @@
         ctx.fillStyle = isHotel ? '#dfbd6e' : muted;
         ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillText(`${formatDate(config.start, false)} — ${formatDate(config.end, false)}`, width - margin, 615);
+
+        if (isJourney) {
+          const routeY = 646;
+          const routeStartX = margin + 24;
+          const routeEndX = width - margin - 30;
+          ctx.save();
+          ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, .48)`;
+          ctx.lineWidth = 3;
+          ctx.setLineDash([10, 8]);
+          ctx.beginPath();
+          ctx.moveTo(routeStartX + 14, routeY);
+          ctx.lineTo(routeEndX - 18, routeY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.arc(routeStartX, routeY, 7, 0, Math.PI * 2);
+          ctx.fillStyle = config.color;
+          ctx.fill();
+          ctx.strokeStyle = '#fffdf8';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          ctx.translate(routeEndX, routeY);
+          ctx.rotate(8 * Math.PI / 180);
+          ctx.fillStyle = config.color;
+          ctx.font = '700 28px -apple-system, BlinkMacSystemFont, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('✦', 0, 1);
+          ctx.restore();
+        }
 
         days.forEach((day, index) => {
           const col = index % cols;
@@ -2776,6 +2975,23 @@
         $('copyButton').addEventListener('click', copyGeneratedUrl);
         $('saveShareTemplateButton').addEventListener('click', saveShareTemplate);
         $('resetShareTemplateButton').addEventListener('click', resetShareTemplate);
+        $('addCustomStampButton').addEventListener('click', addCustomStamps);
+        $('adminCustomStamp').addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            addCustomStamps();
+          }
+        });
+        $('saveStampSetButton').addEventListener('click', saveStampSet);
+        $('deleteStampSetButton').addEventListener('click', deleteStampSet);
+        $('newStampSetButton').addEventListener('click', () => {
+          $('adminStampSetName').value = '';
+          $('adminSavedStampSet').value = '';
+          const defaults = stampsForTemplate($('adminTemplate').value);
+          renderAdminStampChoices($('adminTemplate').value, defaults, defaults[0]);
+          toast('新しいセットを編集できます');
+        });
+        $('adminSavedStampSet').addEventListener('change', () => loadStampSet($('adminSavedStampSet').value));
         $('participantName').addEventListener('input', () => {
           if (!currentConfig) return;
           const name = $('participantName').value.slice(0, 32);
