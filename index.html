@@ -818,8 +818,9 @@
       grid-template-columns: minmax(0, 1fr) auto auto;
     }
     .stamp-set-row.actions {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 1fr) auto;
     }
+    .stamp-set-row.actions.new-set { grid-template-columns: 1fr; }
     .stamp-set-row input,
     .stamp-set-row select {
       min-width: 0;
@@ -840,6 +841,18 @@
     .stamp-set-row.actions .btn {
       padding-inline: 6px;
     }
+    .stamp-set-mode {
+      margin: 2px 0;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .stamp-set-step {
+      margin: 7px 0 0;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 900;
+    }
     .stamp-set-preview-wrap {
       padding: 10px 11px;
       border: 1px solid #d9e4ec;
@@ -858,6 +871,10 @@
       gap: 6px;
       font-size: 23px;
       line-height: 1.25;
+    }
+    .stamp-set-preview-empty {
+      color: var(--muted);
+      font-size: 12px;
     }
 
     .share-help {
@@ -1337,21 +1354,23 @@
               <select id="adminSavedStampSet" aria-label="保存済み絵文字セット"></select>
               <button id="newStampSetButton" class="btn btn-plain" type="button">新しいセット</button>
             </div>
+            <p id="stampSetMode" class="stamp-set-mode">「AMENITY」を編集中</p>
+            <p class="stamp-set-step">① セット名</p>
             <input id="adminStampSetName" type="text" maxlength="40" placeholder="セット名" aria-label="絵文字セット名">
-            <p class="admin-stamp-help">選んだセットの名前と内容を、この下でそのまま編集できます。</p>
+            <p class="stamp-set-step">② 参加者が選べる絵文字</p>
+            <p class="admin-stamp-help">使う絵文字をタップすると色が付きます。もう一度タップすると外れます。</p>
+            <div id="adminStampChoices" class="admin-stamp-choices" role="group" aria-label="参加者が選べる絵文字"></div>
             <div class="stamp-set-preview-wrap">
-              <p class="stamp-set-preview-label">このセットの内容</p>
+              <p id="stampSetPreviewLabel" class="stamp-set-preview-label">現在のセット内容</p>
               <div id="adminStampSetPreview" class="stamp-set-preview" aria-live="polite"></div>
             </div>
-            <div id="adminStampChoices" class="admin-stamp-choices" role="group" aria-label="参加者が選べる絵文字"></div>
-            <p class="admin-stamp-help">色が付いた絵文字だけが参加者に表示されます。タップで登録・解除できます。</p>
             <div class="stamp-set-row">
-              <input id="adminCustomStamp" type="text" inputmode="text" maxlength="80" placeholder="絵文字を追加（例：🎂 🐶）" aria-label="追加する絵文字">
+              <input id="adminCustomStamp" type="text" inputmode="text" maxlength="80" placeholder="一覧にない絵文字を追加（例：🎂 🐶）" aria-label="追加する絵文字">
               <button id="addCustomStampButton" class="btn btn-soft" type="button">追加</button>
             </div>
+            <p class="stamp-set-step">③ セットを保存</p>
             <div class="stamp-set-row actions">
               <button id="saveStampSetButton" class="btn btn-soft" type="button">変更を保存</button>
-              <button id="duplicateStampSetButton" class="btn btn-soft" type="button">別名で保存</button>
               <button id="deleteStampSetButton" class="btn btn-plain" type="button">削除</button>
             </div>
             <p class="field-note">保存したセットは共同管理者にも共有されます。</p>
@@ -1879,16 +1898,24 @@
         toast('スタンプを追加しました');
       }
 
-      function saveStampSet(asCopy = false) {
+      function setStampSetEditorMode(isNew, name = '') {
+        $('stampSetMode').textContent = isNew ? '新しいセットを作成中' : `「${name}」を編集中`;
+        $('saveStampSetButton').textContent = isNew ? 'このセットを保存' : '変更を保存';
+        $('deleteStampSetButton').classList.toggle('hidden', isNew);
+        $('saveStampSetButton').parentElement.classList.toggle('new-set', isNew);
+      }
+
+      function saveStampSet() {
         const name = $('adminStampSetName').value.trim().slice(0, 40);
         if (!name) return toast('セット名を入力してください');
-        if (asCopy && name === editingStampSetOriginalName) return toast('別のセット名を入力してください');
-        if (!asCopy && editingStampSetOriginalName && editingStampSetOriginalName !== name) {
+        if (!adminSelectedStamps.length) return toast('使う絵文字を1つ以上選んでください');
+        if (editingStampSetOriginalName && editingStampSetOriginalName !== name) {
           delete sharedStampSets[editingStampSetOriginalName];
         }
         sharedStampSets[name] = [...adminSelectedStamps];
         editingStampSetOriginalName = name;
         refreshSavedStampSets(name);
+        setStampSetEditorMode(false, name);
         toast(`「${name}」を保存しました。カードを保存すると共同管理者にも共有されます`);
       }
 
@@ -1898,6 +1925,7 @@
         editingStampSetOriginalName = name;
         $('adminStampSetName').value = name;
         renderAdminStampChoices($('adminTemplate').value, saved[name], saved[name][0]);
+        setStampSetEditorMode(false, name);
       }
 
       function deleteStampSet() {
@@ -1916,7 +1944,7 @@
           .map((stamp) => stamp === '🩵' ? '💙' : stamp);
         if (defaultStamp === '🩵') defaultStamp = '💙';
         const stamps = [...new Set(requested.filter((stamp) => typeof stamp === 'string' && /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(stamp)))].slice(0, 40);
-        const result = stamps.length ? stamps : [...STAMPS];
+        const result = stamps.length ? stamps : (defaultStamp ? [...STAMPS] : []);
         if (defaultStamp && /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(defaultStamp) && !result.includes(defaultStamp)) result.unshift(defaultStamp);
         return result;
       }
@@ -1956,7 +1984,7 @@
 
       function renderAdminStampChoices(template, selected = null, preferred = '') {
         const defaults = stampsForTemplate(template);
-        adminSelectedStamps = normalizeStampSet(selected && selected.length ? selected : defaults, '');
+        adminSelectedStamps = normalizeStampSet(Array.isArray(selected) ? selected : defaults, '');
         const list = $('adminStampChoices');
         list.innerHTML = '';
         const catalog = [...new Set([...adminSelectedStamps.filter((stamp) => !STAMPS.includes(stamp)), ...STAMPS])];
@@ -1969,7 +1997,6 @@
           button.setAttribute('aria-pressed', adminSelectedStamps.includes(stamp) ? 'true' : 'false');
           button.addEventListener('click', () => {
             if (adminSelectedStamps.includes(stamp)) {
-              if (adminSelectedStamps.length === 1) return toast('スタンプは1つ以上登録してください');
               adminSelectedStamps = adminSelectedStamps.filter((item) => item !== stamp);
             } else {
               adminSelectedStamps.push(stamp);
@@ -1980,6 +2007,13 @@
         });
         const preview = $('adminStampSetPreview');
         preview.innerHTML = '';
+        $('stampSetPreviewLabel').textContent = `現在のセット内容（${adminSelectedStamps.length}個）`;
+        if (!adminSelectedStamps.length) {
+          const empty = document.createElement('span');
+          empty.className = 'stamp-set-preview-empty';
+          empty.textContent = 'まだ選ばれていません。上の絵文字をタップしてください。';
+          preview.appendChild(empty);
+        }
         adminSelectedStamps.forEach((stamp) => {
           const item = document.createElement('span');
           item.textContent = stamp;
@@ -2274,6 +2308,7 @@
         $('adminStampSetName').value = 'AMENITY';
         editingStampSetOriginalName = 'AMENITY';
         renderAdminStampChoices($('adminTemplate').value, incomingStamps, incomingStamp === '🩵' ? '💙' : incomingStamp);
+        setStampSetEditorMode(false, 'AMENITY');
         const colorRaw = firstParam(params, 'c', 'color');
         const incoming = /^[0-9a-f]{6}$/i.test(colorRaw) ? `#${colorRaw}` : colorRaw;
         if (incoming && COLORS.includes(incoming)) {
@@ -2443,6 +2478,7 @@
         editingStampSetOriginalName = selectedSetName;
         $('adminStampSetName').value = selectedSetName;
         renderAdminStampChoices($('adminTemplate').value, config.stamps, config.stamp);
+        setStampSetEditorMode(false, selectedSetName);
         updateSharedAdminUi(config);
       }
 
@@ -3566,14 +3602,16 @@
             addCustomStamps();
           }
         });
-        $('saveStampSetButton').addEventListener('click', () => saveStampSet(false));
-        $('duplicateStampSetButton').addEventListener('click', () => saveStampSet(true));
+        $('saveStampSetButton').addEventListener('click', saveStampSet);
         $('deleteStampSetButton').addEventListener('click', deleteStampSet);
         $('newStampSetButton').addEventListener('click', () => {
+          $('adminSavedStampSet').value = '';
           $('adminStampSetName').value = '';
           editingStampSetOriginalName = '';
+          renderAdminStampChoices($('adminTemplate').value, [], '');
+          setStampSetEditorMode(true);
           $('adminStampSetName').focus();
-          toast('名前と内容を編集して「変更を保存」を押してください');
+          toast('①名前 → ②絵文字 → ③保存の順に作成してください');
         });
         $('adminSavedStampSet').addEventListener('change', () => loadStampSet($('adminSavedStampSet').value));
         $('participantName').addEventListener('input', () => {
