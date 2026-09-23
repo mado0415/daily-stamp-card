@@ -1396,7 +1396,7 @@
               <button id="saveStampSetButton" class="btn btn-soft" type="button">変更を保存</button>
               <button id="deleteStampSetButton" class="btn btn-plain" type="button">削除</button>
             </div>
-            <p class="field-note">保存したセットは共同管理者にも共有されます。</p>
+            <p class="field-note">保存したセットは、この共同管理ページ内のほかのカードでも選べます。</p>
           </div>
           <input id="adminStamp" type="hidden" value="⛄️">
         </div>
@@ -1537,6 +1537,7 @@
       let generatedWorkspaceUrl = '';
       let workspaceEditKey = /^[a-zA-Z0-9_-]{32,160}$/.test(incomingSharedEditKey) ? incomingSharedEditKey : '';
       let workspaceCards = [];
+      let workspaceStampSetsRevision = 0;
 
       const $ = (id) => document.getElementById(id);
 
@@ -1811,6 +1812,58 @@
         return url.href;
       }
 
+      function postSharedRequest(apiUrl, payload) {
+        return new Promise((resolve, reject) => {
+          const api = safeSharedApiUrl(apiUrl);
+          if (!api) return reject(new Error('共同編集URLが正しくありません。'));
+          const requestId = `shared_${randomToken(8)}`;
+          const frameName = `daily_stamp_post_${randomToken(8)}`;
+          const frame = document.createElement('iframe');
+          const form = document.createElement('form');
+          frame.name = frameName;
+          frame.hidden = true;
+          frame.setAttribute('aria-hidden', 'true');
+          form.method = 'POST';
+          form.action = api;
+          form.target = frameName;
+          form.hidden = true;
+          [['payload', JSON.stringify(payload)], ['requestId', requestId]].forEach(([name, value]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+          });
+          let finished = false;
+          const cleanup = () => {
+            if (finished) return;
+            finished = true;
+            clearTimeout(timer);
+            window.removeEventListener('message', receive);
+            form.remove();
+            frame.remove();
+          };
+          const receive = (event) => {
+            const message = event.data;
+            if (!message || message.type !== 'daily-stamp-shared-card' || message.requestId !== requestId) return;
+            cleanup();
+            if (!message.result || !message.result.ok) {
+              reject(new Error(message.result && message.result.error ? message.result.error : '保存できませんでした。'));
+              return;
+            }
+            resolve(message.result);
+          };
+          window.addEventListener('message', receive);
+          const timer = setTimeout(() => {
+            cleanup();
+            reject(new Error('共同編集サーバーの応答に時間がかかっています。'));
+          }, 15000);
+          document.body.appendChild(frame);
+          document.body.appendChild(form);
+          form.submit();
+        });
+      }
+
       async function saveSharedConfig(config, apiUrl) {
         if (sharedSaveBusy) throw new Error('保存中です。少し待ってからもう一度お試しください。');
         sharedSaveBusy = true;
@@ -1823,51 +1876,20 @@
         const expectedRevision = sameSharedCard ? Number(currentConfig.sharedRevision || 0) : 0;
         const storedConfig = sharedConfigPayload(config);
         try {
-          const postController = typeof AbortController !== 'undefined' ? new AbortController() : null;
-          const postTimer = setTimeout(() => {
-            if (postController) postController.abort();
-          }, 12000);
-          try {
-            await fetch(apiUrl, {
-              method: 'POST',
-              mode: 'no-cors',
-              cache: 'no-store',
-              keepalive: true,
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({
-                action: 'save',
-                id: cardId,
-                editKey,
-                expectedRevision,
-                config: storedConfig
-              }),
-              signal: postController ? postController.signal : undefined
-            });
-          } catch (_) {
-            // Safariで送信結果を読めなくても、直後の読み込み確認を続けます。
-          } finally {
-            clearTimeout(postTimer);
-          }
-          let loaded = null;
-          let lastError = null;
-          for (let attempt = 0; attempt < 2; attempt += 1) {
-            await new Promise((resolve) => setTimeout(resolve, 500 + attempt * 350));
-            try {
-              loaded = await loadSharedConfig(apiUrl, cardId, editKey);
-              if (loaded.canEdit && sharedConfigSignature(loaded.config) === sharedConfigSignature(storedConfig)) break;
-            } catch (error) {
-              lastError = error;
-            }
-            loaded = null;
-          }
-          if (!loaded) throw lastError || new Error('保存結果を確認できませんでした。他の人が先に更新した可能性があります。ページを再読み込みしてください。');
+          const saved = await postSharedRequest(apiUrl, {
+            action: 'save',
+            id: cardId,
+            editKey,
+            expectedRevision,
+            config: storedConfig
+          });
           try { localStorage.setItem(SAVED_SHARED_API_URL_KEY, apiUrl); } catch (_) {}
           return {
-            ...loaded.config,
+            ...storedConfig,
             id: cardId,
             sharedCardId: cardId,
             sharedEditKey: editKey,
-            sharedRevision: Number(loaded.revision || 0),
+            sharedRevision: Number(saved.revision || expectedRevision + 1),
             apiUrl
           };
         } finally {
@@ -1907,6 +1929,18 @@
           .filter(([name, stamps]) => name && stamps.length));
       }
 
+      async function saveWorkspaceStampSets() {
+        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
+        if (!apiUrl || !workspaceEditKey) return;
+        const result = await postSharedRequest(apiUrl, {
+          action: 'saveWorkspace',
+          editKey: workspaceEditKey,
+          expectedRevision: workspaceStampSetsRevision,
+          stampSets: loadSavedStampSets()
+        });
+        workspaceStampSetsRevision = Number(result.revision || workspaceStampSetsRevision + 1);
+      }
+
       function importSharedStampSets(stampSets) {
         const imported = {};
         Object.entries(stampSets && typeof stampSets === 'object' && !Array.isArray(stampSets) ? stampSets : {}).slice(0, 30).forEach(([name, stamps]) => {
@@ -1939,10 +1973,12 @@
         $('saveStampSetButton').parentElement.classList.toggle('new-set', isNew);
       }
 
-      function saveStampSet() {
+      async function saveStampSet() {
         const name = $('adminStampSetName').value.trim().slice(0, 40);
         if (!name) return toast('セット名を入力してください');
         if (!adminSelectedStamps.length) return toast('使う絵文字を1つ以上選んでください');
+        const previousSets = loadSavedStampSets();
+        const previousOriginalName = editingStampSetOriginalName;
         if (editingStampSetOriginalName && editingStampSetOriginalName !== name) {
           delete sharedStampSets[editingStampSetOriginalName];
         }
@@ -1950,7 +1986,17 @@
         editingStampSetOriginalName = name;
         refreshSavedStampSets(name);
         setStampSetEditorMode(false, name);
-        toast(`「${name}」を保存しました。カードを保存すると共同管理者にも共有されます`);
+        try {
+          await saveWorkspaceStampSets();
+          toast(`「${name}」を共同管理ページに保存しました`);
+        } catch (error) {
+          sharedStampSets = { AMENITY: [...AMENITY_STAMPS], ...previousSets };
+          editingStampSetOriginalName = previousOriginalName;
+          refreshSavedStampSets(previousOriginalName || 'AMENITY');
+          loadStampSet($('adminSavedStampSet').value);
+          showError(error && error.message ? error.message : 'スタンプセットを保存できませんでした。');
+          toast('スタンプセットの保存に失敗しました');
+        }
       }
 
       function loadStampSet(name) {
@@ -1962,15 +2008,25 @@
         setStampSetEditorMode(false, name);
       }
 
-      function deleteStampSet() {
+      async function deleteStampSet() {
         const name = $('adminSavedStampSet').value || $('adminStampSetName').value.trim();
         const saved = loadSavedStampSets();
         if (!name || !saved[name]) return toast('削除する保存済みセットを選んでください');
         if (name === 'AMENITY') return toast('AMENITYセットは削除せず、内容を編集して使えます');
+        const previousSets = loadSavedStampSets();
         delete sharedStampSets[name];
         refreshSavedStampSets('AMENITY');
         loadStampSet($('adminSavedStampSet').value);
-        toast(`「${name}」を削除しました。カードを保存すると共同管理者にも反映されます`);
+        try {
+          await saveWorkspaceStampSets();
+          toast(`「${name}」を削除しました`);
+        } catch (error) {
+          sharedStampSets = { AMENITY: [...AMENITY_STAMPS], ...previousSets };
+          refreshSavedStampSets(name);
+          loadStampSet(name);
+          showError(error && error.message ? error.message : 'スタンプセットを削除できませんでした。');
+          toast('スタンプセットの削除に失敗しました');
+        }
       }
 
       function normalizeStampSet(value, defaultStamp = '⛄️') {
@@ -2385,7 +2441,25 @@
       async function refreshWorkspaceCards(apiUrl) {
         if (!apiUrl || !workspaceEditKey) return;
         const result = await loadSharedWorkspace(apiUrl, workspaceEditKey);
-        workspaceCards = Array.isArray(result.cards) ? result.cards : [];
+        applyWorkspaceResult(result);
+        renderWorkspacePanel();
+      }
+
+      function applyWorkspaceResult(result) {
+        workspaceCards = Array.isArray(result && result.cards) ? result.cards : [];
+        workspaceStampSetsRevision = Number(result && result.settingsRevision || 0);
+        importSharedStampSets(result && result.stampSets);
+      }
+
+      function upsertWorkspaceCard(config) {
+        if (!config || !config.sharedCardId) return;
+        const item = {
+          id: config.sharedCardId,
+          config: sharedConfigPayload(config),
+          updatedAt: new Date().toISOString(),
+          revision: Number(config.sharedRevision || 0)
+        };
+        workspaceCards = [item, ...workspaceCards.filter((card) => card.id !== item.id)];
         renderWorkspacePanel();
       }
 
@@ -2394,7 +2468,6 @@
         const config = workspaceItemConfig(item);
         if (!config) return toast('編集するカードを選んでください');
         currentConfig = config;
-        importSharedStampSets(config.stampSets);
         fillForm(config);
         $('urlBox').classList.remove('show');
         showAdmin();
@@ -2449,7 +2522,7 @@
         const status = $('sharedStatus');
         status.classList.toggle('show', Boolean(shared || inWorkspace));
         status.textContent = shared
-          ? `共同管理ページで編集中｜更新 ${Number(config.sharedRevision || 0)}回目。保存すると参加者ページにも反映されます。`
+          ? '共同管理ページで編集中。保存すると参加者ページにも反映されます。'
           : inWorkspace
             ? '共同管理ページに新しいカードとして保存します。'
           : '';
@@ -2493,7 +2566,7 @@
         $('adminShareTemplate').value = config.shareTemplate || DEFAULT_SHARE_TEMPLATE;
         $('adminTemplate').value = config.template || 'hotel';
         $('adminApiUrl').value = config.apiUrl || loadSavedSharedApiUrl();
-        importSharedStampSets(config.stampSets);
+        if (!workspaceEditKey) importSharedStampSets(config.stampSets);
         const savedSets = loadSavedStampSets();
         const selectedSetName = savedSets[config.stampSetName]
           ? config.stampSetName
@@ -3471,8 +3544,7 @@
         try {
           const saved = await saveSharedConfig(config, apiUrl);
           currentConfig = saved;
-          importSharedStampSets(saved.stampSets);
-          await refreshWorkspaceCards(saved.apiUrl);
+          upsertWorkspaceCard(saved);
           showGeneratedUrls(sharedCardUrl(saved.sharedCardId, saved.apiUrl));
           updateSharedAdminUi(saved);
           toast('共有カードを保存しました');
@@ -3499,8 +3571,7 @@
         try {
           const saved = await saveSharedConfig(config, apiUrl);
           currentConfig = saved;
-          importSharedStampSets(saved.stampSets);
-          await refreshWorkspaceCards(saved.apiUrl);
+          upsertWorkspaceCard(saved);
           $('urlBox').classList.remove('show');
           updateSharedAdminUi(saved);
           toast('一時保存しました。このページを閉じても大丈夫です');
@@ -3584,9 +3655,8 @@
             };
             if (result.canEdit) {
               workspaceEditKey = incomingSharedEditKey;
-              importSharedStampSets(result.config.stampSets);
               const workspace = await loadSharedWorkspace(sharedApi, workspaceEditKey);
-              workspaceCards = Array.isArray(workspace.cards) ? workspace.cards : [];
+              applyWorkspaceResult(workspace);
             }
           } catch (error) {
             sharedLoadError = error && error.message ? error.message : '共有カードを読み込めませんでした。';
@@ -3594,10 +3664,9 @@
         } else if (requestedAdmin && sharedApi && workspaceEditKey) {
           try {
             const workspace = await loadSharedWorkspace(sharedApi, workspaceEditKey);
-            workspaceCards = Array.isArray(workspace.cards) ? workspace.cards : [];
+            applyWorkspaceResult(workspace);
             if (workspaceCards.length) {
               config = workspaceItemConfig(workspaceCards[0], sharedApi);
-              importSharedStampSets(config.stampSets);
             }
           } catch (error) {
             sharedLoadError = error && error.message ? error.message : '共同管理ページを読み込めませんでした。';
