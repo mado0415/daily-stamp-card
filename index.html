@@ -778,6 +778,7 @@
       padding: 4px 0 2px;
     }
     .admin-stamp-choice {
+      position: relative;
       width: 42px;
       height: 42px;
       border: 1px solid #cddae5;
@@ -786,13 +787,29 @@
       background: #f4f7fa;
       font-size: 22px;
       line-height: 1;
-      opacity: .42;
+      opacity: .28;
     }
     .admin-stamp-choice.selected {
-      border-color: var(--theme);
-      background: rgba(var(--theme-rgb), .12);
-      box-shadow: 0 0 0 2px rgba(var(--theme-rgb), .18);
+      border: 2px solid #2779b8;
+      background: #dff1ff;
+      box-shadow: 0 0 0 2px rgba(39,121,184,.18);
       opacity: 1;
+    }
+    .admin-stamp-choice.selected::after {
+      content: '✓';
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      display: grid;
+      place-items: center;
+      width: 17px;
+      height: 17px;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      color: #fff;
+      background: #2779b8;
+      font-size: 10px;
+      font-weight: 900;
     }
     .admin-stamp-help {
       margin: 8px 0 0;
@@ -1996,13 +2013,15 @@
           button.title = STAMP_NAMES[stamp] || stamp;
           button.setAttribute('aria-pressed', adminSelectedStamps.includes(stamp) ? 'true' : 'false');
           button.addEventListener('click', () => {
-            if (adminSelectedStamps.includes(stamp)) {
+            const removing = adminSelectedStamps.includes(stamp);
+            if (removing) {
               adminSelectedStamps = adminSelectedStamps.filter((item) => item !== stamp);
             } else {
               adminSelectedStamps.push(stamp);
             }
             const nextPreferred = adminSelectedStamps.includes($('adminStamp').value) ? $('adminStamp').value : adminSelectedStamps[0];
             renderAdminStampChoices(template, adminSelectedStamps, nextPreferred);
+            toast(removing ? `${stamp}をセットから外しました` : `${stamp}をセットに追加しました`);
           });
         });
         const preview = $('adminStampSetPreview');
