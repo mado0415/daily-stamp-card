@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- build: 20260924-0850-shared-url-position -->
+<!-- build: 20260924-test-return-fix -->
 <html lang="ja">
 <head>
   <meta charset="utf-8">
@@ -2300,6 +2300,11 @@
         if (testMode) {
           url.searchParams.set('z', '1');
           url.searchParams.set('d', config.start);
+          const returnApiUrl = safeSharedApiUrl($('adminApiUrl').value);
+          if (returnApiUrl && workspaceEditKey) {
+            url.searchParams.set('ra', returnApiUrl);
+            url.searchParams.set('re', workspaceEditKey);
+          }
         }
         return url.href;
       }
@@ -2706,10 +2711,21 @@
         $('adminView').classList.add('hidden');
         $('participantView').classList.remove('hidden');
         setupTestPanel(config);
+        const returnApiUrl = safeSharedApiUrl(params.get('ra') || '');
+        const returnEditKey = /^[a-zA-Z0-9_-]{32,160}$/.test(params.get('re') || '')
+          ? params.get('re')
+          : '';
+        const canReturnToWorkspace = Boolean(isTestMode && returnApiUrl && returnEditKey);
         const canManageHere = isTestMode || Boolean(config.sharedEditKey);
-        $('modeLink').textContent = canManageHere ? '管理用設定' : '';
+        $('modeLink').textContent = canReturnToWorkspace
+          ? '共同管理ページに戻る'
+          : canManageHere ? '管理用設定' : '';
         $('modeLink').classList.toggle('hidden', !canManageHere);
         $('modeLink').onclick = canManageHere ? () => {
+          if (canReturnToWorkspace) {
+            location.href = sharedAdminUrl(returnApiUrl, returnEditKey);
+            return;
+          }
           fillForm(config);
           showAdmin();
         } : null;
