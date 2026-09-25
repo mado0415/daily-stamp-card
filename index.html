@@ -1451,7 +1451,7 @@
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
       <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日以降まで続ける場合は、カード終了日を発売日より後に設定できます。</p>
-      <p class="build-version">更新版 2026.09.26 00:18</p>
+      <p class="build-version">更新版 2026.09.26 00:26</p>
       <p id="adminSyncStatus" class="admin-sync-status" role="status" aria-live="polite"></p>
 
       <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
@@ -1684,6 +1684,8 @@
       const incomingSharedCardId = params.get('card') || '';
       const incomingSharedEditKey = params.get('edit') || '';
       const incomingSharedApiUrl = params.get('api') || '';
+      const incomingTestShareCardId = params.get('shareCard') || '';
+      const incomingTestShareApiUrl = params.get('shareApi') || '';
       let simulatedToday = /^\d{4}-\d{2}-\d{2}$/.test(incomingTestDay) ? incomingTestDay : '';
       let currentConfig = null;
       let adminSelectedStamps = [];
@@ -3914,8 +3916,8 @@
       }
 
       function participantShareUrl(config) {
-        const directCardId = String(config.sharedCardId || incomingSharedCardId || '');
-        const directApiUrl = safeSharedApiUrl(config.apiUrl || incomingSharedApiUrl || '');
+        const directCardId = String(config.sharedCardId || incomingSharedCardId || incomingTestShareCardId || '');
+        const directApiUrl = safeSharedApiUrl(config.apiUrl || incomingSharedApiUrl || incomingTestShareApiUrl || '');
         if (/^[a-zA-Z0-9_-]{16,80}$/.test(directCardId) && directApiUrl) {
           return sharedCardUrl(directCardId, directApiUrl);
         }
@@ -3980,20 +3982,30 @@
         const config = configFromForm();
         if (!config) return;
         if (testMode) {
+          const testUrl = new URL(configUrl(config, true));
+          const testShareCardId = String(
+            editingWorkspaceCardId
+            || (currentConfig && currentConfig.sharedCardId)
+            || incomingSharedCardId
+            || ''
+          );
           if (apiUrl && workspaceEditKey) {
-            const returnUrl = editingWorkspaceCardId
-              ? sharedCardUrl(editingWorkspaceCardId, apiUrl, workspaceEditKey)
+            const returnUrl = testShareCardId
+              ? sharedCardUrl(testShareCardId, apiUrl, workspaceEditKey)
               : sharedAdminUrl(apiUrl, workspaceEditKey);
             try {
               sessionStorage.setItem(TEST_RETURN_URL_KEY, returnUrl);
-              if (editingWorkspaceCardId) {
-                sessionStorage.setItem(TEST_PARTICIPANT_URL_KEY, sharedCardUrl(editingWorkspaceCardId, apiUrl));
+              if (/^[a-zA-Z0-9_-]{16,80}$/.test(testShareCardId)) {
+                const participantUrl = sharedCardUrl(testShareCardId, apiUrl);
+                sessionStorage.setItem(TEST_PARTICIPANT_URL_KEY, participantUrl);
+                testUrl.searchParams.set('shareCard', testShareCardId);
+                testUrl.searchParams.set('shareApi', apiUrl);
               } else {
                 sessionStorage.removeItem(TEST_PARTICIPANT_URL_KEY);
               }
             } catch (_) {}
           }
-          location.href = configUrl(config, true);
+          location.href = testUrl.href;
           return;
         }
         if (!apiUrl) {
