@@ -1451,7 +1451,7 @@
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
       <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日以降まで続ける場合は、カード終了日を発売日より後に設定できます。</p>
-      <p class="build-version">更新版 2026.09.26 00:08</p>
+      <p class="build-version">更新版 2026.09.26 00:18</p>
       <p id="adminSyncStatus" class="admin-sync-status" role="status" aria-live="polite"></p>
 
       <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
@@ -1677,6 +1677,7 @@
       const DEFAULT_SHARE_TEMPLATE = '⛄️ {カードタイトル}\n「{曲名}」を1日1回聴いています！\n【{スタンプ数} STAMPS】\n{参加者用URL}\n#SnowMan';
       const SAVED_SHARED_API_URL_KEY = 'daily_stamp_shared_api_url_v1';
       const TEST_RETURN_URL_KEY = 'daily_stamp_test_return_url_v1';
+      const TEST_PARTICIPANT_URL_KEY = 'daily_stamp_test_participant_url_v1';
       const params = new URLSearchParams(location.search);
       const isTestMode = params.get('z') === '1' || params.get('test') === '1' || params.get('mode') === 'test';
       const incomingTestDay = params.get('d') || params.get('today') || '';
@@ -3897,7 +3898,7 @@
       function shareText(config) {
         const days = dateRange(config.start, config.end);
         const count = [...loadStamps(config)].filter((day) => days.includes(day)).length;
-        const participantUrl = configUrl(config);
+        const participantUrl = participantShareUrl(config);
         const replacements = {
           '{スタンプ}': config.stamp,
           '{カードタイトル}': config.title,
@@ -3910,6 +3911,25 @@
         text = text.trim();
         if (!text.includes(participantUrl)) text += `\n${participantUrl}`;
         return text;
+      }
+
+      function participantShareUrl(config) {
+        const directCardId = String(config.sharedCardId || incomingSharedCardId || '');
+        const directApiUrl = safeSharedApiUrl(config.apiUrl || incomingSharedApiUrl || '');
+        if (/^[a-zA-Z0-9_-]{16,80}$/.test(directCardId) && directApiUrl) {
+          return sharedCardUrl(directCardId, directApiUrl);
+        }
+        if (isTestMode) {
+          try {
+            const saved = new URL(sessionStorage.getItem(TEST_PARTICIPANT_URL_KEY) || '');
+            const savedCardId = saved.searchParams.get('card') || '';
+            const savedApiUrl = safeSharedApiUrl(saved.searchParams.get('api') || '');
+            if (saved.origin === location.origin && /^[a-zA-Z0-9_-]{16,80}$/.test(savedCardId) && savedApiUrl) {
+              return sharedCardUrl(savedCardId, savedApiUrl);
+            }
+          } catch (_) {}
+        }
+        return configUrl(config);
       }
 
       function showGeneratedUrls(participantUrl, adminUrl = '') {
@@ -3964,7 +3984,14 @@
             const returnUrl = editingWorkspaceCardId
               ? sharedCardUrl(editingWorkspaceCardId, apiUrl, workspaceEditKey)
               : sharedAdminUrl(apiUrl, workspaceEditKey);
-            try { sessionStorage.setItem(TEST_RETURN_URL_KEY, returnUrl); } catch (_) {}
+            try {
+              sessionStorage.setItem(TEST_RETURN_URL_KEY, returnUrl);
+              if (editingWorkspaceCardId) {
+                sessionStorage.setItem(TEST_PARTICIPANT_URL_KEY, sharedCardUrl(editingWorkspaceCardId, apiUrl));
+              } else {
+                sessionStorage.removeItem(TEST_PARTICIPANT_URL_KEY);
+              }
+            } catch (_) {}
           }
           location.href = configUrl(config, true);
           return;
