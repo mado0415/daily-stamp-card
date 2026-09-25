@@ -71,6 +71,21 @@
       text-align: right;
     }
 
+    .admin-sync-status {
+      display: none;
+      margin: -7px 0 18px;
+      padding: 10px 12px;
+      color: #365c73;
+      background: #edf7fd;
+      border: 1px solid #b9dff3;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.55;
+    }
+    .admin-sync-status.show { display: block; }
+    .admin-sync-status.warning { color: #8a4b25; background: #fff5df; border-color: #f1cf96; }
+
     .card {
       position: relative;
       overflow: hidden;
@@ -526,8 +541,13 @@
       --muted: #85565a;
       --line: #d2ad5d;
       --wash: #f1d9bb;
+      background: #f8ead2;
       border: 1px solid rgba(201, 164, 82, .72);
       box-shadow: 0 20px 55px rgba(92, 5, 28, .17), 0 0 0 3px rgba(var(--theme-rgb), .12);
+    }
+
+    .template-hotel .progress-area {
+      background: #f8ead2;
     }
 
     .template-hotel .hero {
@@ -1431,7 +1451,8 @@
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
       <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日以降まで続ける場合は、カード終了日を発売日より後に設定できます。</p>
-      <p class="build-version">更新版 2026.09.25 22:13</p>
+      <p class="build-version">更新版 2026.09.26 00:08</p>
+      <p id="adminSyncStatus" class="admin-sync-status" role="status" aria-live="polite"></p>
 
       <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
         <h2>共同管理者にこのページを共有</h2>
@@ -1879,7 +1900,6 @@
             if (finished) return;
             finished = true;
             clearTimeout(timer);
-            clearTimeout(fallbackTimer);
             window.removeEventListener('message', receive);
             if (frame) frame.remove();
             script.remove();
@@ -1926,12 +1946,11 @@
             document.body.appendChild(frame);
           };
           script.onerror = startFrameFallback;
-          const fallbackTimer = setTimeout(startFrameFallback, 8000);
 
           const timer = setTimeout(() => {
             cleanup();
             reject(new Error('共同編集サーバーの応答に時間がかかっています。'));
-          }, 22000);
+          }, 32000);
 
           document.head.appendChild(script);
         });
@@ -3303,6 +3322,7 @@
         clone.style.maxWidth = 'none';
         clone.style.margin = '0';
         clone.style.animation = 'none';
+        clone.setAttribute('data-image-capture-card', 'true');
 
         const rootStyles = getComputedStyle(document.documentElement);
         Array.from(rootStyles).filter((name) => name.startsWith('--')).forEach((name) => {
@@ -3333,7 +3353,14 @@
               logging: false,
               imageTimeout: 0,
               scrollX: 0,
-              scrollY: 0
+              scrollY: 0,
+              onclone: (clonedDocument) => {
+                const capturedCard = clonedDocument.querySelector('[data-image-capture-card="true"]');
+                if (!capturedCard || !capturedCard.classList.contains('template-hotel')) return;
+                capturedCard.style.background = '#f8ead2';
+                const progressArea = capturedCard.querySelector('.progress-area');
+                if (progressArea) progressArea.style.background = '#f8ead2';
+              }
             });
             sandbox.remove();
             return canvas;
@@ -4031,6 +4058,13 @@
         $('modeLink').classList.add('hidden');
       }
 
+      function setAdminSyncStatus(message = '', warning = false) {
+        const status = $('adminSyncStatus');
+        status.textContent = message;
+        status.classList.toggle('show', Boolean(message));
+        status.classList.toggle('warning', Boolean(message && warning));
+      }
+
       async function init() {
         initAdminDefaults();
         let config = null;
@@ -4047,12 +4081,43 @@
             history.replaceState(null, '', sharedAdminUrl(sharedApi, workspaceEditKey));
           }
         }
-        if (incomingSharedCardId) {
+        let renderedAdminCache = false;
+        if (requestedAdmin && sharedApi && workspaceEditKey) {
+          const cachedWorkspace = loadWorkspaceCache(sharedApi, workspaceEditKey);
+          if (cachedWorkspace) {
+            applyWorkspaceResult(cachedWorkspace);
+            const cachedTarget = workspaceCards.find((item) => item.id === incomingSharedCardId)
+              || workspaceCards[0];
+            if (cachedTarget) {
+              config = workspaceItemConfig(cachedTarget, sharedApi);
+              editingWorkspaceCardId = cachedTarget.id;
+              currentConfig = config;
+              fillForm(config);
+            }
+            showAdmin();
+            setAdminSyncStatus('前回の内容を先に表示しています。最新状態を確認中です…');
+            renderedAdminCache = true;
+          }
+          try {
+            const workspace = await loadSharedWorkspace(sharedApi, workspaceEditKey);
+            applyWorkspaceResult(workspace);
+            const target = workspaceCards.find((item) => item.id === incomingSharedCardId)
+              || workspaceCards.find((item) => item.id === editingWorkspaceCardId)
+              || workspaceCards[0];
+            config = target ? workspaceItemConfig(target, sharedApi) : null;
+            editingWorkspaceCardId = target ? target.id : '';
+            setAdminSyncStatus('');
+          } catch (error) {
+            if (renderedAdminCache) {
+              config = currentConfig;
+              setAdminSyncStatus('最新状態を確認できませんでした。前回表示した内容を開いています。通信状態を確認して再読み込みしてください。', true);
+            } else {
+              sharedLoadError = error && error.message ? error.message : '共同管理ページを読み込めませんでした。';
+            }
+          }
+        } else if (incomingSharedCardId) {
           try {
             const result = await loadSharedConfig(sharedApi, incomingSharedCardId, incomingSharedEditKey);
-            if (requestedAdmin && (!incomingSharedEditKey || !result.canEdit)) {
-              throw new Error('共同管理URLの編集キーを確認してください。参加者用URLからは管理画面を開けません。');
-            }
             config = {
               ...result.config,
               id: incomingSharedCardId,
@@ -4066,21 +4131,10 @@
             };
             if (result.canEdit) {
               workspaceEditKey = incomingSharedEditKey;
-              const workspace = await loadSharedWorkspace(sharedApi, workspaceEditKey);
-              applyWorkspaceResult(workspace);
+              upsertWorkspaceCard(config);
             }
           } catch (error) {
             sharedLoadError = error && error.message ? error.message : '共有カードを読み込めませんでした。';
-          }
-        } else if (requestedAdmin && sharedApi && workspaceEditKey) {
-          try {
-            const workspace = await loadSharedWorkspace(sharedApi, workspaceEditKey);
-            applyWorkspaceResult(workspace);
-            if (workspaceCards.length) {
-              config = workspaceItemConfig(workspaceCards[0], sharedApi);
-            }
-          } catch (error) {
-            sharedLoadError = error && error.message ? error.message : '共同管理ページを読み込めませんでした。';
           }
         } else if (incomingSharedApiUrl) {
           sharedLoadError = '共同管理URLの編集キーを確認してください。';
