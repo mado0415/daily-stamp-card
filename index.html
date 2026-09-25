@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- VERIFIED LATEST: 2026-09-24 / shared workspace + separate drafts -->
+<!-- VERIFIED LATEST: 2026-09-25 / participant UX feedback + shared workspace + separate drafts -->
 <html lang="ja">
 <head>
   <meta charset="utf-8">
@@ -132,18 +132,46 @@
     }
 
     .progress-track {
+      position: relative;
       height: 10px;
-      overflow: hidden;
+      overflow: visible;
       background: #eaf0f5;
       border-radius: 999px;
     }
 
     .progress-bar {
+      position: absolute;
+      z-index: 1;
+      inset: 0 auto 0 0;
       width: 0;
       height: 100%;
       background: var(--theme);
       border-radius: inherit;
       transition: width .35s ease;
+    }
+
+    .progress-milestones {
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      pointer-events: none;
+    }
+    .progress-milestone {
+      position: absolute;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      border: 1.5px solid #fff;
+      background: #cbd6df;
+      box-shadow: 0 1px 3px rgba(36,54,74,.18);
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+    .progress-milestone.reached { background: var(--theme); }
+    .template-hotel .progress-milestone.reached { background: #d0aa54; }
+    .progress-milestone.current {
+      width: 10px;
+      height: 10px;
+      box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .20), 0 1px 4px rgba(36,54,74,.2);
     }
 
     .milestone-note {
@@ -342,7 +370,7 @@
     }
 
     .participant-identity {
-      margin: 0 24px 14px;
+      margin: 0;
       display: grid;
       grid-template-columns: auto minmax(0, 1fr);
       align-items: center;
@@ -521,7 +549,7 @@
       box-shadow: 0 0 0 2px rgba(243,213,141,.24);
     }
     .template-hotel .progress-bar {
-      position: relative;
+      position: absolute;
       background: linear-gradient(90deg, #8f0c31 0%, var(--theme) 62%, #d0aa54 100%);
     }
     .template-hotel .progress-bar::after {
@@ -679,23 +707,23 @@
 
     .stamp-picker {
       position: relative;
-      margin: 0 24px 16px;
-      padding: 12px 13px;
+      margin: 0 24px 12px;
+      padding: 9px 10px;
       border: 1px solid var(--line);
       border-radius: 15px;
       background: rgba(255,255,255,.48);
     }
     .stamp-picker-label {
-      margin: 0 0 8px;
+      margin: 0 0 5px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
     }
     .stamp-choices {
       display: flex;
-      gap: 7px;
+      gap: 6px;
       overflow-x: auto;
-      padding: 3px 25px 6px 2px;
+      padding: 2px 23px 3px 1px;
       scrollbar-width: none;
     }
     .stamp-choices::-webkit-scrollbar { display: none; }
@@ -703,9 +731,9 @@
       position: absolute;
       z-index: 3;
       right: 5px;
-      bottom: 25px;
-      width: 22px;
-      height: 32px;
+      bottom: 11px;
+      width: 20px;
+      height: 29px;
       border-radius: 10px 0 0 10px;
       color: #5a1728;
       background: linear-gradient(90deg, rgba(255,244,213,.28), #fff4d5 48%);
@@ -722,13 +750,13 @@
       50% { transform: translateX(2px); }
     }
     .stamp-choice {
-      flex: 0 0 42px;
-      width: 42px;
-      height: 42px;
+      flex: 0 0 36px;
+      width: 36px;
+      height: 36px;
       border: 1px solid var(--line);
       border-radius: 12px;
       background: rgba(255,255,255,.74);
-      font-size: 23px;
+      font-size: 20px;
       line-height: 1;
     }
     .stamp-choice.selected {
@@ -744,8 +772,8 @@
     .template-hotel .stamp-choice { background: #fff8df; }
 
     .participant-color-picker {
-      margin: 0 24px 16px;
-      padding: 11px 13px;
+      margin: 10px 0 0;
+      padding: 9px 10px;
       border: 1px solid var(--line);
       border-radius: 15px;
       background: rgba(255,255,255,.48);
@@ -760,15 +788,43 @@
     .participant-color-picker .color-list {
       flex-wrap: nowrap;
       justify-content: space-between;
-      gap: 4px;
+      gap: 3px;
     }
     .participant-color-picker .color-choice {
-      flex: 0 0 27px;
-      width: 27px;
-      height: 27px;
+      flex: 0 0 25px;
+      width: 25px;
+      height: 25px;
       border-width: 2px;
     }
     .template-hotel .participant-color-picker {
+      border-color: rgba(203,169,87,.65);
+      background: #f8e8c7;
+    }
+
+    .participant-settings {
+      margin: 0 24px 12px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255,255,255,.48);
+      overflow: hidden;
+    }
+    .participant-settings summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 39px;
+      padding: 9px 12px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      list-style: none;
+    }
+    .participant-settings summary::-webkit-details-marker { display: none; }
+    .participant-settings summary::after { content: '⌄'; font-size: 16px; line-height: 1; }
+    .participant-settings[open] summary::after { content: '⌃'; }
+    .participant-settings-content { padding: 0 12px 12px; }
+    .template-hotel .participant-settings {
       border-color: rgba(203,169,87,.65);
       background: #f8e8c7;
     }
@@ -1157,8 +1213,10 @@
       inset: 0;
       z-index: 20;
       display: none;
-      place-items: center;
-      padding: 18px;
+      align-items: start;
+      justify-items: center;
+      overflow-y: auto;
+      padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
       background: rgba(25, 42, 57, .55);
       backdrop-filter: blur(5px);
     }
@@ -1166,7 +1224,7 @@
     .modal.show { display: grid; }
     .modal-box {
       width: min(100%, 480px);
-      max-height: calc(100vh - 36px);
+      max-height: calc(100dvh - max(20px, env(safe-area-inset-top)) - max(20px, env(safe-area-inset-bottom)));
       overflow: auto;
       padding: 18px;
       background: #fff;
@@ -1179,7 +1237,13 @@
     .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 13px; }
     .share-modal-actions {
       grid-template-columns: 1fr 1fr !important;
+      position: sticky;
+      z-index: 3;
+      top: -18px;
       margin: 0 0 13px;
+      padding: 12px 0 10px;
+      background: #fff;
+      box-shadow: 0 8px 12px rgba(255,255,255,.96);
     }
 
     .toast {
@@ -1254,7 +1318,7 @@
 <body>
   <main class="shell">
     <div class="topline">
-      <span>SNOW MAN SUPPORT TOOL</span>
+      <span>SNOW MAN FANS SUPPORT TOOL</span>
       <button id="modeLink" class="mode-link" type="button"></button>
     </div>
 
@@ -1290,29 +1354,35 @@
           <strong id="progressCount">0 STAMPS</strong>
           <span id="daysLeftText"></span>
         </div>
-        <div class="progress-track" role="progressbar" aria-label="次のマイルストーンまでの進み具合" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress-track" role="progressbar" aria-label="スタンプカード全体の進み具合" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div id="progressBar" class="progress-bar"></div>
+          <div id="progressMilestones" class="progress-milestones" aria-hidden="true"></div>
         </div>
       </div>
 
-      <div class="participant-identity">
-        <label for="participantName">NAME / @ACCOUNT</label>
-        <input id="participantName" type="text" maxlength="32" autocomplete="nickname" placeholder="@username または名前（任意）">
-      </div>
+      <details id="participantSettings" class="participant-settings">
+        <summary>参加設定を変更（名前・テーマカラー）</summary>
+        <div class="participant-settings-content">
+          <div class="participant-identity">
+            <label for="participantName">NAME / @ACCOUNT</label>
+            <input id="participantName" type="text" maxlength="32" autocomplete="nickname" placeholder="@username または名前（任意）">
+          </div>
 
-      <div class="participant-color-picker">
-        <p>カードカラーを選ぶ</p>
-        <div id="participantColorList" class="color-list" role="group" aria-label="カードカラー"></div>
-      </div>
+          <div class="participant-color-picker">
+            <p>テーマカラーを選ぶ</p>
+            <div id="participantColorList" class="color-list" role="group" aria-label="テーマカラー"></div>
+          </div>
+        </div>
+      </details>
 
       <div id="stampPicker" class="stamp-picker">
-        <p class="stamp-picker-label">今日押すスタンプを選ぶ（途中で変更できます）</p>
+        <p class="stamp-picker-label">今日のスタンプ（毎日変更できます）</p>
         <div id="stampChoices" class="stamp-choices" role="group" aria-label="今日押すスタンプ"></div>
         <span id="stampScrollHint" class="stamp-scroll-hint" aria-hidden="true">›</span>
       </div>
       <div class="action-row">
         <button id="skipTodayButton" class="btn btn-soft hidden" type="button">今日は押さず次の日へ</button>
-        <button id="imageButtonTop" class="btn btn-plain" type="button">記録を画像にする</button>
+        <button id="imageButtonTop" class="btn btn-plain" type="button">画像にして共有</button>
       </div>
 
       <div id="stageDecoration" class="stage-decoration" aria-hidden="true">✦　✦　✦</div>
@@ -1334,7 +1404,7 @@
       </section>
 
       <div class="share-row single">
-        <button id="imageButton" class="btn btn-plain" type="button">画像を作る</button>
+        <button id="imageButton" class="btn btn-plain" type="button">画像にして共有</button>
       </div>
     </section>
 
@@ -1399,6 +1469,13 @@
         <div class="field">
           <label for="adminYoutube">YouTube（任意）</label>
           <input id="adminYoutube" type="url" inputmode="url" placeholder="https://youtu.be/..."></div>
+        <div class="field">
+          <label for="adminAmazon">Amazon Music（任意）</label>
+          <input id="adminAmazon" type="url" inputmode="url" placeholder="曲単体の共有URL https://music.amazon.co.jp/..."></div>
+        <div class="field">
+          <label for="adminAwa">AWA（任意）</label>
+          <input id="adminAwa" type="url" inputmode="url" placeholder="曲単体の共有URL https://s.awa.fm/..."></div>
+        <p class="field-note wide">各サービスは、アルバムやプレイリストではなく「1日1回聴く曲」単体の共有URLを登録してください。</p>
         <div class="field">
           <label for="adminTemplate">カードテンプレート</label>
           <select id="adminTemplate">
@@ -1489,10 +1566,10 @@
 
   <div id="shareModal" class="modal" aria-hidden="true">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
-      <h2 id="shareTitle">スタンプカード画像</h2>
+      <h2 id="shareTitle">画像にして共有</h2>
       <div class="modal-actions share-modal-actions">
         <button id="nativeShareButton" class="btn btn-primary" type="button">SNS・写真アプリへ共有</button>
-        <button id="saveImageButton" class="btn btn-soft" type="button">画像ファイルを保存</button>
+        <button id="saveImageButton" class="btn btn-soft hidden" type="button">画像ファイルを保存</button>
         <button id="closeModalButton" class="btn btn-plain" type="button">閉じる</button>
       </div>
       <img id="shareImage" alt="スタンプカードの共有画像">
@@ -1514,7 +1591,7 @@
   <div id="listenModal" class="modal" aria-hidden="true">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="listenModalTitle">
       <h2 id="listenModalTitle">曲を聴く</h2>
-      <p class="listen-modal-copy">使うサービスを選んでください。再生ページを開くと、今日の窓からスタンプを押せるようになります。</p>
+      <p class="listen-modal-copy">使うサービスを選んでください。曲を聴いたらブラウザのこのカードへ戻り、今日の窓からスタンプを押してください。</p>
       <div id="listenModalLinks" class="listen-modal-links"></div>
       <div class="modal-actions">
         <button id="closeListenModalButton" class="btn btn-plain btn-full" type="button">閉じる</button>
@@ -1531,7 +1608,11 @@
 
       const COLORS = [
         '#ffcc33', '#7b2cbf', '#f8f9fa', '#4ea8de', '#f97316',
-        '#2a9d8f', '#283044', '#e63946', '#ff69b4'
+        '#2a9d8f', '#283044', '#e63946', '#ff69b4', '#bfe8f6'
+      ];
+      const COLOR_LABELS = [
+        'イエロー', 'パープル', 'ホワイト', 'ブルー', 'オレンジ',
+        'グリーン', 'ブラック', 'レッド', 'ピンク', '箱推し（水色）'
       ];
       const STAMPS = [
         '⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🔑', '🛎️', '🧳', '☕️', '🪥', '🪮', '🏨',
@@ -1748,6 +1829,8 @@
           spotify: config.spotify || '',
           line: config.line || '',
           youtube: config.youtube || '',
+          amazon: config.amazon || '',
+          awa: config.awa || '',
           shareTemplate: config.shareTemplate || DEFAULT_SHARE_TEMPLATE,
           template: config.template || 'hotel',
           stampSetName: config.stampSetName || $('adminSavedStampSet').value || editingStampSetOriginalName || 'AMENITY',
@@ -2266,11 +2349,13 @@
         const spotify = safeUrl(firstParam(source, 'p', 'spotify'));
         const line = safeUrl(firstParam(source, 'n', 'line'));
         const youtube = safeUrl(firstParam(source, 'y', 'youtube'));
+        const amazon = safeUrl(firstParam(source, 'amz', 'amazon'));
+        const awa = safeUrl(firstParam(source, 'awa'));
         const shareTemplate = (firstParam(source, 'm', 'message') || DEFAULT_SHARE_TEMPLATE).slice(0, 500);
         const seed = `${title}|${song}|${start}|${release}|${end}`;
         const id = (firstParam(source, 'i', 'cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
         if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(release) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || release < start || end < release) return null;
-        return { title, song, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, shareTemplate, template, id };
+        return { title, song, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id };
       }
 
       function configFromForm(options = {}) {
@@ -2289,10 +2374,14 @@
         const rawSpotify = $('adminSpotify').value.trim();
         const rawLine = $('adminLine').value.trim();
         const rawYoutube = $('adminYoutube').value.trim();
+        const rawAmazon = $('adminAmazon').value.trim();
+        const rawAwa = $('adminAwa').value.trim();
         const apple = safeUrl(rawApple);
         const spotify = safeUrl(rawSpotify);
         const line = safeUrl(rawLine);
         const youtube = safeUrl(rawYoutube);
+        const amazon = safeUrl(rawAmazon);
+        const awa = safeUrl(rawAwa);
         const shareTemplate = $('adminShareTemplate').value.trim() || DEFAULT_SHARE_TEMPLATE;
         const template = $('adminTemplate').value;
         const rawApiUrl = $('adminApiUrl').value.trim();
@@ -2309,8 +2398,8 @@
         else if (release < start) error = 'CD発売日は開始日以降にしてください。';
         else if (end < release) error = 'カード終了日はCD発売日以降にしてください。';
         else if (dateRange(start, end).length > 366) error = '期間は366日以内にしてください。';
-        else if ([rawLink && !link, rawApple && !apple, rawSpotify && !spotify, rawLine && !line, rawYoutube && !youtube].some(Boolean)) error = '再生先は https:// で始まるURLにしてください。';
-        else if (!allowIncomplete && ![link, apple, spotify, line, youtube].some(Boolean)) error = '曲を聴くためのURLを1つ以上入力してください。';
+        else if ([rawLink && !link, rawApple && !apple, rawSpotify && !spotify, rawLine && !line, rawYoutube && !youtube, rawAmazon && !amazon, rawAwa && !awa].some(Boolean)) error = '再生先は https:// で始まるURLにしてください。';
+        else if (!allowIncomplete && ![link, apple, spotify, line, youtube, amazon, awa].some(Boolean)) error = '曲を聴くためのURLを1つ以上入力してください。';
         else if (rawApiUrl && !apiUrl) error = '共同編集サーバーURLは、Apps Scriptでデプロイした /exec のURLを入力してください。';
         showError(error);
         if (error) return null;
@@ -2318,7 +2407,7 @@
           ? currentConfig.id
           : hashText(`${title}|${song}|${start}|${release}|${end}`);
         const stampSetName = $('adminSavedStampSet').value || editingStampSetOriginalName || 'AMENITY';
-        return { title, song, start, release, end, stamp, stamps, stampSets, stampSetName, color, link, apple, spotify, line, youtube, shareTemplate, template, id, apiUrl };
+        return { title, song, start, release, end, stamp, stamps, stampSets, stampSetName, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id, apiUrl };
       }
 
       function configUrl(config, testMode = false) {
@@ -2338,6 +2427,8 @@
         if (config.spotify) url.searchParams.set('p', config.spotify);
         if (config.line) url.searchParams.set('n', config.line);
         if (config.youtube) url.searchParams.set('y', config.youtube);
+        if (config.amazon) url.searchParams.set('amz', config.amazon);
+        if (config.awa) url.searchParams.set('awa', config.awa);
         if (config.shareTemplate && config.shareTemplate !== DEFAULT_SHARE_TEMPLATE) url.searchParams.set('m', config.shareTemplate);
         url.searchParams.set('e', config.stamp);
         url.searchParams.set('x', encodeStampSet(config.stamps));
@@ -2416,6 +2507,20 @@
         return `${isTestMode ? 'daily_stamp_test_name_' : 'daily_stamp_name_'}${config.id}`;
       }
 
+      function participantSettingsSeenKey(config) {
+        return `${isTestMode ? 'daily_stamp_test_settings_seen_' : 'daily_stamp_settings_seen_'}${config.id}`;
+      }
+
+      function setupParticipantSettings(config) {
+        const details = $('participantSettings');
+        if (details.dataset.cardId === config.id) return;
+        details.dataset.cardId = config.id;
+        let seen = false;
+        try { seen = localStorage.getItem(participantSettingsSeenKey(config)) === '1'; } catch (_) {}
+        details.open = !seen;
+        try { localStorage.setItem(participantSettingsSeenKey(config), '1'); } catch (_) {}
+      }
+
       function loadParticipantName(config) {
         return (localStorage.getItem(participantNameKey(config)) || '').slice(0, 32);
       }
@@ -2443,14 +2548,28 @@
         return meta;
       }
 
+      function milestoneMarks(total) {
+        return [...new Set([3, 5, 10, 15, 20, total])]
+          .filter((value) => value > 0 && value <= total)
+          .sort((a, b) => a - b);
+      }
+
       function milestoneState(count, total) {
-        const marks = [...new Set([3, 5, 10, 15, 20, total])].filter((value) => value > 0 && value <= total).sort((a, b) => a - b);
-        const next = marks.find((value) => value > count) || total;
-        const previous = [...marks].reverse().find((value) => value <= count) || 0;
-        const span = Math.max(1, next - previous);
-        const progress = count >= total ? 100 : Math.round(((count - previous) / span) * 100);
+        const marks = milestoneMarks(total);
+        const progress = total > 0 ? Math.min(100, Math.round((count / total) * 100)) : 0;
         const stage = count >= total ? 4 : count >= 10 ? 3 : count >= 5 ? 2 : count >= 3 ? 1 : 0;
-        return { next, previous, progress, stage };
+        return { progress, stage, marks };
+      }
+
+      function renderProgressMilestones(count, total) {
+        const wrap = $('progressMilestones');
+        wrap.innerHTML = '';
+        milestoneMarks(total).forEach((mark) => {
+          const tick = document.createElement('span');
+          tick.className = `progress-milestone${count >= mark ? ' reached' : ''}${count === mark ? ' current' : ''}`;
+          tick.style.left = `${(mark / total) * 100}%`;
+          wrap.appendChild(tick);
+        });
       }
 
       function showError(message) {
@@ -2469,12 +2588,12 @@
         const list = $('participantColorList');
         list.innerHTML = '';
         const activeColor = loadParticipantColor(config);
-        COLORS.forEach((color) => {
+        COLORS.forEach((color, index) => {
           const button = document.createElement('button');
           button.type = 'button';
           button.className = `color-choice${color === activeColor ? ' selected' : ''}`;
           button.style.setProperty('--dot', color);
-          button.setAttribute('aria-label', `カラー ${color}`);
+          button.setAttribute('aria-label', COLOR_LABELS[index] || `カラー ${color}`);
           button.setAttribute('aria-pressed', color === activeColor ? 'true' : 'false');
           button.addEventListener('click', () => {
             saveParticipantColor(config, color);
@@ -2485,7 +2604,7 @@
               item.classList.toggle('selected', selected);
               item.setAttribute('aria-pressed', selected ? 'true' : 'false');
             });
-            toast('カードカラーを変更しました');
+            toast('テーマカラーを変更しました');
           });
           list.appendChild(button);
         });
@@ -2503,6 +2622,8 @@
         $('adminSpotify').value = firstParam(params, 'p', 'spotify');
         $('adminLine').value = firstParam(params, 'n', 'line');
         $('adminYoutube').value = firstParam(params, 'y', 'youtube');
+        $('adminAmazon').value = firstParam(params, 'amz', 'amazon');
+        $('adminAwa').value = firstParam(params, 'awa');
         $('adminShareTemplate').value = firstParam(params, 'm', 'message') || loadSavedShareTemplate() || DEFAULT_SHARE_TEMPLATE;
         $('adminApiUrl').value = safeSharedApiUrl(incomingSharedApiUrl) || loadSavedSharedApiUrl();
         const templateRaw = firstParam(params, 'v', 'template');
@@ -2796,6 +2917,8 @@
         $('adminSpotify').value = config.spotify || '';
         $('adminLine').value = config.line || '';
         $('adminYoutube').value = config.youtube || '';
+        $('adminAmazon').value = config.amazon || '';
+        $('adminAwa').value = config.awa || '';
         $('adminShareTemplate').value = config.shareTemplate || DEFAULT_SHARE_TEMPLATE;
         $('adminTemplate').value = config.template || 'hotel';
         $('adminApiUrl').value = config.apiUrl || loadSavedSharedApiUrl();
@@ -2870,7 +2993,9 @@
           ['Apple Music', config.apple],
           ['Spotify', config.spotify],
           ['LINE MUSIC', config.line],
-          ['YouTube', config.youtube]
+          ['YouTube', config.youtube],
+          ['Amazon Music', config.amazon],
+          ['AWA', config.awa]
         ].filter((item) => item[1]);
       }
 
@@ -2954,6 +3079,7 @@
         $('testBadge').classList.toggle('hidden', !isTestMode);
         $('testTodayText').textContent = isTestMode ? formatDate(today, false) : '';
         const activeStamp = renderStampPicker(config);
+        setupParticipantSettings(config);
         renderParticipantColorChoices(config);
         renderParticipantName(config);
         const stampIcons = loadStampIcons(config);
@@ -2975,6 +3101,7 @@
               ? `発売日まであと${releaseDistance}日`
               : `発売から${Math.abs(releaseDistance)}日`;
         $('progressBar').style.width = `${milestone.progress}%`;
+        renderProgressMilestones(count, days.length);
         const progressTrack = document.querySelector('.progress-track');
         progressTrack.setAttribute('aria-valuenow', String(milestone.progress));
 
@@ -3141,7 +3268,7 @@
           stamp.textContent = button.dataset.stamp || currentConfig.stamp;
           button.replaceWith(stamp);
         });
-        clone.querySelectorAll('.listen-reset, .participant-identity, .participant-color-picker, .listen-links, .stamp-picker, .action-row, .share-row').forEach((element) => element.remove());
+        clone.querySelectorAll('.listen-reset, .participant-settings, .participant-identity, .participant-color-picker, .listen-links, .stamp-picker, .action-row, .share-row').forEach((element) => element.remove());
         clone.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
         clone.style.width = `${sourceWidth}px`;
         clone.style.maxWidth = 'none';
@@ -3336,6 +3463,19 @@
             ctx.stroke();
           }
         }
+        milestone.marks.forEach((mark) => {
+          const x = margin + (width - margin * 2) * (mark / days.length);
+          const size = count === mark ? 9 : 7;
+          ctx.save();
+          ctx.translate(x, 387);
+          ctx.rotate(Math.PI / 4);
+          ctx.fillStyle = count >= mark ? (isHotel ? '#d0aa54' : config.color) : '#cbd6df';
+          ctx.fillRect(-size / 2, -size / 2, size, size);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(-size / 2, -size / 2, size, size);
+          ctx.restore();
+        });
 
         const stageAlpha = [.22, .42, .62, .82, 1][milestone.stage] || .22;
         ctx.save();
@@ -3932,6 +4072,8 @@
             spotify: '',
             line: '',
             youtube: '',
+            amazon: '',
+            awa: '',
             shareTemplate: DEFAULT_SHARE_TEMPLATE,
             template: 'hotel',
             id: 'test-demo'
