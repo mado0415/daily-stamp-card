@@ -63,6 +63,14 @@
       text-underline-offset: 3px;
     }
 
+    .build-version {
+      margin: -8px 0 18px;
+      color: #8293a5;
+      font-size: 10px;
+      font-weight: 700;
+      text-align: right;
+    }
+
     .card {
       position: relative;
       overflow: hidden;
@@ -1205,6 +1213,17 @@
     .field-note { margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
 
     .listen-modal-copy { margin: 0 0 13px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .listen-return-guide {
+      margin: 0 0 14px;
+      padding: 13px 14px;
+      color: #314b61;
+      background: #fff5c7;
+      border: 2px solid #f1cc62;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .listen-return-guide strong { display: block; color: #7a421e; font-size: 15px; }
     .listen-modal-links { display: grid; gap: 9px; }
     .listen-modal-links .btn { width: 100%; }
 
@@ -1412,6 +1431,7 @@
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
       <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日以降まで続ける場合は、カード終了日を発売日より後に設定できます。</p>
+      <p class="build-version">更新版 2026.09.25 22:13</p>
 
       <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
         <h2>共同管理者にこのページを共有</h2>
@@ -1467,7 +1487,7 @@
           <label for="adminLine">LINE MUSIC（任意）</label>
           <input id="adminLine" type="url" inputmode="url" placeholder="https://music.line.me/..."></div>
         <div class="field">
-          <label for="adminYoutube">YouTube（任意）</label>
+          <label for="adminYoutube">YouTube Music（任意）</label>
           <input id="adminYoutube" type="url" inputmode="url" placeholder="https://youtu.be/..."></div>
         <div class="field">
           <label for="adminAmazon">Amazon Music（任意）</label>
@@ -1591,7 +1611,7 @@
   <div id="listenModal" class="modal" aria-hidden="true">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="listenModalTitle">
       <h2 id="listenModalTitle">曲を聴く</h2>
-      <p class="listen-modal-copy">使うサービスを選んでください。曲を聴いたらブラウザのこのカードへ戻り、今日の窓からスタンプを押してください。</p>
+      <p id="listenModalCopy" class="listen-return-guide"><strong>聴き終えたら、このカードへ戻ってください</strong>使うサービスを選んで曲を聴き、ブラウザのこの画面へ戻るとスタンプを押せます。</p>
       <div id="listenModalLinks" class="listen-modal-links"></div>
       <div class="modal-actions">
         <button id="closeListenModalButton" class="btn btn-plain btn-full" type="button">閉じる</button>
@@ -1608,7 +1628,7 @@
 
       const COLORS = [
         '#ffcc33', '#7b2cbf', '#f8f9fa', '#4ea8de', '#f97316',
-        '#2a9d8f', '#283044', '#e63946', '#ff69b4', '#bfe8f6'
+        '#2a9d8f', '#283044', '#e63946', '#ff69b4', '#d6f4ff'
       ];
       const COLOR_LABELS = [
         'イエロー', 'パープル', 'ホワイト', 'ブルー', 'オレンジ',
@@ -2993,7 +3013,7 @@
           ['Apple Music', config.apple],
           ['Spotify', config.spotify],
           ['LINE MUSIC', config.line],
-          ['YouTube', config.youtube],
+          ['YouTube Music', config.youtube],
           ['Amazon Music', config.amazon],
           ['AWA', config.awa]
         ].filter((item) => item[1]);
@@ -3010,6 +3030,11 @@
       function openListenModal(config, day) {
         const links = getListenLinks(config);
         const wrap = $('listenModalLinks');
+        const closeButton = $('closeListenModalButton');
+        $('listenModalTitle').textContent = '曲を聴く';
+        $('listenModalCopy').innerHTML = '<strong>聴き終えたら、このカードへ戻ってください</strong>使うサービスを選んで曲を聴き、ブラウザのこの画面へ戻るとスタンプを押せます。';
+        closeButton.textContent = '閉じる';
+        closeButton.className = 'btn btn-plain btn-full';
         wrap.innerHTML = '';
         links.forEach(([label, href], index) => {
           const link = document.createElement('a');
@@ -3020,8 +3045,11 @@
           link.textContent = `▶ ${label}`;
           link.addEventListener('click', () => {
             localStorage.setItem(listenReadyKey(config, day), '1');
-            closeListenModal();
-            requestAnimationFrame(renderParticipant);
+            $('listenModalTitle').textContent = '聴き終えたら戻ってきてください';
+            $('listenModalCopy').innerHTML = '<strong>このカードの画面はそのまま残っています</strong>曲を聴き終えたらブラウザへ戻り、下のボタンから今日のスタンプを押してください。';
+            wrap.innerHTML = '';
+            closeButton.textContent = 'カードに戻ってスタンプを押す';
+            closeButton.className = 'btn btn-primary btn-full';
           });
           wrap.appendChild(link);
         });
@@ -3032,6 +3060,7 @@
       function closeListenModal() {
         $('listenModal').classList.remove('show');
         $('listenModal').setAttribute('aria-hidden', 'true');
+        if (currentConfig) requestAnimationFrame(renderParticipant);
       }
 
       function renderStampPicker(config) {
