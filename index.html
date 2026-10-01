@@ -1335,6 +1335,111 @@
       to { transform: translate3d(var(--x), 110vh, 0) rotate(700deg); }
     }
 
+    .celebration-overlay {
+      position: fixed;
+      z-index: 46;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      pointer-events: none;
+      animation: celebrationFade 2.9s ease forwards;
+    }
+    .celebration-overlay.release {
+      background: radial-gradient(circle at 50% 45%, rgba(255, 238, 179, .20), transparent 38%);
+    }
+    .celebration-overlay.final {
+      background: radial-gradient(circle at 50% 45%, rgba(255, 236, 169, .28), transparent 40%), rgba(72, 5, 25, .035);
+      animation-duration: 3.5s;
+    }
+    .celebration-panel {
+      min-width: min(86vw, 390px);
+      border: 1px solid rgba(235, 204, 119, .90);
+      border-radius: 22px;
+      padding: 18px 22px 16px;
+      color: #fff4d5;
+      background: linear-gradient(135deg, rgba(108, 5, 31, .94), rgba(64, 3, 20, .92));
+      box-shadow: 0 0 0 4px rgba(255, 239, 190, .10), 0 20px 65px rgba(65, 3, 20, .34), 0 0 42px rgba(224, 185, 86, .28);
+      text-align: center;
+      transform: translateY(10px) scale(.94);
+      animation: celebrationPanel 2.9s cubic-bezier(.2,.75,.2,1) forwards;
+    }
+    .celebration-overlay.final .celebration-panel {
+      padding-top: 21px;
+      padding-bottom: 19px;
+      box-shadow: 0 0 0 5px rgba(255, 239, 190, .13), 0 24px 72px rgba(65, 3, 20, .38), 0 0 58px rgba(224, 185, 86, .38);
+      animation-duration: 3.5s;
+    }
+    .celebration-kicker {
+      display: block;
+      margin-bottom: 5px;
+      color: #e6c56d;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .18em;
+    }
+    .celebration-title {
+      display: block;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(27px, 8vw, 39px);
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: .035em;
+      text-shadow: 0 2px 12px rgba(0,0,0,.22);
+    }
+    .celebration-sub {
+      display: block;
+      margin-top: 7px;
+      color: #f0d993;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .10em;
+    }
+    .celebration-spark {
+      position: fixed;
+      z-index: 45;
+      left: var(--left);
+      top: var(--top);
+      color: var(--c);
+      font-size: var(--size);
+      line-height: 1;
+      text-shadow: 0 0 10px rgba(255, 234, 169, .65);
+      pointer-events: none;
+      opacity: 0;
+      animation: sparkleBurst var(--d) ease-out forwards;
+      animation-delay: var(--delay);
+    }
+    .special-release-pulse { animation: releaseCardPulse 1.65s ease-out; }
+    .special-final-pulse { animation: finalCardPulse 2.05s ease-out; }
+    @keyframes celebrationFade {
+      0% { opacity: 0; }
+      12%, 70% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    @keyframes celebrationPanel {
+      0% { opacity: 0; transform: translateY(18px) scale(.90); }
+      14% { opacity: 1; transform: translateY(0) scale(1.02); }
+      24%, 72% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-8px) scale(.98); }
+    }
+    @keyframes sparkleBurst {
+      0% { opacity: 0; transform: scale(.25) rotate(0deg); }
+      18% { opacity: 1; transform: scale(1.15) rotate(20deg); }
+      70% { opacity: .95; }
+      100% { opacity: 0; transform: scale(.55) rotate(70deg) translateY(-18px); }
+    }
+    @keyframes releaseCardPulse {
+      0% { transform: scale(1); filter: brightness(1); }
+      23% { transform: scale(1.012); filter: brightness(1.055); box-shadow: 0 20px 65px rgba(137, 85, 10, .28), 0 0 0 4px rgba(224,185,86,.22); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+    @keyframes finalCardPulse {
+      0% { transform: scale(1); filter: brightness(1); }
+      18% { transform: scale(1.018); filter: brightness(1.07); box-shadow: 0 24px 76px rgba(109, 4, 31, .30), 0 0 0 5px rgba(224,185,86,.28); }
+      45% { transform: scale(1.008); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+
     .hidden { display: none !important; }
 
     @media (max-width: 500px) {
@@ -3049,7 +3154,14 @@
         }
         panel.classList.remove('hidden');
         const effectLabels = { 3: '（演出1）', 5: '（演出2）', 10: '（演出3）', 15: '（演出4）', 20: '（演出4）' };
-        $('testCount').innerHTML = days.map((day, index) => `<option value="${index}">${index}${day === config.release ? '（発売日）' : effectLabels[index] || ''}</option>`).join('')
+        $('testCount').innerHTML = days.map((day, index) => {
+          const special = day === config.end
+            ? '（最終日を試す）'
+            : day === config.release
+              ? '（発売日を試す）'
+              : effectLabels[index] || '';
+          return `<option value="${index}">${index}${special}</option>`;
+        }).join('')
           + `<option value="${days.length}">${days.length}（全日）</option>`;
         $('testTemplate').value = config.template;
 
@@ -3315,7 +3427,11 @@
           if (isTestMode && nextDay) toast(`${formatDate(today, false)}にスタンプ。次は${formatDate(nextDay, false)}です`);
           else toast(`${stampIcons[today]} 今日のスタンプを押しました`);
           const validStampCount = [...stamps].filter((day) => campaignDays.includes(day)).length;
-          if ([3, 5, 10, 15, 20, total].includes(validStampCount)) launchConfetti();
+          const isFinalDay = today === config.end;
+          const isReleaseDay = today === config.release;
+          if (isFinalDay) launchSpecialCelebration('final', config, validStampCount === total);
+          else if (isReleaseDay) launchSpecialCelebration('release', config, false);
+          else if ([3, 5, 10, 15, 20, total].includes(validStampCount)) launchConfetti();
         } else {
           toast('今日のスタンプを取り消しました');
         }
@@ -3351,6 +3467,69 @@
           document.body.appendChild(piece);
           setTimeout(() => piece.remove(), 4500);
         }
+      }
+
+      function launchSpecialCelebration(kind, config, perfect = false) {
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const isFinal = kind === 'final';
+        const palette = isFinal
+          ? ['#fff4d5', '#f1d47c', '#d4af37', '#ffffff', '#8d0b30', config.color]
+          : ['#fff4d5', '#f1d47c', '#d4af37', '#c9962f', '#8d0b30', config.color];
+        const card = $('participantView');
+        const pulseClass = isFinal ? 'special-final-pulse' : 'special-release-pulse';
+        card.classList.remove('special-final-pulse', 'special-release-pulse');
+        void card.offsetWidth;
+        card.classList.add(pulseClass);
+        setTimeout(() => card.classList.remove(pulseClass), isFinal ? 2300 : 1900);
+
+        const overlay = document.createElement('div');
+        overlay.className = `celebration-overlay ${isFinal ? 'final' : 'release'}`;
+        const panel = document.createElement('div');
+        panel.className = 'celebration-panel';
+        const kicker = document.createElement('span');
+        kicker.className = 'celebration-kicker';
+        kicker.textContent = isFinal ? 'LISTENING CARD' : '6th ALBUM';
+        const title = document.createElement('span');
+        title.className = 'celebration-title';
+        title.textContent = isFinal ? (perfect ? 'PERFECT！' : 'FINISH！') : 'RELEASE DAY ✦';
+        const sub = document.createElement('span');
+        sub.className = 'celebration-sub';
+        sub.textContent = isFinal ? 'THANK YOU FOR LISTENING' : 'TODAY IS THE DAY';
+        panel.append(kicker, title, sub);
+        overlay.appendChild(panel);
+        document.body.appendChild(overlay);
+
+        const pieces = isFinal ? 135 : 98;
+        for (let i = 0; i < pieces; i += 1) {
+          const piece = document.createElement('i');
+          piece.className = 'confetti-piece';
+          piece.style.left = `${Math.random() * 100}vw`;
+          piece.style.width = `${6 + Math.random() * (isFinal ? 9 : 7)}px`;
+          piece.style.height = `${10 + Math.random() * (isFinal ? 16 : 12)}px`;
+          piece.style.borderRadius = i % 5 === 0 ? '999px' : '2px';
+          piece.style.setProperty('--c', palette[i % palette.length]);
+          piece.style.setProperty('--d', `${2.4 + Math.random() * (isFinal ? 2.8 : 2.1)}s`);
+          piece.style.setProperty('--r', `${Math.random() * 220}deg`);
+          piece.style.setProperty('--x', `${-120 + Math.random() * 240}px`);
+          document.body.appendChild(piece);
+          setTimeout(() => piece.remove(), 5600);
+        }
+
+        const sparkCount = isFinal ? 34 : 22;
+        for (let i = 0; i < sparkCount; i += 1) {
+          const spark = document.createElement('i');
+          spark.className = 'celebration-spark';
+          spark.textContent = i % 4 === 0 ? '✧' : '✦';
+          spark.style.setProperty('--left', `${5 + Math.random() * 90}vw`);
+          spark.style.setProperty('--top', `${8 + Math.random() * 78}vh`);
+          spark.style.setProperty('--c', palette[i % palette.length]);
+          spark.style.setProperty('--size', `${12 + Math.random() * (isFinal ? 28 : 20)}px`);
+          spark.style.setProperty('--d', `${1.3 + Math.random() * 1.35}s`);
+          spark.style.setProperty('--delay', `${Math.random() * .75}s`);
+          document.body.appendChild(spark);
+          setTimeout(() => spark.remove(), 3900);
+        }
+        setTimeout(() => overlay.remove(), isFinal ? 3800 : 3200);
       }
 
       function escapeXmlText(value) {
@@ -3845,15 +4024,27 @@
         });
       }
 
+      function imageCelebrationKind(config) {
+        const stamps = loadStamps(config);
+        const today = currentDay();
+        const justStampedDay = isTestMode ? addDays(today, -1) : today;
+        const effectiveDay = isTestMode && stamps.has(justStampedDay) ? justStampedDay : today;
+        if (effectiveDay === config.end && stamps.has(config.end)) return 'final';
+        if (effectiveDay === config.release && stamps.has(config.release)) return 'release';
+        return 'milestone';
+      }
+
       function imageConfettiReason(config) {
         const days = dateRange(config.start, config.end);
         const stamps = loadStamps(config);
         const count = [...stamps].filter((day) => days.includes(day)).length;
         const milestones = [...new Set([3, 5, 10, 15, 20, days.length])];
         const isMilestone = count > 0 && milestones.includes(count) && (isTestMode || stamps.has(currentDay()));
-        const isRelease = currentDay() === config.release;
-        if (isRelease && isMilestone) return '発売日と節目の記録です。紙吹雪の有無を選べます。';
-        if (isRelease) return '発売日の記録です。紙吹雪の有無を選べます。';
+        const kind = imageCelebrationKind(config);
+        if (kind === 'final') return count === days.length
+          ? '最終日のPERFECT記録です。スペシャル演出の有無を選べます。'
+          : '最終日の記録です。スペシャル演出の有無を選べます。';
+        if (kind === 'release') return '発売日の記録です。RELEASE DAY演出の有無を選べます。';
         if (isMilestone) return `${count}個達成の記録です。紙吹雪の有無を選べます。`;
         return '';
       }
@@ -3864,7 +4055,10 @@
           openShareImage(false);
           return;
         }
+        const kind = imageCelebrationKind(currentConfig);
         $('confettiChoiceReason').textContent = reason;
+        $('imageWithConfettiButton').textContent = kind === 'milestone' ? '🎉 紙吹雪あり' : '✨ スペシャル演出あり';
+        $('imageWithoutConfettiButton').textContent = kind === 'milestone' ? '紙吹雪なし' : '演出なし';
         $('confettiChoiceModal').classList.add('show');
         $('confettiChoiceModal').setAttribute('aria-hidden', 'false');
       }
@@ -3927,10 +4121,71 @@
         return output;
       }
 
+      function addSpecialCelebrationToCanvas(canvas, config, kind) {
+        const output = document.createElement('canvas');
+        output.width = canvas.width;
+        output.height = canvas.height;
+        const ctx = output.getContext('2d');
+        ctx.drawImage(canvas, 0, 0);
+        const isFinal = kind === 'final';
+        const palette = isFinal
+          ? ['#fff4d5', '#f1d47c', '#d4af37', '#ffffff', '#8d0b30', config.color]
+          : ['#fff4d5', '#f1d47c', '#d4af37', '#c9962f', '#8d0b30', config.color];
+        const amount = isFinal ? 170 : 125;
+        ctx.save();
+        for (let i = 0; i < amount; i += 1) {
+          const leftEdge = i % 2 === 0;
+          const edgeBias = i < Math.round(amount * .64);
+          const x = edgeBias
+            ? (leftEdge ? Math.random() * output.width * .19 : output.width * (.81 + Math.random() * .19))
+            : Math.random() * output.width;
+          const y = edgeBias ? Math.random() * output.height : Math.random() * output.height * .42;
+          const w = 10 + Math.random() * (isFinal ? 24 : 19);
+          const h = 7 + Math.random() * (isFinal ? 16 : 13);
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(Math.random() * Math.PI * 1.35);
+          ctx.globalAlpha = .78 + Math.random() * .22;
+          ctx.fillStyle = palette[i % palette.length];
+          if (i % 5 === 0) {
+            ctx.font = `${18 + Math.random() * (isFinal ? 24 : 17)}px Georgia, serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(i % 10 === 0 ? '✧' : '✦', 0, 0);
+          } else if (i % 4 === 0) {
+            ctx.beginPath();
+            ctx.arc(0, 0, w * .33, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillRect(-w / 2, -h / 2, w, h);
+          }
+          ctx.restore();
+        }
+        const ribbonCount = isFinal ? 11 : 8;
+        for (let i = 0; i < ribbonCount; i += 1) {
+          const startX = output.width * (.06 + i * (.88 / Math.max(1, ribbonCount - 1)));
+          ctx.beginPath();
+          ctx.moveTo(startX, 0);
+          ctx.bezierCurveTo(startX - 50, 85, startX + 70, 145, startX + (i % 2 ? -35 : 35), 245 + i * 15);
+          ctx.strokeStyle = palette[(i + 1) % palette.length];
+          ctx.globalAlpha = .86;
+          ctx.lineWidth = isFinal ? 8 : 7;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+        }
+        ctx.restore();
+        return output;
+      }
+
       async function openShareImage(withConfetti = false) {
         try {
           const canvas = await buildCanvas(currentConfig);
-          const finishedCanvas = withConfetti ? addConfettiToCanvas(canvas, currentConfig) : canvas;
+          const celebrationKind = imageCelebrationKind(currentConfig);
+          const finishedCanvas = withConfetti
+            ? (celebrationKind === 'release' || celebrationKind === 'final'
+              ? addSpecialCelebrationToCanvas(canvas, currentConfig, celebrationKind)
+              : addConfettiToCanvas(canvas, currentConfig))
+            : canvas;
           shareBlob = await canvasBlob(finishedCanvas);
           $('shareImage').src = URL.createObjectURL(shareBlob);
           const shareFile = new File([shareBlob], `daily-stamp-${currentConfig.id}.png`, { type: 'image/png' });
