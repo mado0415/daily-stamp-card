@@ -1021,6 +1021,8 @@
     .test-panel h2 { margin: 0; font-size: 15px; }
     .test-panel p { margin: 5px 0 12px; color: var(--muted); font-size: 11px; line-height: 1.55; }
     .test-controls { display: grid; grid-template-columns: .8fr 1.25fr auto; gap: 8px; align-items: end; }
+    .test-repro-button { margin-top: 9px; min-height: 42px; font-size: 11px; }
+    .test-repro-note { margin: 6px 2px 0 !important; font-size: 10px !important; text-align: center; }
     .test-field label { display: block; margin: 0 0 4px; font-size: 11px; font-weight: 800; }
     .test-field input, .test-field select {
       width: 100%;
@@ -1393,6 +1395,8 @@
         </div>
         <button id="testReset" class="btn btn-plain" type="button">リセット</button>
       </div>
+      <button id="testAddHiddenStamp" class="btn btn-plain btn-full test-repro-button" type="button">🧪 不具合再現用：期間外スタンプを1個入れる</button>
+      <p id="testHiddenStampStatus" class="test-repro-note">本番データには影響しません。先に「スタンプ数」を1にしてから押してください。</p>
     </section>
 
     <section id="participantView" class="card hidden" aria-label="表題曲デイリースタンプカード">
@@ -3076,6 +3080,20 @@
           currentConfig = { ...currentConfig, template, stamps, stamp: stamps.includes(currentConfig.stamp) ? currentConfig.stamp : stamps[0] };
           showParticipant(currentConfig);
         });
+        $('testAddHiddenStamp').addEventListener('click', () => {
+          const hiddenDay = addDays(currentConfig.start, -1);
+          const stamps = loadStamps(currentConfig);
+          const stampIcons = loadStampIcons(currentConfig);
+          stamps.add(hiddenDay);
+          stampIcons[hiddenDay] = loadActiveStamp(currentConfig);
+          saveStamps(currentConfig, stamps);
+          saveStampIcons(currentConfig, stampIcons);
+          $('testAddHiddenStamp').disabled = true;
+          $('testAddHiddenStamp').textContent = '✓ 期間外スタンプを1個入れました';
+          $('testHiddenStampStatus').textContent = '画面のSTAMPS数には入りませんが、現在の紙吹雪判定には含まれる状態です。';
+          renderParticipant();
+          toast('期間外スタンプを1個追加しました');
+        });
         $('testReset').addEventListener('click', () => {
           localStorage.removeItem(storageKey(currentConfig));
           localStorage.removeItem(metaKey(currentConfig));
@@ -3085,6 +3103,9 @@
           localStorage.removeItem(participantNameKey(currentConfig));
           dateRange(currentConfig.start, currentConfig.end).forEach((day) => localStorage.removeItem(listenReadyKey(currentConfig, day)));
           setTestToday(currentConfig.start);
+          $('testAddHiddenStamp').disabled = false;
+          $('testAddHiddenStamp').textContent = '🧪 不具合再現用：期間外スタンプを1個入れる';
+          $('testHiddenStampStatus').textContent = '本番データには影響しません。先に「スタンプ数」を1にしてから押してください。';
           renderParticipant();
           toast('テスト状態をリセットしました');
         });
