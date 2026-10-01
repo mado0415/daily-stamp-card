@@ -994,6 +994,19 @@
       text-align: center;
     }
 
+    .operator-credit {
+      margin: -9px 24px 22px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.6;
+      text-align: center;
+    }
+    .operator-credit a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
     .test-panel {
       margin: 0 0 12px;
       padding: 15px;
@@ -1440,11 +1453,13 @@
           <span class="journey-route-goal">✦</span>
         </div>
         <div id="stampGrid" class="stamp-grid"></div>
+        <p class="helper">※このスタンプカード企画は、ファンによる非公式の応援アカウントが実施しています。Snow Man・所属事務所および各種ストリーミングサービスによる公式企画ではありません。</p>
       </section>
 
       <div class="share-row single">
         <button id="imageButton" class="btn btn-plain" type="button">画像にして共有</button>
       </div>
+      <p class="operator-credit web-only">企画・運営：<a href="https://x.com/SnowManFans_SH" target="_blank" rel="noopener noreferrer">Fans ✦ Snow Man Station（@SnowManFans_SH）</a></p>
     </section>
 
     <section id="adminView" class="card admin-card hidden" aria-label="スタンプカード管理設定">
@@ -3319,7 +3334,7 @@
           stamp.textContent = button.dataset.stamp || currentConfig.stamp;
           button.replaceWith(stamp);
         });
-        clone.querySelectorAll('.listen-reset, .participant-settings, .participant-identity, .participant-color-picker, .listen-links, .stamp-picker, .action-row, .share-row').forEach((element) => element.remove());
+        clone.querySelectorAll('.listen-reset, .participant-settings, .participant-identity, .participant-color-picker, .listen-links, .stamp-picker, .action-row, .share-row, .web-only').forEach((element) => element.remove());
         clone.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
         clone.style.width = `${sourceWidth}px`;
         clone.style.maxWidth = 'none';
