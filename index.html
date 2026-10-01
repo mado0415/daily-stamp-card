@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- LIGHTWEIGHT TEST BUILD: participant cache + lazy html2canvas; production index.html unchanged -->
 <!-- VERIFIED LATEST: 2026-09-25 / participant UX feedback + shared workspace + separate drafts -->
 <html lang="ja">
 <head>
@@ -1657,7 +1658,6 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     (() => {
       'use strict';
@@ -1705,6 +1705,7 @@
       let currentConfig = null;
       let adminSelectedStamps = [];
       let shareBlob = null;
+      let html2canvasLoadPromise = null;
       let toastTimer = null;
       let sharedSaveBusy = false;
       let sharedStampSets = { AMENITY: [...AMENITY_STAMPS] };
@@ -1851,6 +1852,51 @@
         } catch (_) {
           return null;
         }
+      }
+
+      function participantCardCacheName(apiUrl, cardId) {
+        return `daily_stamp_participant_card_cache_v1_${hashText(`${apiUrl || ''}|${cardId || ''}`)}`;
+      }
+
+      function loadParticipantCardCache(apiUrl, cardId) {
+        if (!apiUrl || !cardId) return null;
+        try {
+          const cached = JSON.parse(localStorage.getItem(participantCardCacheName(apiUrl, cardId)) || 'null');
+          if (!cached || !cached.config || cached.cardId !== cardId || cached.apiUrl !== apiUrl) return null;
+          return cached;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function saveParticipantCardCache(apiUrl, cardId, result) {
+        if (!apiUrl || !cardId || !result || !result.config) return;
+        try {
+          localStorage.setItem(participantCardCacheName(apiUrl, cardId), JSON.stringify({
+            apiUrl,
+            cardId,
+            config: result.config,
+            revision: Number(result.revision || 0),
+            draftRevision: Number(result.draftRevision || 0),
+            published: Boolean(result.published),
+            isDraft: Boolean(result.isDraft),
+            cachedAt: Date.now()
+          }));
+        } catch (_) {}
+      }
+
+      function sharedResultToParticipantConfig(result, apiUrl, cardId, editKey = '') {
+        return {
+          ...result.config,
+          id: cardId,
+          sharedCardId: cardId,
+          sharedEditKey: result.canEdit ? editKey : '',
+          sharedRevision: Number(result.revision || 0),
+          sharedDraftRevision: Number(result.draftRevision || 0),
+          published: Boolean(result.published),
+          isDraft: Boolean(result.isDraft),
+          apiUrl
+        };
       }
 
       function saveWorkspaceEditKey(apiUrl, editKey) {
@@ -3310,6 +3356,20 @@
         return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       }
 
+      function ensureHtml2CanvasLoaded() {
+        if (typeof window.html2canvas === 'function') return Promise.resolve(true);
+        if (html2canvasLoadPromise) return html2canvasLoadPromise;
+        html2canvasLoadPromise = new Promise((resolve) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+          script.async = true;
+          script.onload = () => resolve(typeof window.html2canvas === 'function');
+          script.onerror = () => resolve(false);
+          document.head.appendChild(script);
+        });
+        return html2canvasLoadPromise;
+      }
+
       async function loadSnapshotImage(url) {
         return new Promise((resolve, reject) => {
           const image = new Image();
@@ -3357,6 +3417,7 @@
         const width = Math.ceil(clone.getBoundingClientRect().width);
         const height = Math.ceil(clone.scrollHeight);
 
+        await ensureHtml2CanvasLoaded();
         if (typeof window.html2canvas === 'function') {
           try {
             const canvas = await window.html2canvas(clone, {
@@ -4120,11 +4181,11 @@
       }
 
       async function init() {
-        initAdminDefaults();
         let config = null;
         let sharedLoadError = '';
         const requestedAdmin = params.get('admin') === '1';
         const sharedApi = safeSharedApiUrl(incomingSharedApiUrl);
+        if (requestedAdmin || !incomingSharedCardId) initAdminDefaults();
         if (requestedAdmin && sharedApi && !workspaceEditKey) {
           workspaceEditKey = loadWorkspaceEditKey(sharedApi) || randomToken(32);
           saveWorkspaceEditKey(sharedApi, workspaceEditKey);
@@ -4170,25 +4231,33 @@
             }
           }
         } else if (incomingSharedCardId) {
-          try {
-            const result = await loadSharedConfig(sharedApi, incomingSharedCardId, incomingSharedEditKey);
-            config = {
-              ...result.config,
-              id: incomingSharedCardId,
-              sharedCardId: incomingSharedCardId,
-              sharedEditKey: result.canEdit ? incomingSharedEditKey : '',
-              sharedRevision: Number(result.revision || 0),
-              sharedDraftRevision: Number(result.draftRevision || 0),
-              published: Boolean(result.published),
-              isDraft: Boolean(result.isDraft),
-              apiUrl: sharedApi
-            };
-            if (result.canEdit) {
-              workspaceEditKey = incomingSharedEditKey;
-              upsertWorkspaceCard(config);
+          const cachedParticipant = !incomingSharedEditKey
+            ? loadParticipantCardCache(sharedApi, incomingSharedCardId)
+            : null;
+          if (cachedParticipant) {
+            config = sharedResultToParticipantConfig({ ...cachedParticipant, canEdit: false }, sharedApi, incomingSharedCardId, '');
+            currentConfig = config;
+            showParticipant(config);
+            loadSharedConfig(sharedApi, incomingSharedCardId, incomingSharedEditKey).then((result) => {
+              saveParticipantCardCache(sharedApi, incomingSharedCardId, result);
+              const freshConfig = sharedResultToParticipantConfig(result, sharedApi, incomingSharedCardId, incomingSharedEditKey);
+              currentConfig = freshConfig;
+              showParticipant(freshConfig);
+            }).catch((error) => {
+              console.warn('最新の共有カード設定を確認できなかったため、前回の表示を使用します', error);
+            });
+          } else {
+            try {
+              const result = await loadSharedConfig(sharedApi, incomingSharedCardId, incomingSharedEditKey);
+              saveParticipantCardCache(sharedApi, incomingSharedCardId, result);
+              config = sharedResultToParticipantConfig(result, sharedApi, incomingSharedCardId, incomingSharedEditKey);
+              if (result.canEdit) {
+                workspaceEditKey = incomingSharedEditKey;
+                upsertWorkspaceCard(config);
+              }
+            } catch (error) {
+              sharedLoadError = error && error.message ? error.message : '共有カードを読み込めませんでした。';
             }
-          } catch (error) {
-            sharedLoadError = error && error.message ? error.message : '共有カードを読み込めませんでした。';
           }
         } else if (incomingSharedApiUrl) {
           sharedLoadError = '共同管理URLの編集キーを確認してください。';
