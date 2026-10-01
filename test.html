@@ -3335,7 +3335,8 @@
           const total = dateRange(config.start, config.end).length;
           if (isTestMode && nextDay) toast(`${formatDate(today, false)}にスタンプ。次は${formatDate(nextDay, false)}です`);
           else toast(`${stampIcons[today]} 今日のスタンプを押しました`);
-          if ([3, 5, 10, 15, 20, total].includes(stamps.size)) launchConfetti();
+          const validStampCount = [...stamps].filter((day) => campaignDays.includes(day)).length;
+          if ([3, 5, 10, 15, 20, total].includes(validStampCount)) launchConfetti();
         } else {
           toast('今日のスタンプを取り消しました');
         }
