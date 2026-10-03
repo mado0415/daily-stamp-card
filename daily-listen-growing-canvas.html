@@ -70,8 +70,8 @@ canvas{display:block;width:100%;height:100%}
 <div id="progress" class="progress"></div>
 <div class="copy"><h1 id="title">today's piece will appear here.</h1><p id="state">TODAY<br>OPEN</p></div>
 <div id="optionalActions" class="actions" style="margin-top:10px;display:none">
-  <button id="keepBtn" class="btn primary" type="button">このまま残す</button>
-  <button id="drawBtn" class="btn" type="button">自分で触る</button>
+  <button id="keepBtn" class="btn primary" type="button">これでOK</button>
+  <button id="drawBtn" class="btn" type="button">＋ 自分で描き足す</button>
 </div>
 <details id="colorSettings" style="margin-top:13px;border-top:1px solid rgba(20,20,20,.13);padding-top:10px">
 <summary style="font-size:9px;font-weight:900;letter-spacing:.16em;color:#817d75;cursor:pointer">COLOR / CHANGE</summary>
@@ -174,10 +174,10 @@ function ui(){
  state.innerHTML=materialUnlocked?'TODAY<br>ADDED':'TODAY<br>OPEN';
  overlay.classList.toggle('hide',touches.length>0);
  if(materialUnlocked){
-   title.textContent=complete?'today’s trace is here.':'today’s piece is here.';
+   title.textContent=complete?'今日のピースが入りました。':'今日のピースが入りました。';
    done.classList.add('show');
  }else{
-   title.textContent='today’s piece will appear here.';
+   title.textContent='聴いたら、ここに今日のピースが加わります。';
    done.classList.remove('show');
  }
 }
@@ -285,7 +285,10 @@ function drawStoredGesture(t,i){
 }
 frame.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 frame.addEventListener('pointerdown',e=>{
- if(complete)return;
+ const guide=document.querySelector('#drawGuide'); if(guide)guide.style.display='none';
+ const db=document.querySelector('#drawBtn'); if(db){db.disabled=false;db.textContent='＋ さらに描き足す'}
+ // Existing work stays; drawing is always additive.
+ complete=false;
  const r=frame.getBoundingClientRect(),p={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
  gestureStart=p;gesturePoints=[p];lastBrushPoint=p;lastSoundPoint=p;
  frame.setPointerCapture?.(e.pointerId);
@@ -326,8 +329,8 @@ frame.addEventListener('pointerup',e=>{
  gestureStart=null;gesturePoints=[];lastBrushPoint=null;lastSoundPoint=null;
  paint();
  if(typeof shapeEffect==='function')shapeEffect(p.x,p.y,touches.length-1);
- complete=true;
- setTimeout(()=>{paint();if(typeof finishEffect==='function')finishEffect();ui()},180);
+ complete=false;
+ setTimeout(()=>{paint();ui();try{navigator.vibrate?.(10)}catch(_){}},90);
 });
 
 function addAutoPiece(){
@@ -386,15 +389,25 @@ document.querySelector('#listenDemo').onclick=()=>{
 document.querySelector('#unlockDemo').onclick=()=>{
  materialUnlocked=true;sessionStorage.setItem('daily_art_material_unlocked_v1','1');
  renderMaterialGate();
-if(materialUnlocked){document.querySelector('#optionalActions').style.display='grid';if(!touches.length)addAutoPiece();}
+if(materialUnlocked){document.querySelector('#optionalActions').style.display='grid';
+ document.querySelector('#keepBtn').textContent='これでOK';
+ document.querySelector('#drawBtn').textContent='＋ 自分で描き足す';if(!touches.length)addAutoPiece();}
  if(!touches.length)addAutoPiece();
  document.querySelector('#optionalActions').style.display='grid';
+ document.querySelector('#keepBtn').textContent='これでOK';
+ document.querySelector('#drawBtn').textContent='＋ 自分で描き足す';
  try{navigator.vibrate?.(18)}catch(_){}
 };
 renderMaterialGate();
 
 document.querySelector('#keepBtn').onclick=()=>{storeWork();document.querySelector('#keepBtn').textContent='SNAPSHOT SAVED'};
-document.querySelector('#drawBtn').onclick=()=>{overlay.classList.remove('hide');overlay.querySelector('strong').textContent='draw anywhere';overlay.querySelector('span').textContent='ONE SWIPE IS ENOUGH';setTimeout(()=>overlay.classList.add('hide'),1400)};
+document.querySelector('#drawBtn').onclick=()=>{
+ const guide=document.querySelector('#drawGuide');
+ guide.style.display='grid';
+ document.querySelector('#drawBtn').textContent='白い作品エリアを指でなぞってください';
+ document.querySelector('#drawBtn').disabled=true;
+ setTimeout(()=>{guide.style.display='none'},2200);
+};
 document.querySelector('#saveBtn').onclick=()=>{let a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='daily-listen-growing-work.png';a.click()};
 document.querySelector('#newBtn').onclick=()=>{addAutoPiece()};
 
