@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#f2efe8">
+<title>DAILY LISTEN — ART LAB</title>
+<style>
+:root{--paper:#f2efe8;--ink:#171717;--muted:#817d75}
+*{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Hiragino Sans","Yu Gothic",sans-serif;-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}button{font:inherit;-webkit-tap-highlight-color:transparent}
+main{width:min(100%,620px);margin:auto;padding:max(18px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom))}
+.top{display:flex;justify-content:space-between;align-items:start;margin:2px 1px 13px}.brand{font-size:10px;font-weight:900;letter-spacing:.22em}.day{font-size:9px;font-weight:800;letter-spacing:.18em;color:var(--muted);text-align:right;line-height:1.6}
+.frame{position:relative;aspect-ratio:4/5;overflow:hidden;background:#fbfaf7;border:1px solid rgba(20,20,20,.13);cursor:pointer;touch-action:manipulation}
+canvas{display:block;width:100%;height:100%}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none;transition:opacity .35s}
+.overlay.hide{opacity:0}.overlay strong{display:block;font:400 clamp(26px,8vw,42px) Georgia,serif;letter-spacing:.02em}.overlay span{display:block;margin-top:9px;font-size:9px;font-weight:800;letter-spacing:.18em;color:var(--muted)}
+.progress{display:flex;gap:5px;margin:12px 1px 0}.pip{height:2px;flex:1;background:#d7d2c9}.pip.on{background:#171717}
+.copy{display:flex;justify-content:space-between;gap:14px;align-items:end;margin:12px 1px 0}.copy h1{margin:0;font:400 20px Georgia,serif}.copy p{margin:0;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.12em;text-align:right;line-height:1.6}
+.done{display:none;margin-top:13px}.done.show{display:block}.done-head{display:flex;justify-content:space-between;align-items:end;border-top:1px solid rgba(20,20,20,.18);padding-top:12px}.done-head strong{font:400 24px Georgia,serif}.done-head span{font-size:9px;color:var(--muted);letter-spacing:.16em;font-weight:800}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:11px}.btn{min-height:45px;border:1px solid #191919;border-radius:999px;background:transparent;font-size:10px;font-weight:900;letter-spacing:.12em}.btn.primary{background:#191919;color:#fff}
+.archive{margin-top:22px;border-top:1px solid rgba(20,20,20,.15);padding-top:13px}.archive-head{display:flex;justify-content:space-between;align-items:center}.archive h2{margin:0;font-size:10px;letter-spacing:.2em}.archive small{color:var(--muted);font-size:9px}.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}.thumb{position:relative;aspect-ratio:4/5;background:#fbfaf7;border:1px solid rgba(20,20,20,.09);overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover;display:block}.thumb span{position:absolute;left:5px;bottom:5px;padding:2px 4px;background:rgba(248,246,241,.76);font-size:7px;font-weight:900;letter-spacing:.08em}
+.reset{display:block;margin:17px auto 0;border:0;background:none;color:#aaa59d;font-size:9px;text-decoration:underline;text-underline-offset:3px}
+.burst{position:absolute;border:1px solid currentColor;border-radius:50%;pointer-events:none;animation:burst .8s ease-out forwards}@keyframes burst{from{opacity:.65;transform:translate(-50%,-50%) scale(.15)}to{opacity:0;transform:translate(-50%,-50%) scale(2.3)}}
+@media(max-width:390px){main{padding-left:12px;padding-right:12px}}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><div class="brand">DAILY LISTEN / ART LAB</div><div class="day"><span id="date"></span><br>ONE LISTEN · ONE WORK</div></div>
+<div id="frame" class="frame"><canvas id="art"></canvas><div id="overlay" class="overlay"><div><strong>touch to begin</strong><span>5 TOUCHES → TODAY'S WORK</span></div></div></div>
+<div id="progress" class="progress"></div>
+<div class="copy"><h1 id="title">make today's work.</h1><p id="state">0 / 5<br>TOUCHES</p></div>
+<section id="done" class="done"><div class="done-head"><strong>TODAY COMPLETE.</strong><span id="workNo">WORK 01</span></div><div class="actions"><button id="saveBtn" class="btn primary">SAVE IMAGE</button><button id="newBtn" class="btn">TRY ANOTHER STYLE</button></div></section>
+<section class="archive"><div class="archive-head"><h2>MY ARCHIVE</h2><small id="archiveCount">0 WORKS</small></div><div id="thumbs" class="thumbs"></div></section>
+<button id="reset" class="reset">実験データをリセット</button>
+</main>
+<script>
+(()=>{'use strict';
+const canvas=document.querySelector('#art'),ctx=canvas.getContext('2d'),frame=document.querySelector('#frame'),overlay=document.querySelector('#overlay'),progress=document.querySelector('#progress'),state=document.querySelector('#state'),title=document.querySelector('#title'),done=document.querySelector('#done'),thumbs=document.querySelector('#thumbs');
+const STEPS=5,KEY='daily_art_lab_v1',PALETTES=[
+['#181818','#d6534d','#e2ae3f','#f3eee4'],
+['#183a45','#4d8f86','#e87868','#efc45b'],
+['#241f38','#6658a6','#e36c9c','#f0b54a'],
+['#102d28','#2d776b','#d1a13c','#d85b52'],
+['#242424','#3f78a1','#cf6b37','#d76b99']
+];
+let touches=[],seed=Math.floor(Math.random()*1e9),complete=false,archive=[];
+try{archive=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(archive))archive=[]}catch(e){archive=[]}
+const today=new Date();document.querySelector('#date').textContent=`${today.getMonth()+1}.${String(today.getDate()).padStart(2,'0')}`;
+for(let i=0;i<STEPS;i++){let p=document.createElement('i');p.className='pip';progress.append(p)}
+function rand(n=1){seed=(seed*1664525+1013904223)>>>0;return (seed/4294967296)*n}
+function resize(){let r=frame.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);paint()}
+function roundedRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
+function paint(){
+ let w=frame.clientWidth,h=frame.clientHeight;ctx.clearRect(0,0,w,h);ctx.fillStyle='#fbfaf7';ctx.fillRect(0,0,w,h);
+ let oldSeed=seed;seed=(touches.length?touches[0].seed:seed)||seed;let pal=PALETTES[Math.floor(rand(PALETTES.length))];
+ // quiet editorial scaffolding
+ ctx.strokeStyle='rgba(20,20,20,.12)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(w*.08,h*.12);ctx.lineTo(w*.92,h*.12);ctx.stroke();
+ touches.forEach((t,i)=>{
+   seed=t.seed;
+   const x=t.x*w,y=t.y*h,c=pal[(i+Math.floor(rand(3)))%pal.length];
+   ctx.save();ctx.translate(x,y);ctx.rotate((rand()-.5)*1.2);
+   if(i%5===0){ // expanding disc + orbit
+     ctx.globalAlpha=.92;ctx.fillStyle=c;ctx.beginPath();ctx.arc(0,0,34+rand(28),0,Math.PI*2);ctx.fill();
+     ctx.strokeStyle=pal[(i+2)%pal.length];ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,70+rand(35),25+rand(22),rand(),0,Math.PI*2);ctx.stroke();
+   } else if(i%5===1){ // typographic slab
+     ctx.fillStyle=c;ctx.font=`700 ${48+rand(34)}px Georgia,serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(['S','M','✦','9'][Math.floor(rand(4))],0,0);
+     ctx.strokeStyle=pal[(i+1)%pal.length];ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(-65-rand(35),35);ctx.lineTo(65+rand(40),-28);ctx.stroke();
+   } else if(i%5===2){ // bars
+     for(let k=0;k<7;k++){ctx.fillStyle=pal[(k+i)%pal.length];ctx.globalAlpha=.78;let bw=10+rand(17),bh=55+rand(100);ctx.fillRect((k-3)*22,-bh/2,bw,bh)}
+   } else if(i%5===3){ // rings
+     for(let k=0;k<4;k++){ctx.strokeStyle=pal[(k+i)%pal.length];ctx.lineWidth=3+k*2;ctx.globalAlpha=.72;ctx.beginPath();ctx.arc(0,0,20+k*17+rand(8),0,Math.PI*2);ctx.stroke()}
+   } else { // polygon/star burst
+     ctx.fillStyle=c;ctx.globalAlpha=.9;ctx.beginPath();for(let k=0;k<12;k++){let a=k*Math.PI/6,r=k%2?30+rand(15):75+rand(28),px=Math.cos(a)*r,py=Math.sin(a)*r;k?ctx.lineTo(px,py):ctx.moveTo(px,py)}ctx.closePath();ctx.fill();
+   }
+   ctx.restore();
+ });
+ if(complete){
+   ctx.fillStyle='#171717';ctx.font='700 9px -apple-system,sans-serif';ctx.letterSpacing='2px';ctx.fillText('TODAY / DAILY LISTEN',w*.08,h*.91);
+   ctx.font='400 28px Georgia,serif';ctx.fillText(String(touches.length).padStart(2,'0'),w*.08,h*.955);
+ }
+ seed=oldSeed;
+}
+function ui(){
+ [...progress.children].forEach((p,i)=>p.classList.toggle('on',i<touches.length));
+ state.innerHTML=`${touches.length} / ${STEPS}<br>TOUCHES`;
+ overlay.classList.toggle('hide',touches.length>0);
+ if(complete){title.textContent='your work is ready.';done.classList.add('show')}else{title.textContent=touches.length?'keep touching.':'make today’s work.';done.classList.remove('show')}
+}
+function audio(x,y){
+ try{let A=window._A||(window._A=new (AudioContext||webkitAudioContext)()),o=A.createOscillator(),g=A.createGain();o.type=['sine','triangle'][touches.length%2];o.frequency.value=180+x*420;g.gain.setValueAtTime(.035,A.currentTime);g.gain.exponentialRampToValueAtTime(.0001,A.currentTime+.16+y*.12);o.connect(g).connect(A.destination);o.start();o.stop(A.currentTime+.3)}catch(e){}
+}
+frame.addEventListener('pointerdown',e=>{
+ if(complete)return;let r=frame.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+ touches.push({x,y,seed:Math.floor(Math.random()*1e9)});audio(x,y);
+ let b=document.createElement('i');b.className='burst';b.style.left=e.clientX-r.left+'px';b.style.top=e.clientY-r.top+'px';b.style.width=b.style.height='52px';b.style.color=PALETTES[touches.length%PALETTES.length][1];frame.append(b);setTimeout(()=>b.remove(),850);
+ if(touches.length>=STEPS){complete=true;setTimeout(()=>{paint();ui();storeWork()},220)}else{paint();ui()}
+});
+function storeWork(){
+ let img=canvas.toDataURL('image/jpeg',.82),date=`${today.getMonth()+1}/${today.getDate()}`;archive.unshift({img,date});archive=archive.slice(0,12);localStorage.setItem(KEY,JSON.stringify(archive));renderArchive();document.querySelector('#workNo').textContent=`WORK ${String(archive.length).padStart(2,'0')}`;
+}
+function renderArchive(){thumbs.innerHTML='';document.querySelector('#archiveCount').textContent=`${archive.length} WORK${archive.length===1?'':'S'}`;archive.forEach(a=>{let d=document.createElement('div');d.className='thumb';d.innerHTML=`<img src="${a.img}"><span>${a.date}</span>`;thumbs.append(d)})}
+document.querySelector('#saveBtn').onclick=()=>{let a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='daily-listen-art.png';a.click()};
+document.querySelector('#newBtn').onclick=()=>{touches=[];seed=Math.floor(Math.random()*1e9);complete=false;paint();ui()};
+document.querySelector('#reset').onclick=()=>{if(confirm('実験データをすべて消しますか？')){archive=[];localStorage.removeItem(KEY);touches=[];complete=false;renderArchive();paint();ui()}};
+addEventListener('resize',resize);renderArchive();ui();requestAnimationFrame(resize);
+})();
+</script>
+</body>
+</html>
