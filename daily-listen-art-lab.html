@@ -39,14 +39,21 @@ canvas{display:block;width:100%;height:100%}
 .reset{display:block;margin:17px auto 0;border:0;background:none;color:#aaa59d;font-size:9px;text-decoration:underline;text-underline-offset:3px}
 .burst{position:absolute;border:1px solid currentColor;border-radius:50%;pointer-events:none;animation:burst .8s ease-out forwards}@keyframes burst{from{opacity:.65;transform:translate(-50%,-50%) scale(.15)}to{opacity:0;transform:translate(-50%,-50%) scale(2.3)}}
 @media(max-width:390px){main{padding-left:12px;padding-right:12px}}
+
+.gesture-trail{position:absolute;z-index:11;left:0;top:0;width:100%;height:100%;pointer-events:none}
+.gesture-line{position:absolute;height:3px;border-radius:999px;background:currentColor;transform-origin:0 50%;pointer-events:none;opacity:.8;animation:gestureLine .62s ease-out forwards}
+.gesture-dot{position:absolute;width:13px;height:13px;border:2px solid currentColor;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;animation:gestureDot .55s ease-out forwards}
+@keyframes gestureLine{0%{opacity:.95;filter:blur(0);transform:rotate(var(--a)) scaleX(.08)}70%{opacity:.8;transform:rotate(var(--a)) scaleX(1.04)}100%{opacity:0;filter:blur(1px);transform:rotate(var(--a)) scaleX(1)}}
+@keyframes gestureDot{0%{opacity:1;transform:translate(-50%,-50%) scale(.4)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.3)}}
+
 </style>
 </head>
 <body>
 <main>
 <div class="top"><div class="brand">DAILY LISTEN / ART LAB</div><div class="day"><span id="date"></span><br>ONE LISTEN · ONE WORK</div></div>
-<div id="frame" class="frame"><canvas id="art"></canvas><div id="overlay" class="overlay"><div><strong>touch to begin</strong><span>5 TOUCHES → TODAY'S WORK</span></div></div></div>
+<div id="frame" class="frame"><canvas id="art"></canvas><div id="gestureTrail" class="gesture-trail"></div><div id="overlay" class="overlay"><div><strong>touch or swipe</strong><span>5 MOVES → TODAY'S WORK</span></div></div></div>
 <div id="progress" class="progress"></div>
-<div class="copy"><h1 id="title">make today's work.</h1><p id="state">0 / 5<br>TOUCHES</p></div>
+<div class="copy"><h1 id="title">compose today's work.</h1><p id="state">0 / 5<br>MOVES</p></div>
 <div class="moodrow"><span>COLOR MOOD</span><div id="moodChoices"></div></div>
 <section id="done" class="done"><div class="done-head"><strong>TODAY COMPLETE.</strong><span id="workNo">WORK 01</span></div><div class="actions"><button id="saveBtn" class="btn primary">SAVE IMAGE</button><button id="newBtn" class="btn">TRY ANOTHER STYLE</button></div></section>
 <section class="archive"><div class="archive-head"><h2>MY ARCHIVE</h2><small id="archiveCount">0 WORKS</small></div><div id="thumbs" class="thumbs"></div></section>
@@ -109,6 +116,25 @@ function paint(){
    }
    ctx.restore();
  });
+
+ // User-directed gesture layer: direction, length and speed remain visible in the finished work.
+ touches.forEach((t,i)=>{
+   if(!t.kind || t.kind==='tap') return;
+   const R=rng((t.seed^0x9e3779b9)>>>0), pal=typeof activePalette==='function'?activePalette():PALETTES[0];
+   const x=t.x*w,y=t.y*h,ex=(t.ex??t.x)*w,ey=(t.ey??t.y)*h,dx=ex-x,dy=ey-y;
+   ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+   ctx.strokeStyle=pal[(i+1)%pal.length];
+   ctx.globalAlpha=t.kind==='flick'?.88:.68;
+   ctx.lineWidth=t.kind==='long'?14:t.kind==='flick'?3:8;
+   ctx.beginPath();ctx.moveTo(x,y);
+   const bend=(R()-.5)*55;
+   ctx.quadraticCurveTo((x+ex)/2-dy*.08+bend,(y+ey)/2+dx*.08-bend,ex,ey);ctx.stroke();
+   if(t.kind==='flick'){
+     ctx.globalAlpha=.5;ctx.lineWidth=1.5;
+     for(let k=1;k<=2;k++){ctx.beginPath();ctx.moveTo(x,y+k*7);ctx.lineTo(ex,ey+k*7);ctx.stroke()}
+   }
+   ctx.restore();
+ });
  if(complete){
    ctx.fillStyle='#171717';ctx.font='700 9px -apple-system,sans-serif';ctx.letterSpacing='2px';ctx.fillText('TODAY / DAILY LISTEN',w*.08,h*.91);
    ctx.font='400 28px Georgia,serif';ctx.fillText(String(touches.length).padStart(2,'0'),w*.08,h*.955);
@@ -117,9 +143,9 @@ function paint(){
 }
 function ui(){
  [...progress.children].forEach((p,i)=>p.classList.toggle('on',i<touches.length));
- state.innerHTML=`${touches.length} / ${STEPS}<br>TOUCHES`;
+ state.innerHTML=`${touches.length} / ${STEPS}<br>MOVES`;
  overlay.classList.toggle('hide',touches.length>0);
- if(complete){title.textContent='your work is ready.';done.classList.add('show')}else{title.textContent=touches.length?'keep touching.':'make today’s work.';done.classList.remove('show')}
+ if(complete){title.textContent='your work is ready.';done.classList.add('show')}else{title.textContent=touches.length?'keep composing.':'make today’s work.';done.classList.remove('show')}
 }
 function audio(x,y){
  try{let A=window._A||(window._A=new (AudioContext||webkitAudioContext)()),o=A.createOscillator(),g=A.createGain();o.type=['sine','triangle'][touches.length%2];o.frequency.value=180+x*420;g.gain.setValueAtTime(.035,A.currentTime);g.gain.exponentialRampToValueAtTime(.0001,A.currentTime+.16+y*.12);o.connect(g).connect(A.destination);o.start();o.stop(A.currentTime+.3)}catch(e){}
@@ -141,11 +167,45 @@ function finishEffect(){
 const moodWrap=document.querySelector('#moodChoices');
 COLOR_MOODS.forEach(m=>{const b=document.createElement('button');b.className='mood'+(m[0]===colorMood?' on':'');b.style.setProperty('--c',m[1]);b.title=m[0];b.onclick=()=>{colorMood=m[0];localStorage.setItem(MOODKEY,colorMood);[...moodWrap.children].forEach(x=>x.classList.toggle('on',x===b));paint()};moodWrap.append(b)});
 
+let gestureStart=null, gesturePoints=[];
+function gesturePreview(x1,y1,x2,y2,color){
+ const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy),a=Math.atan2(dy,dx);
+ if(len<4)return;
+ const line=document.createElement('i');line.className='gesture-line';line.style.left=x1+'px';line.style.top=y1+'px';line.style.width=len+'px';line.style.color=color;line.style.setProperty('--a',a+'rad');
+ document.querySelector('#gestureTrail').append(line);setTimeout(()=>line.remove(),680);
+}
 frame.addEventListener('pointerdown',e=>{
- if(complete)return;let r=frame.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
- touches.push({x,y,seed:Math.floor(Math.random()*1e9)});audio(x,y);shapeEffect(e.clientX-r.left,e.clientY-r.top,touches.length-1);
- let b=document.createElement('i');b.className='burst';b.style.left=e.clientX-r.left+'px';b.style.top=e.clientY-r.top+'px';b.style.width=b.style.height='52px';b.style.color=PALETTES[touches.length%PALETTES.length][1];frame.append(b);setTimeout(()=>b.remove(),850);
- if(touches.length>=STEPS){complete=true;setTimeout(()=>{paint();finishEffect();ui();storeWork()},220)}else{paint();ui()}
+ if(complete)return;
+ const r=frame.getBoundingClientRect();
+ gestureStart={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
+ gesturePoints=[gestureStart];
+ frame.setPointerCapture?.(e.pointerId);
+});
+frame.addEventListener('pointermove',e=>{
+ if(!gestureStart||complete)return;
+ const r=frame.getBoundingClientRect(),p={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
+ const last=gesturePoints[gesturePoints.length-1];
+ if(Math.hypot(p.x-last.x,p.y-last.y)>8)gesturePoints.push(p);
+});
+frame.addEventListener('pointerup',e=>{
+ if(!gestureStart||complete)return;
+ const r=frame.getBoundingClientRect(),end={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
+ const dx=end.x-gestureStart.x,dy=end.y-gestureStart.y,dist=Math.hypot(dx,dy),dur=Math.max(1,end.t-gestureStart.t),speed=dist/dur;
+ const nx=Math.max(0,Math.min(1,gestureStart.x/r.width)),ny=Math.max(0,Math.min(1,gestureStart.y/r.height));
+ const ex=Math.max(0,Math.min(1,end.x/r.width)),ey=Math.max(0,Math.min(1,end.y/r.height));
+ const kind=dist<18?'tap':speed>1.05?'flick':dist>r.width*.34?'long':'swipe';
+ const moveIndex=touches.length;
+ touches.push({x:nx,y:ny,ex,ey,kind,speed,dist:dist/r.width,seed:Math.floor(Math.random()*1e9)});
+ const pal=typeof activePalette==='function'?activePalette():PALETTES[moveIndex%PALETTES.length];
+ const color=pal[moveIndex%pal.length];
+ if(kind==='tap'){
+   const dot=document.createElement('i');dot.className='gesture-dot';dot.style.left=gestureStart.x+'px';dot.style.top=gestureStart.y+'px';dot.style.color=color;document.querySelector('#gestureTrail').append(dot);setTimeout(()=>dot.remove(),600);
+ }else gesturePreview(gestureStart.x,gestureStart.y,end.x,end.y,color);
+ audio(nx,ny);
+ if(typeof shapeEffect==='function')shapeEffect(end.x,end.y,moveIndex,color);
+ gestureStart=null;gesturePoints=[];
+ if(touches.length>=STEPS){complete=true;setTimeout(()=>{paint();if(typeof finishEffect==='function')finishEffect();ui();storeWork()},260)}
+ else{paint();ui()}
 });
 function storeWork(){
  let img=canvas.toDataURL('image/jpeg',.82),date=`${today.getMonth()+1}/${today.getDate()}`;archive.unshift({img,date});archive=archive.slice(0,12);localStorage.setItem(KEY,JSON.stringify(archive));renderArchive();document.querySelector('#workNo').textContent=`WORK ${String(archive.length).padStart(2,'0')}`;
