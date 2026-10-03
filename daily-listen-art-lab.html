@@ -51,7 +51,7 @@ canvas{display:block;width:100%;height:100%}
 <body>
 <main>
 <div class="top"><div class="brand">DAILY LISTEN / ART LAB</div><div class="day"><span id="date"></span><br>ONE LISTEN · ONE WORK</div></div>
-<div id="frame" class="frame"><canvas id="art"></canvas><div id="gestureTrail" class="gesture-trail"></div><div id="overlay" class="overlay"><div><strong>touch or swipe</strong><span>5 MOVES → TODAY'S WORK</span></div></div></div>
+<div id="frame" class="frame"><canvas id="art"></canvas><canvas id="liveArt" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6"></canvas><div id="gestureTrail" class="gesture-trail"></div><div id="overlay" class="overlay"><div><strong>touch or swipe</strong><span>5 MOVES → TODAY'S WORK</span></div></div></div>
 <div id="progress" class="progress"></div>
 <div class="copy"><h1 id="title">compose today's work.</h1><p id="state">0 / 5<br>MOVES</p></div>
 <div class="moodrow"><span>COLOR MOOD</span><div id="moodChoices"></div></div>
@@ -61,7 +61,7 @@ canvas{display:block;width:100%;height:100%}
 </main>
 <script>
 (()=>{'use strict';
-const canvas=document.querySelector('#art'),ctx=canvas.getContext('2d'),frame=document.querySelector('#frame'),overlay=document.querySelector('#overlay'),progress=document.querySelector('#progress'),state=document.querySelector('#state'),title=document.querySelector('#title'),done=document.querySelector('#done'),thumbs=document.querySelector('#thumbs');
+const canvas=document.querySelector('#art'),ctx=canvas.getContext('2d'),liveCanvas=document.querySelector('#liveArt'),liveCtx=liveCanvas.getContext('2d'),frame=document.querySelector('#frame'),overlay=document.querySelector('#overlay'),progress=document.querySelector('#progress'),state=document.querySelector('#state'),title=document.querySelector('#title'),done=document.querySelector('#done'),thumbs=document.querySelector('#thumbs');
 const STEPS=5,KEY='daily_art_lab_v2',MOODKEY='daily_art_mood_v2',PALETTES=[
 ['#181818','#d6534d','#e2ae3f','#f3eee4'],
 ['#183a45','#4d8f86','#e87868','#efc45b'],
@@ -90,7 +90,8 @@ try{archive=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(archiv
 const today=new Date();document.querySelector('#date').textContent=`${today.getMonth()+1}.${String(today.getDate()).padStart(2,'0')}`;
 for(let i=0;i<STEPS;i++){let p=document.createElement('i');p.className='pip';progress.append(p)}
 function rand(n=1){seed=(seed*1664525+1013904223)>>>0;return (seed/4294967296)*n}
-function resize(){let r=frame.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);paint()}
+function resize(){let r=frame.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+liveCanvas.width=Math.round(r.width*dpr);liveCanvas.height=Math.round(r.height*dpr);liveCtx.setTransform(dpr,0,0,dpr,0,0);paint()}
 function roundedRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
 function paint(){
  let w=frame.clientWidth,h=frame.clientHeight;ctx.clearRect(0,0,w,h);ctx.fillStyle='#fbfaf7';ctx.fillRect(0,0,w,h);
@@ -117,9 +118,10 @@ function paint(){
    ctx.restore();
  });
 
+ touches.forEach((t,i)=>{if(t.points)drawStoredGesture(t,i)});
  // User-directed gesture layer: direction, length and speed remain visible in the finished work.
  touches.forEach((t,i)=>{
-   if(!t.kind || t.kind==='tap') return;
+   if(!t.kind || t.kind==='tap' || t.points) return;
    const R=rng((t.seed^0x9e3779b9)>>>0), pal=typeof activePalette==='function'?activePalette():PALETTES[0];
    const x=t.x*w,y=t.y*h,ex=(t.ex??t.x)*w,ey=(t.ey??t.y)*h,dx=ex-x,dy=ey-y;
    ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
@@ -167,48 +169,101 @@ function finishEffect(){
 const moodWrap=document.querySelector('#moodChoices');
 COLOR_MOODS.forEach(m=>{const b=document.createElement('button');b.className='mood'+(m[0]===colorMood?' on':'');b.style.setProperty('--c',m[1]);b.title=m[0];b.onclick=()=>{colorMood=m[0];localStorage.setItem(MOODKEY,colorMood);[...moodWrap.children].forEach(x=>x.classList.toggle('on',x===b));paint()};moodWrap.append(b)});
 
-let gestureStart=null, gesturePoints=[];
-function gesturePreview(x1,y1,x2,y2,color){
- const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy),a=Math.atan2(dy,dx);
- if(len<4)return;
- const line=document.createElement('i');line.className='gesture-line';line.style.left=x1+'px';line.style.top=y1+'px';line.style.width=len+'px';line.style.color=color;line.style.setProperty('--a',a+'rad');
- document.querySelector('#gestureTrail').append(line);setTimeout(()=>line.remove(),680);
+let gestureStart=null,gesturePoints=[],lastBrushPoint=null,lastSoundPoint=null;
+function livePalette(){return typeof activePalette==='function'?activePalette():PALETTES[0]}
+function tinyTone(x,speed=.4){
+ try{
+  let A=window._A||(window._A=new(AudioContext||webkitAudioContext)()),o=A.createOscillator(),g=A.createGain();
+  o.type='sine';o.frequency.value=190+(x/Math.max(1,frame.clientWidth))*430+Math.min(100,speed*35);
+  g.gain.setValueAtTime(.018,A.currentTime);g.gain.exponentialRampToValueAtTime(.0001,A.currentTime+.07);
+  o.connect(g).connect(A.destination);o.start();o.stop(A.currentTime+.08)
+ }catch(_){}
 }
-
-frame.addEventListener('touchmove',e=>{e.preventDefault()},{passive:false});
-
+function liveBrushSegment(a,b,index){
+ const pal=livePalette(),color=pal[index%pal.length],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),ang=Math.atan2(dy,dx);
+ if(d<1)return;
+ liveCtx.save();liveCtx.strokeStyle=color;liveCtx.fillStyle=color;liveCtx.lineCap='round';
+ if(index%5===0){
+   liveCtx.globalAlpha=.72;liveCtx.lineWidth=2.2;liveCtx.beginPath();liveCtx.moveTo(a.x,a.y);liveCtx.lineTo(b.x,b.y);liveCtx.stroke();
+   liveCtx.globalAlpha=.92;liveCtx.beginPath();liveCtx.arc(b.x,b.y,2.5+(index%3),0,Math.PI*2);liveCtx.fill();
+ }else if(index%5===1){
+   liveCtx.globalAlpha=.76;liveCtx.lineWidth=8;liveCtx.beginPath();liveCtx.moveTo(a.x,a.y);liveCtx.lineTo(b.x,b.y);liveCtx.stroke();
+ }else if(index%5===2){
+   liveCtx.globalAlpha=.8;liveCtx.translate(b.x,b.y);liveCtx.rotate(ang);liveCtx.fillRect(-5,-2,10,4);
+ }else if(index%5===3){
+   liveCtx.globalAlpha=.68;liveCtx.lineWidth=2;liveCtx.beginPath();liveCtx.arc(b.x,b.y,6,0,Math.PI*2);liveCtx.stroke();
+ }else{
+   liveCtx.globalAlpha=.9;liveCtx.font='12px Georgia';liveCtx.textAlign='center';liveCtx.textBaseline='middle';liveCtx.fillText('✦',b.x,b.y);
+ }
+ liveCtx.restore();
+}
+function commitLiveStroke(){
+ const w=frame.clientWidth,h=frame.clientHeight;
+ const img=liveCtx.getImageData(0,0,liveCanvas.width,liveCanvas.height);
+ liveCtx.clearRect(0,0,w,h);
+ return img;
+}
+function drawStoredGesture(t,i){
+ if(!t.points||t.points.length<2)return;
+ const pal=activePalette(),color=pal[i%pal.length];
+ ctx.save();ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineCap='round';ctx.lineJoin='round';
+ for(let k=1;k<t.points.length;k++){
+   const a={x:t.points[k-1].x*frame.clientWidth,y:t.points[k-1].y*frame.clientHeight};
+   const b={x:t.points[k].x*frame.clientWidth,y:t.points[k].y*frame.clientHeight};
+   const ang=Math.atan2(b.y-a.y,b.x-a.x);
+   if(i%5===0){ctx.globalAlpha=.72;ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();if(k%2===0){ctx.beginPath();ctx.arc(b.x,b.y,3,0,Math.PI*2);ctx.fill()}}
+   else if(i%5===1){ctx.globalAlpha=.76;ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}
+   else if(i%5===2){ctx.globalAlpha=.8;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(ang);ctx.fillRect(-5,-2,10,4);ctx.restore()}
+   else if(i%5===3){if(k%2===0){ctx.globalAlpha=.68;ctx.lineWidth=2;ctx.beginPath();ctx.arc(b.x,b.y,6,0,Math.PI*2);ctx.stroke()}}
+   else if(k%2===0){ctx.globalAlpha=.9;ctx.font='12px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('✦',b.x,b.y)}
+ }
+ ctx.restore();
+}
+frame.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 frame.addEventListener('pointerdown',e=>{
  if(complete)return;
- const r=frame.getBoundingClientRect();
- gestureStart={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
- gesturePoints=[gestureStart];
+ const r=frame.getBoundingClientRect(),p={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
+ gestureStart=p;gesturePoints=[p];lastBrushPoint=p;lastSoundPoint=p;
  frame.setPointerCapture?.(e.pointerId);
+ // Immediate feedback on contact.
+ const pal=livePalette(),color=pal[touches.length%pal.length];
+ liveCtx.save();liveCtx.fillStyle=color;liveCtx.globalAlpha=.9;liveCtx.beginPath();liveCtx.arc(p.x,p.y,4,0,Math.PI*2);liveCtx.fill();liveCtx.restore();
+ tinyTone(p.x,.2);
 });
 frame.addEventListener('pointermove',e=>{
  if(!gestureStart||complete)return;
  const r=frame.getBoundingClientRect(),p={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
- const last=gesturePoints[gesturePoints.length-1];
- if(Math.hypot(p.x-last.x,p.y-last.y)>8)gesturePoints.push(p);
+ const d=Math.hypot(p.x-lastBrushPoint.x,p.y-lastBrushPoint.y);
+ if(d>=5){
+   liveBrushSegment(lastBrushPoint,p,touches.length);
+   gesturePoints.push(p);lastBrushPoint=p;
+ }
+ const sd=Math.hypot(p.x-lastSoundPoint.x,p.y-lastSoundPoint.y);
+ if(sd>=28){tinyTone(p.x,sd/Math.max(1,p.t-lastSoundPoint.t));lastSoundPoint=p}
 });
 frame.addEventListener('pointerup',e=>{
  if(!gestureStart||complete)return;
- const r=frame.getBoundingClientRect(),end={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
- const dx=end.x-gestureStart.x,dy=end.y-gestureStart.y,dist=Math.hypot(dx,dy),dur=Math.max(1,end.t-gestureStart.t),speed=dist/dur;
- const nx=Math.max(0,Math.min(1,gestureStart.x/r.width)),ny=Math.max(0,Math.min(1,gestureStart.y/r.height));
- const ex=Math.max(0,Math.min(1,end.x/r.width)),ey=Math.max(0,Math.min(1,end.y/r.height));
- const kind=dist<18?'tap':speed>1.05?'flick':dist>r.width*.34?'long':'swipe';
- const moveIndex=touches.length;
- touches.push({x:nx,y:ny,ex,ey,kind,speed,dist:dist/r.width,seed:Math.floor(Math.random()*1e9)});
- const pal=typeof activePalette==='function'?activePalette():PALETTES[moveIndex%PALETTES.length];
- const color=pal[moveIndex%pal.length];
- if(kind==='tap'){
-   const dot=document.createElement('i');dot.className='gesture-dot';dot.style.left=gestureStart.x+'px';dot.style.top=gestureStart.y+'px';dot.style.color=color;document.querySelector('#gestureTrail').append(dot);setTimeout(()=>dot.remove(),600);
- }else gesturePreview(gestureStart.x,gestureStart.y,end.x,end.y,color);
- audio(nx,ny);
- if(typeof shapeEffect==='function')shapeEffect(end.x,end.y,moveIndex,color);
- gestureStart=null;gesturePoints=[];
- if(touches.length>=STEPS){complete=true;setTimeout(()=>{paint();if(typeof finishEffect==='function')finishEffect();ui();storeWork()},260)}
- else{paint();ui()}
+ const r=frame.getBoundingClientRect(),p={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
+ if(Math.hypot(p.x-lastBrushPoint.x,p.y-lastBrushPoint.y)>2){liveBrushSegment(lastBrushPoint,p,touches.length);gesturePoints.push(p)}
+ const dist=Math.hypot(p.x-gestureStart.x,p.y-gestureStart.y);
+ const norm=gesturePoints.map(q=>({x:Math.max(0,Math.min(1,q.x/r.width)),y:Math.max(0,Math.min(1,q.y/r.height))}));
+ if(dist<12){
+   norm.push({x:Math.max(0,Math.min(1,p.x/r.width)),y:Math.max(0,Math.min(1,p.y/r.height))});
+ }
+ touches.push({
+   x:gestureStart.x/r.width,y:gestureStart.y/r.height,
+   ex:p.x/r.width,ey:p.y/r.height,
+   kind:dist<12?'tap':'freehand',
+   points:norm,seed:Math.floor(Math.random()*1e9)
+ });
+ liveCtx.clearRect(0,0,frame.clientWidth,frame.clientHeight);
+ gestureStart=null;gesturePoints=[];lastBrushPoint=null;lastSoundPoint=null;
+ paint();
+ if(typeof shapeEffect==='function')shapeEffect(p.x,p.y,touches.length-1);
+ if(touches.length>=STEPS){
+   complete=true;
+   setTimeout(()=>{paint();if(typeof finishEffect==='function')finishEffect();ui();storeWork()},260);
+ }else ui();
 });
 function storeWork(){
  let img=canvas.toDataURL('image/jpeg',.82),date=`${today.getMonth()+1}/${today.getDate()}`;archive.unshift({img,date});archive=archive.slice(0,12);localStorage.setItem(KEY,JSON.stringify(archive));renderArchive();document.querySelector('#workNo').textContent=`WORK ${String(archive.length).padStart(2,'0')}`;
