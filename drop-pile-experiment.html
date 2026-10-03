@@ -1,0 +1,23 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>積もる実験</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eaf2f8;color:#24364a;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+main{max-width:680px;margin:auto;padding:18px 12px}.card{background:#fff;border-radius:24px;padding:18px;box-shadow:0 15px 40px #30537020}
+h1{font-size:23px;text-align:center;margin:3px 0}.sub{text-align:center;color:#718096;font-size:12px;line-height:1.6;margin:7px 0 15px}
+#stage{height:min(62vh,500px);min-height:380px;position:relative;overflow:hidden;border:1px solid #dce7f0;border-radius:20px;background:linear-gradient(#fbfdff,#edf5fa)}
+#stage:after{content:"";position:absolute;bottom:0;left:0;right:0;height:5px;background:#b7c9d6}.piece{position:absolute;display:grid;place-items:center;font-weight:900;line-height:1;user-select:none}
+.label{font-size:11px;font-weight:900;color:#718096;margin:14px 0 6px}.choices{display:flex;gap:6px;overflow:auto}.choice{flex:0 0 42px;height:42px;border:1px solid #dce7f0;border-radius:12px;background:#f8fbfd;font-size:21px}.choice.on{border:2px solid #4ea8de;background:#edf8fe}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}.drop,.reset{min-height:49px;border:0;border-radius:14px;font-weight:900}.drop{background:#397fac;color:#fff;font-size:15px}.reset{background:#edf3f7;color:#52677b;padding:0 15px}.status{margin-top:10px;color:#718096;font-size:11px;font-weight:800;display:flex;justify-content:space-between}.note{color:#718096;font-size:10px;line-height:1.5}
+</style></head><body><main><section class="card"><h1>聴いた分だけ、積もっていく</h1><p class="sub">記号を選んで落としてみる実験です。<br>止まった位置と角度は保存され、再読み込みしても変わりません。</p><div id="stage"></div><p class="label">今日落とすもの</p><div id="choices" class="choices"></div><div class="row"><button id="drop" class="drop">✦ 1個落とす</button><button id="reset" class="reset">リセット</button></div><div class="status"><span id="count"></span><span>位置を端末に保存</span></div><p class="note">※挙動確認用です。日付・再生確認・節目演出などはまだ入れていません。</p></section></main>
+<script>
+(()=>{'use strict';
+const SYMS=['♪','✦','●','◆','★','♡','S','M'],COL=['#ffcc33','#7b2cbf','#4ea8de','#f97316','#2a9d8f','#283044','#e63946','#ff69b4'],KEY='pile_test_v2';
+const st=document.querySelector('#stage'),ch=document.querySelector('#choices'),ct=document.querySelector('#count'),db=document.querySelector('#drop');let sel='✦',ps=[],busy=false;
+try{ps=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(ps))ps=[]}catch(e){ps=[]}
+const dim=()=>({w:st.clientWidth,h:st.clientHeight}),rad=p=>p.s*.41,save=()=>localStorage.setItem(KEY,JSON.stringify(ps));
+function render(){st.querySelectorAll('.piece').forEach(x=>x.remove());let{w,h}=dim();ps.forEach(p=>{let e=document.createElement('div');e.className='piece';e.textContent=p.t;e.style.cssText=`width:${p.s}px;height:${p.s}px;font-size:${p.s*.78}px;color:${p.c};left:${p.x*w-p.s/2}px;top:${p.y*h-p.s/2}px;transform:rotate(${p.a}rad)`;st.append(e)});ct.textContent=`${ps.length} PIECE${ps.length==1?'':'S'}`}
+SYMS.forEach(s=>{let b=document.createElement('button');b.className='choice'+(s==sel?' on':'');b.textContent=s;b.onclick=()=>{sel=s;[...ch.children].forEach(x=>x.classList.toggle('on',x==b));db.textContent=s+' 1個落とす'};ch.append(b)});
+function ceiling(p,x){let{w,h}=dim(),r=rad(p),best=h-5-r;ps.forEach(q=>{let qr=rad(q),dx=x-q.x*w,m=r+qr;if(Math.abs(dx)<m){let y=q.y*h-Math.sqrt(Math.max(0,m*m-dx*dx));if(y<best)best=y}});return best}
+db.onclick=()=>{if(busy)return;busy=true;db.disabled=true;let{w,h}=dim(),s=43+Math.random()*15,p={t:sel,c:COL[Math.floor(Math.random()*COL.length)],s,x:0,y:0,a:0},x=s/2+Math.random()*(w-s),y=-s,vy=0,vx=(Math.random()-.5)*1.2,a=(Math.random()-.5)*.2,av=(Math.random()-.5)*.04,e=document.createElement('div');e.className='piece';e.textContent=p.t;e.style.cssText=`width:${s}px;height:${s}px;font-size:${s*.78}px;color:${p.c}`;st.append(e);let last=performance.now(),still=0;
+function f(now){let dt=Math.min(2,(now-last)/16.67);last=now;vy+=.45*dt;y+=vy*dt;x+=vx*dt;a+=av*dt;let r=rad(p);if(x<r){x=r;vx=Math.abs(vx)*.5}if(x>w-r){x=w-r;vx=-Math.abs(vx)*.5}let sy=ceiling(p,x);if(y>=sy){y=sy;vy*=-.18;vx*=.7;av*=.65;if(Math.abs(vy)<.7)still++;else still=0}e.style.left=x-s/2+'px';e.style.top=y-s/2+'px';e.style.transform=`rotate(${a}rad)`;if(still>7){p.x=x/w;p.y=y/h;p.a=a;ps.push(p);save();render();busy=false;db.disabled=false;return}requestAnimationFrame(f)}requestAnimationFrame(f)};
+document.querySelector('#reset').onclick=()=>{if(confirm('全部リセットしますか？')){ps=[];save();render()}};addEventListener('resize',render);render()})();
+</script></body></html>
