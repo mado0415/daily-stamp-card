@@ -11,7 +11,7 @@
 body{overflow-x:hidden}button{font:inherit;-webkit-tap-highlight-color:transparent}
 main{width:min(100%,620px);margin:auto;padding:max(18px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom))}
 .top{display:flex;justify-content:space-between;align-items:start;margin:2px 1px 13px}.brand{font-size:10px;font-weight:900;letter-spacing:.22em}.day{font-size:9px;font-weight:800;letter-spacing:.18em;color:var(--muted);text-align:right;line-height:1.6}
-.frame{position:relative;aspect-ratio:4/5;overflow:hidden;background:#fbfaf7;border:1px solid rgba(20,20,20,.13);cursor:pointer;touch-action:manipulation}
+.frame{position:relative;aspect-ratio:4/5;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;background:#fbfaf7;border:1px solid rgba(20,20,20,.13);cursor:pointer;touch-action:manipulation}
 canvas{display:block;width:100%;height:100%}
 .overlay{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none;transition:opacity .35s}
 .overlay.hide{opacity:0}.overlay strong{display:block;font:400 clamp(26px,8vw,42px) Georgia,serif;letter-spacing:.02em}.overlay span{display:block;margin-top:9px;font-size:9px;font-weight:800;letter-spacing:.18em;color:var(--muted)}
@@ -174,6 +174,9 @@ function gesturePreview(x1,y1,x2,y2,color){
  const line=document.createElement('i');line.className='gesture-line';line.style.left=x1+'px';line.style.top=y1+'px';line.style.width=len+'px';line.style.color=color;line.style.setProperty('--a',a+'rad');
  document.querySelector('#gestureTrail').append(line);setTimeout(()=>line.remove(),680);
 }
+
+frame.addEventListener('touchmove',e=>{e.preventDefault()},{passive:false});
+
 frame.addEventListener('pointerdown',e=>{
  if(complete)return;
  const r=frame.getBoundingClientRect();
