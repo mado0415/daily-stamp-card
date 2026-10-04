@@ -46,6 +46,13 @@ canvas{display:block;width:100%;height:100%}
 @keyframes gestureLine{0%{opacity:.95;filter:blur(0);transform:rotate(var(--a)) scaleX(.08)}70%{opacity:.8;transform:rotate(var(--a)) scaleX(1.04)}100%{opacity:0;filter:blur(1px);transform:rotate(var(--a)) scaleX(1)}}
 @keyframes gestureDot{0%{opacity:1;transform:translate(-50%,-50%) scale(.4)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.3)}}
 
+
+.thumb{cursor:pointer}
+.thumb.selected{outline:2px solid #171717;outline-offset:-2px}
+.thumb.selected::after{content:'✓';position:absolute;right:5px;top:5px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#171717;color:#fff;font-size:10px;font-weight:900}
+.archive-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.archive-tools button{min-height:38px;border:1px solid #ccc7be;background:#f7f4ee;border-radius:999px;font-size:9px;font-weight:900;letter-spacing:.06em}
+.archive-tools button:disabled{opacity:.35}
 </style>
 </head>
 <body>
@@ -83,7 +90,11 @@ canvas{display:block;width:100%;height:100%}
 <p style="margin:6px 0 0;font-size:10px;line-height:1.7;color:#858078">この試作では、描けばその軌跡で追加。描かずに AUTO ADD を押せば自動配置、という2通りを触り比べられます。既存の要素はそのまま残ります。</p>
 </section>
 <section class="archive"><div class="archive-head"><h2>SNAPSHOTS</h2><small id="archiveCount">0 WORKS</small></div><div id="thumbs" class="thumbs"></div>
-<button id="collectionPoster" style="display:none" class="btn" type="button" style="display:none;width:100%;margin-top:10px">MAKE COLLECTION POSTER</button>
+<div class="archive-tools">
+  <button id="deleteSelected" type="button" disabled>選択したものを削除</button>
+  <button id="clearSelection" type="button" disabled>選択解除</button>
+</div>
+<button id="collectionPoster" class="btn" type="button" style="display:none;width:100%;margin-top:10px">選んだ作品でポスターを作る</button>
 </section>
 <button id="reset" class="reset">実験データをリセット</button>
 </main>
@@ -330,16 +341,33 @@ frame.addEventListener('pointerup',e=>{
  }else ui();
 });
 function storeWork(){
- let img=canvas.toDataURL('image/jpeg',.82),date=`${today.getMonth()+1}/${today.getDate()}`;archive.unshift({img,date});archive=archive.slice(0,12);localStorage.setItem(KEY,JSON.stringify(archive));renderArchive();document.querySelector('#workNo').textContent=`WORK ${String(archive.length).padStart(2,'0')}`;
+ let img=canvas.toDataURL('image/jpeg',.82),date=`${today.getMonth()+1}/${today.getDate()}`;archive.unshift({img,date,id:`work-${Date.now()}-${Math.random().toString(36).slice(2,7)}`});archive=archive.slice(0,12);localStorage.setItem(KEY,JSON.stringify(archive));renderArchive();document.querySelector('#workNo').textContent=`WORK ${String(archive.length).padStart(2,'0')}`;
 }
-function renderArchive(){thumbs.innerHTML='';document.querySelector('#archiveCount').textContent=`${archive.length} WORK${archive.length===1?'':'S'}`;archive.forEach(a=>{let d=document.createElement('div');d.className='thumb';d.innerHTML=`<img src="${a.img}"><span>${a.date}</span>`;thumbs.append(d)});document.querySelector('#collectionPoster').style.display=archive.length>=3?'block':'none'}
-
-let materialUnlocked = sessionStorage.getItem('daily_art_material_unlocked_v1')==='1';
-function renderMaterialGate(){
- const lock=document.querySelector('#studioLock'),txt=document.querySelector('#unlockText');
- lock.style.opacity=materialUnlocked?'1':'.28';
- lock.style.pointerEvents=materialUnlocked?'auto':'none';
- txt.style.display=materialUnlocked?'block':'none';
+let selectedSnapshots=new Set();
+function renderArchive(){
+ thumbs.innerHTML='';
+ document.querySelector('#archiveCount').textContent=`${archive.length} WORK${archive.length===1?'':'S'}`;
+ archive.forEach((a,i)=>{
+   if(!a.id)a.id=`work-${i}-${a.date||''}`;
+   const d=document.createElement('div');
+   d.className='thumb'+(selectedSnapshots.has(a.id)?' selected':'');
+   d.innerHTML=`<img src="${a.img}"><span>${a.date||''}</span>`;
+   d.setAttribute('role','button');
+   d.setAttribute('aria-label',`${a.date||'作品'}を選択`);
+   d.onclick=()=>{
+     selectedSnapshots.has(a.id)?selectedSnapshots.delete(a.id):selectedSnapshots.add(a.id);
+     renderArchive();
+   };
+   thumbs.append(d);
+ });
+ const del=document.querySelector('#deleteSelected'),clear=document.querySelector('#clearSelection'),poster=document.querySelector('#collectionPoster');
+ if(del)del.disabled=!selectedSnapshots.size;
+ if(clear)clear.disabled=!selectedSnapshots.size;
+ if(poster){
+   poster.style.display=archive.length?'block':'none';
+   poster.disabled=!selectedSnapshots.size;
+   poster.textContent=selectedSnapshots.size?`選んだ${selectedSnapshots.size}枚でポスターを作る`:'作品を選んでポスターを作る';
+ }
 }
 document.querySelector('#listenDemo').onclick=()=>{
  alert('本番ではここから最新曲の再生先を選びます。\n\nこの実験版では「聴いた想定でPLAY」を押すと制作へ進めます。');
@@ -355,17 +383,40 @@ document.querySelector('#saveBtn').onclick=()=>{let a=document.createElement('a'
 document.querySelector('#newBtn').onclick=()=>{touches=[];seed=Math.floor(Math.random()*1e9);complete=false;materialUnlocked=false;sessionStorage.removeItem('daily_art_material_unlocked_v1');renderMaterialGate();paint();ui();window.scrollTo({top:0,behavior:'smooth'})};
 
 document.querySelector('#collectionPoster').onclick=()=>{
+ const items=archive.filter(a=>selectedSnapshots.has(a.id)).slice(0,9);
+ if(!items.length)return;
  const c=document.createElement('canvas'),x=c.getContext('2d');c.width=1080;c.height=1350;
  x.fillStyle='#f3f0e9';x.fillRect(0,0,c.width,c.height);x.fillStyle='#171717';
- x.font='700 24px sans-serif';x.fillText('MY DAILY LISTEN',70,78);
+ x.font='700 24px sans-serif';x.fillText('DAILY LISTEN',70,78);
  x.font='400 54px Georgia';x.fillText('collection.',70,145);
- const items=archive.slice(0,8),cols=2,gap=22,iw=(940-gap)/2,ih=iw*1.25;
+ const n=items.length,gap=22,left=70,top=205,areaW=940,areaH=1065;
+ const cols=n===1?1:n<=4?2:3,rows=Math.ceil(n/cols);
+ let iw=(areaW-gap*(cols-1))/cols,ih=iw*1.25;
+ if(ih*rows+gap*(rows-1)>areaH){ih=(areaH-gap*(rows-1))/rows;iw=ih*.8}
+ const gridW=iw*cols+gap*(cols-1),gridH=ih*rows+gap*(rows-1),ox=left+(areaW-gridW)/2,oy=top+(areaH-gridH)/2;
  let loaded=0;
- if(!items.length)return;
- items.forEach((a,i)=>{const im=new Image();im.onload=()=>{let col=i%cols,row=Math.floor(i/cols),px=70+col*(iw+gap),py=205+row*(ih+gap);x.drawImage(im,px,py,iw,ih);loaded++;if(loaded===items.length){let link=document.createElement('a');link.href=c.toDataURL('image/png');link.download='daily-listen-collection.png';link.click()}};im.src=a.img});
+ items.forEach((a,i)=>{const im=new Image();im.onload=()=>{
+   const col=i%cols,row=Math.floor(i/cols),px=ox+col*(iw+gap),py=oy+row*(ih+gap);
+   x.drawImage(im,px,py,iw,ih);loaded++;
+   if(loaded===items.length){
+     x.fillStyle='#77726b';x.font='700 18px sans-serif';x.fillText(`${n} SELECTED WORK${n===1?'':'S'}`,70,1310);
+     const link=document.createElement('a');link.href=c.toDataURL('image/png');link.download='daily-listen-collection.png';link.click();
+   }
+ };im.src=a.img});
 };
 
-document.querySelector('#reset').onclick=()=>{if(confirm('実験データをすべて消しますか？')){archive=[];localStorage.removeItem(KEY);touches=[];complete=false;renderArchive();paint();ui()}};
+document.querySelector('#deleteSelected').onclick=()=>{
+ if(!selectedSnapshots.size)return;
+ if(!confirm(`選んだ${selectedSnapshots.size}件を削除しますか？`))return;
+ archive=archive.filter(a=>!selectedSnapshots.has(a.id));
+ selectedSnapshots.clear();
+ localStorage.setItem(KEY,JSON.stringify(archive));
+ renderArchive();
+ const pn=document.querySelector('#playNo');if(pn)pn.textContent=String(archive.length+1).padStart(2,'0');
+};
+document.querySelector('#clearSelection').onclick=()=>{selectedSnapshots.clear();renderArchive()};
+
+document.querySelector('#reset').onclick=()=>{if(confirm('実験データをすべて消しますか？')){archive=[];selectedSnapshots.clear();localStorage.removeItem(KEY);touches=[];complete=false;renderArchive();paint();ui()}};
 addEventListener('resize',resize);renderArchive();const pn=document.querySelector('#playNo');if(pn)pn.textContent=String(archive.length+1).padStart(2,'0');ui();requestAnimationFrame(resize);
 })();
 </script>
