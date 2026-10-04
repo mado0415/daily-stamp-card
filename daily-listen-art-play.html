@@ -57,6 +57,7 @@ canvas{display:block;width:100%;height:100%}
 .longpress-ring{position:absolute;z-index:24;width:54px;height:54px;border:1.5px solid #171717;border-radius:50%;transform:translate(-50%,-50%) scale(.55);opacity:0;pointer-events:none}
 .longpress-ring.active{animation:holdGrow .58s ease-out forwards}
 @keyframes holdGrow{0%{opacity:.15;transform:translate(-50%,-50%) scale(.55)}70%{opacity:.8;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.18)}}
+#frame,#canvas{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 </style>
 </head>
 <body>
@@ -205,7 +206,7 @@ function renderMaterialGate(){
 }
 
 function ui(){
- const count=Math.min(touches.length,STEPS);
+ if(touches.length>STEPS)touches=touches.slice(0,STEPS);const count=Math.min(touches.length,STEPS);
  [...progress.children].forEach((p,i)=>p.classList.toggle('on',i<count));
  state.innerHTML=`${count} / ${STEPS}<br>MOVES`;
  const mt=document.querySelector('#moveTop');if(mt)mt.textContent=`${count} / ${STEPS} MOVES`;
@@ -316,96 +317,98 @@ function drawStoredGesture(t,i){
 }
 frame.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 
-let holdTimer=null,holdStart=null,holdTriggered=false;
-function clearHoldTimer(){if(holdTimer){clearTimeout(holdTimer);holdTimer=null}}
+let holdTimer=null,holdStart=null,holdTriggered=false,autoFilling=false;
+
+function clearHoldTimer(){
+ if(holdTimer){clearTimeout(holdTimer);holdTimer=null}
+}
+function finishAtFive(){
+ if(touches.length<STEPS || complete)return;
+ touches=touches.slice(0,STEPS);
+ complete=true;
+ gestureStart=null;gesturePoints=[];lastBrushPoint=null;lastSoundPoint=null;
+ liveCtx.clearRect(0,0,frame.clientWidth,frame.clientHeight);
+ setTimeout(()=>{paint();if(typeof finishEffect==='function')finishEffect();ui();storeWork()},220);
+}
 function longPressAutoFill(x,y){
- if(complete)return;
- holdTriggered=true;
+ if(complete||autoFilling||touches.length>=STEPS)return;
+ holdTriggered=true;autoFilling=true;
+ gestureStart=null;gesturePoints=[];lastBrushPoint=null;lastSoundPoint=null;
+ liveCtx.clearRect(0,0,frame.clientWidth,frame.clientHeight);
  const ring=document.querySelector('#longpressRing');
  if(ring){ring.style.left=`${x}px`;ring.style.top=`${y}px`;ring.classList.remove('active');void ring.offsetWidth;ring.classList.add('active')}
- const remaining=Math.max(0,STEPS-touches.length);
- for(let i=0;i<remaining;i++){
-   setTimeout(()=>{
-     if(complete)return;
-     const a=(i/Math.max(1,remaining-1))*Math.PI*1.55 + (seed%17)*.08;
-     const radius=18+i*15;
-     const ex=Math.max(18,Math.min(frame.clientWidth-18,x+Math.cos(a)*radius));
-     const ey=Math.max(18,Math.min(frame.clientHeight-18,y+Math.sin(a)*radius*.72));
-     touches.push({x,y,ex,ey,kind:i%3===0?'tap':'swipe',seed:Math.floor(Math.random()*1e9)});
-     audio(touches.length);
-     paint();
-     shapeEffect(ex,ey,(touches.length-1)%5);
-     ui();
-     if(touches.length>=STEPS){
-       complete=true;
-       setTimeout(()=>{paint();if(typeof finishEffect==='function')finishEffect();ui();storeWork()},220);
-     }
-   },i*145);
- }
+ const remaining=STEPS-touches.length;
+ let made=0;
+ const timer=setInterval(()=>{
+   if(complete||made>=remaining||touches.length>=STEPS){
+     clearInterval(timer);autoFilling=false;finishAtFive();return;
+   }
+   const i=made;
+   const a=-Math.PI*.72+(i/Math.max(1,remaining-1))*Math.PI*1.44+(seed%13)*.025;
+   const radius=24+i*18;
+   const ex=Math.max(18,Math.min(frame.clientWidth-18,x+Math.cos(a)*radius));
+   const ey=Math.max(18,Math.min(frame.clientHeight-18,y+Math.sin(a)*radius*.72));
+   const nx=x/frame.clientWidth,ny=y/frame.clientHeight,nex=ex/frame.clientWidth,ney=ey/frame.clientHeight;
+   const pts=[];
+   for(let k=0;k<=12;k++){
+     const t=k/12,bend=Math.sin(t*Math.PI)*(.025+i*.004);
+     pts.push({x:nx+(nex-nx)*t+Math.cos(a+Math.PI/2)*bend,y:ny+(ney-ny)*t+Math.sin(a+Math.PI/2)*bend});
+   }
+   touches.push({x:nx,y:ny,ex:nex,ey:ney,kind:'freehand',points:pts,seed:Math.floor(Math.random()*1e9)});
+   audio(touches.length);paint();
+   if(typeof shapeEffect==='function')shapeEffect(ex,ey,touches.length-1);
+   ui();made++;
+   if(touches.length>=STEPS){clearInterval(timer);autoFilling=false;finishAtFive()}
+ },155);
 }
 
 frame.addEventListener('pointerdown',e=>{
- if(complete)return;
+ if(complete||autoFilling||touches.length>=STEPS)return;
+ e.preventDefault();
  holdTriggered=false;
- const hr=frame.getBoundingClientRect();
- holdStart={x:e.clientX-hr.left,y:e.clientY-hr.top};
- clearHoldTimer();
- holdTimer=setTimeout(()=>longPressAutoFill(holdStart.x,holdStart.y),560);
  const r=frame.getBoundingClientRect(),p={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
- gestureStart=p;gesturePoints=[p];lastBrushPoint=p;lastSoundPoint=p;
- frame.setPointerCapture?.(e.pointerId);
- // Immediate feedback on contact.
+ holdStart=p;gestureStart=p;gesturePoints=[p];lastBrushPoint=p;lastSoundPoint=p;
+ clearHoldTimer();holdTimer=setTimeout(()=>longPressAutoFill(p.x,p.y),520);
+ try{frame.setPointerCapture(e.pointerId)}catch(_){}
  const pal=livePalette(),color=pal[touches.length%pal.length];
  liveCtx.save();liveCtx.fillStyle=color;liveCtx.globalAlpha=.9;liveCtx.beginPath();liveCtx.arc(p.x,p.y,4,0,Math.PI*2);liveCtx.fill();liveCtx.restore();
  tinyTone(p.x,.2);
 });
 frame.addEventListener('pointermove',e=>{
- if(holdStart && !holdTriggered){
-   const rr=frame.getBoundingClientRect(),mx=e.clientX-rr.left,my=e.clientY-rr.top;
-   if(Math.hypot(mx-holdStart.x,my-holdStart.y)>12)clearHoldTimer();
- }
- if(!gestureStart||complete)return;
+ if(!gestureStart||complete||autoFilling)return;
+ e.preventDefault();
  const r=frame.getBoundingClientRect(),p={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
+ if(holdStart&&Math.hypot(p.x-holdStart.x,p.y-holdStart.y)>10)clearHoldTimer();
  const d=Math.hypot(p.x-lastBrushPoint.x,p.y-lastBrushPoint.y);
  if(d>=5){
    const mid={x:(lastBrushPoint.x+p.x)/2,y:(lastBrushPoint.y+p.y)/2,t:p.t};
-   liveBrushSegment(lastBrushPoint,mid,touches.length);
-   liveBrushSegment(mid,p,touches.length);
+   liveBrushSegment(lastBrushPoint,mid,touches.length);liveBrushSegment(mid,p,touches.length);
    gesturePoints.push(p);lastBrushPoint=p;
  }
- const sd=Math.hypot(p.x-lastSoundPoint.x,p.y-lastSoundPoint.y);
- if(sd>=28){tinyTone(p.x,sd/Math.max(1,p.t-lastSoundPoint.t));lastSoundPoint=p}
 });
 frame.addEventListener('pointerup',e=>{
  clearHoldTimer();
- if(holdTriggered){holdStart=null;gesturePoints=[];lastBrushPoint=null;return;}
+ if(holdTriggered||autoFilling){holdStart=null;return}
  holdStart=null;
- if(!gestureStart||complete)return;
+ if(!gestureStart||complete||touches.length>=STEPS)return;
+ e.preventDefault();
  const r=frame.getBoundingClientRect(),p={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
  if(Math.hypot(p.x-lastBrushPoint.x,p.y-lastBrushPoint.y)>2){liveBrushSegment(lastBrushPoint,p,touches.length);gesturePoints.push(p)}
  const dist=Math.hypot(p.x-gestureStart.x,p.y-gestureStart.y);
  const norm=gesturePoints.map(q=>({x:Math.max(0,Math.min(1,q.x/r.width)),y:Math.max(0,Math.min(1,q.y/r.height))}));
- if(dist<12){
-   norm.push({x:Math.max(0,Math.min(1,p.x/r.width)),y:Math.max(0,Math.min(1,p.y/r.height))});
- }
- touches.push({
-   x:gestureStart.x/r.width,y:gestureStart.y/r.height,
-   ex:p.x/r.width,ey:p.y/r.height,
-   kind:dist<12?'tap':'freehand',
-   points:norm,seed:Math.floor(Math.random()*1e9)
- });
+ if(dist<12)norm.push({x:p.x/r.width,y:p.y/r.height});
+ touches.push({x:gestureStart.x/r.width,y:gestureStart.y/r.height,ex:p.x/r.width,ey:p.y/r.height,kind:dist<12?'tap':'freehand',points:norm,seed:Math.floor(Math.random()*1e9)});
  liveCtx.clearRect(0,0,frame.clientWidth,frame.clientHeight);
  gestureStart=null;gesturePoints=[];lastBrushPoint=null;lastSoundPoint=null;
- paint();
- if(typeof shapeEffect==='function')shapeEffect(p.x,p.y,touches.length-1);
- if(touches.length>=STEPS){
-   complete=true;
-   setTimeout(()=>{paint();if(typeof finishEffect==='function')finishEffect();ui();storeWork()},260);
- }else ui();
+ paint();if(typeof shapeEffect==='function')shapeEffect(p.x,p.y,touches.length-1);ui();finishAtFive();
+});
+frame.addEventListener('pointercancel',()=>{
+ clearHoldTimer();holdStart=null;holdTriggered=false;
+ gestureStart=null;gesturePoints=[];lastBrushPoint=null;lastSoundPoint=null;
+ liveCtx.clearRect(0,0,frame.clientWidth,frame.clientHeight);
 });
 function storeWork(){
- let img=canvas.toDataURL('image/jpeg',.82),date=`${today.getMonth()+1}/${today.getDate()}`;archive.unshift({img,date,id:`work-${Date.now()}-${Math.random().toString(36).slice(2,7)}`});archive=archive.slice(0,12);localStorage.setItem(KEY,JSON.stringify(archive));frame.addEventListener('pointercancel',()=>{clearHoldTimer();holdStart=null;holdTriggered=false});
-renderArchive();document.querySelector('#workNo').textContent=`WORK ${String(archive.length).padStart(2,'0')}`;
+ let img=canvas.toDataURL('image/jpeg',.82),date=`${today.getMonth()+1}/${today.getDate()}`;archive.unshift({img,date,id:`work-${Date.now()}-${Math.random().toString(36).slice(2,7)}`});archive=archive.slice(0,12);localStorage.setItem(KEY,JSON.stringify(archive));renderArchive();document.querySelector('#workNo').textContent=`WORK ${String(archive.length).padStart(2,'0')}`;
 }
 let selectedSnapshots=new Set();
 function renderArchive(){
