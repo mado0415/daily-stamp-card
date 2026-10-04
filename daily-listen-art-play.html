@@ -64,7 +64,7 @@ canvas{display:block;width:100%;height:100%}
   <div style="font-size:10px;color:#817d75;line-height:1.6">1曲聴いたら、1回遊べます。</div>
   <div style="display:grid;grid-template-columns:1fr auto;gap:7px;margin-top:11px">
     <button id="listenDemo" class="btn primary" type="button">▶ LISTEN & PLAY</button>
-    <button id="unlockDemo" class="btn" type="button">聴いた想定でPLAY</button>
+    <button id="unlockDemo" class="btn" type="button" style="cursor:pointer">聴いた想定でPLAY</button>
   </div>
   <div id="unlockText" style="display:none;margin-top:10px;font-size:9px;font-weight:900;letter-spacing:.13em">TODAY'S PIECE READY</div>
 </section>
@@ -182,6 +182,24 @@ function paint(){
  }
  seed=oldSeed;
 }
+let materialUnlocked=sessionStorage.getItem('daily_art_material_unlocked_v1')==='1';
+
+function renderMaterialGate(){
+ const gate=document.querySelector('#listenGate');
+ const studio=document.querySelector('#studioLock');
+ const text=document.querySelector('#unlockText');
+ if(studio){
+   studio.style.opacity=materialUnlocked?'1':'.28';
+   studio.style.pointerEvents=materialUnlocked?'auto':'none';
+ }
+ if(text){
+   text.style.display=materialUnlocked?'block':'none';
+   text.textContent=materialUnlocked?'ART PLAY READY':'';
+ }
+ if(gate) gate.style.opacity=materialUnlocked?'.72':'1';
+ ui();
+}
+
 function ui(){
  const count=Math.min(touches.length,STEPS);
  [...progress.children].forEach((p,i)=>p.classList.toggle('on',i<count));
