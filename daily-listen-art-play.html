@@ -88,7 +88,7 @@ canvas{display:block;width:100%;height:100%}
 <summary style="font-size:9px;font-weight:900;letter-spacing:.16em;color:#817d75;cursor:pointer">COLOR / CHANGE</summary>
 <div class="moodrow" style="border:0;margin-top:6px;padding-top:0"><span>YOUR COLOR</span><div id="moodChoices"></div></div>
 </details>
-<section id="done" class="done"><div class="done-head"><strong>TODAY ADDED.</strong><span id="workNo">GROWING WORK</span></div><div class="actions"><button id="saveBtn" class="btn primary">SAVE SNAPSHOT</button><button id="newBtn" class="btn">PLAY AGAIN</button></div></section>
+<section id="done" class="done"><div class="done-head"><strong>TODAY ADDED.</strong><span id="workNo">GROWING WORK</span></div><div class="actions"><button id="saveBtn" class="btn primary">SAVE / SHARE</button><button id="newBtn" class="btn">PLAY AGAIN</button></div></section>
 </div>
 <section style="margin-top:18px;padding:12px 0;border-top:1px solid #ccc7be;border-bottom:1px solid #ccc7be">
 <div style="font-size:9px;font-weight:900;letter-spacing:.16em;color:#858078">TEST FLOW</div>
@@ -454,7 +454,35 @@ document.querySelector('#unlockDemo').onclick=()=>{
 };
 renderMaterialGate();
 
-document.querySelector('#saveBtn').onclick=()=>{let a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='daily-listen-art.png';a.click()};
+document.querySelector('#saveBtn').onclick=async()=>{
+ try{
+   const blob=await new Promise((resolve,reject)=>{
+     canvas.toBlob(b=>b?resolve(b):reject(new Error('画像を作成できませんでした')),'image/png',.95);
+   });
+   const file=new File([blob],`daily-listen-art-${Date.now()}.png`,{type:'image/png'});
+   const data={files:[file]};
+   if(navigator.share && (!navigator.canShare || navigator.canShare(data))){
+     try{
+       await navigator.share(data);
+       return;
+     }catch(err){
+       if(err && err.name==='AbortError') return;
+       console.warn('share failed; fallback to download',err);
+     }
+   }
+   const url=URL.createObjectURL(blob);
+   const a=document.createElement('a');
+   a.href=url;
+   a.download=`daily-listen-art-${Date.now()}.png`;
+   document.body.appendChild(a);
+   a.click();
+   a.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),1200);
+ }catch(err){
+   console.error(err);
+   alert('画像を共有できませんでした。');
+ }
+};
 document.querySelector('#newBtn').onclick=()=>{touches=[];seed=Math.floor(Math.random()*1e9);complete=false;materialUnlocked=false;sessionStorage.removeItem('daily_art_material_unlocked_v1');renderMaterialGate();paint();ui();window.scrollTo({top:0,behavior:'smooth'})};
 
 document.querySelector('#collectionPoster').onclick=()=>{
