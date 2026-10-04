@@ -53,6 +53,10 @@ canvas{display:block;width:100%;height:100%}
 .archive-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .archive-tools button{min-height:38px;border:1px solid #ccc7be;background:#f7f4ee;border-radius:999px;font-size:9px;font-weight:900;letter-spacing:.06em}
 .archive-tools button:disabled{opacity:.35}
+
+.longpress-ring{position:absolute;z-index:24;width:54px;height:54px;border:1.5px solid #171717;border-radius:50%;transform:translate(-50%,-50%) scale(.55);opacity:0;pointer-events:none}
+.longpress-ring.active{animation:holdGrow .58s ease-out forwards}
+@keyframes holdGrow{0%{opacity:.15;transform:translate(-50%,-50%) scale(.55)}70%{opacity:.8;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.18)}}
 </style>
 </head>
 <body>
@@ -70,13 +74,13 @@ canvas{display:block;width:100%;height:100%}
 </section>
 <div id="studioLock" style="opacity:.28;pointer-events:none;transition:.35s">
 <div id="dailyRule" style="display:flex;justify-content:space-between;align-items:end;margin:0 1px 9px">
-  <span style="font:400 18px Georgia,serif">make one piece.</span>
+  <span style="font:400 18px Georgia,serif">tap, swipe, or hold.</span>
   <span style="font-size:8px;font-weight:900;letter-spacing:.13em;color:#817d75;text-align:right">ART PLAY<br>5 MOVES</span>
 </div>
 <div style="display:flex;justify-content:space-between;align-items:end;margin:0 1px 10px">
 <div style="font-size:9px;font-weight:900;letter-spacing:.17em">ART PLAY <span id="playNo">01</span></div>
 <div id="moveTop" style="font-size:9px;font-weight:900;letter-spacing:.17em;color:#858078">0 / 5 MOVES</div>
-</div><div id="frame" class="frame"><canvas id="art"></canvas><canvas id="liveArt" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6"></canvas><div id="gestureTrail" class="gesture-trail"></div><div id="overlay" class="overlay"><div><strong>touch or swipe</strong><span>TAP / SWIPE / DRAW</span></div></div></div>
+</div><div id="frame" class="frame"><canvas id="art"></canvas><canvas id="liveArt" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6"></canvas><div id="gestureTrail" class="gesture-trail"></div><div id="overlay" class="overlay"><div><strong>touch or swipe</strong><span>TAP / SWIPE / HOLD</span></div></div></div>
 <div id="progress" class="progress"></div>
 <div class="copy"><h1 id="title">grow today's work.</h1><p id="state">0 / 5<br>MOVES</p></div>
 <details id="colorSettings" style="margin-top:13px;border-top:1px solid rgba(20,20,20,.13);padding-top:10px">
@@ -207,7 +211,7 @@ function ui(){
  const mt=document.querySelector('#moveTop');if(mt)mt.textContent=`${count} / ${STEPS} MOVES`;
  overlay.classList.toggle('hide',touches.length>0);
  if(complete){title.textContent='done.';done.classList.add('show')}
- else{title.textContent=materialUnlocked?'tap / swipe / draw.':'listen & play.';done.classList.remove('show')}
+ else{title.textContent=materialUnlocked?'tap / swipe / hold.':'listen & play.';done.classList.remove('show')}
 }
 function audio(x,y){
  try{let A=window._A||(window._A=new (AudioContext||webkitAudioContext)()),o=A.createOscillator(),g=A.createGain();o.type=['sine','triangle'][touches.length%2];o.frequency.value=180+x*420;g.gain.setValueAtTime(.035,A.currentTime);g.gain.exponentialRampToValueAtTime(.0001,A.currentTime+.16+y*.12);o.connect(g).connect(A.destination);o.start();o.stop(A.currentTime+.3)}catch(e){}
@@ -311,8 +315,42 @@ function drawStoredGesture(t,i){
  ctx.restore();
 }
 frame.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+
+let holdTimer=null,holdStart=null,holdTriggered=false;
+function clearHoldTimer(){if(holdTimer){clearTimeout(holdTimer);holdTimer=null}}
+function longPressAutoFill(x,y){
+ if(complete)return;
+ holdTriggered=true;
+ const ring=document.querySelector('#longpressRing');
+ if(ring){ring.style.left=`${x}px`;ring.style.top=`${y}px`;ring.classList.remove('active');void ring.offsetWidth;ring.classList.add('active')}
+ const remaining=Math.max(0,STEPS-touches.length);
+ for(let i=0;i<remaining;i++){
+   setTimeout(()=>{
+     if(complete)return;
+     const a=(i/Math.max(1,remaining-1))*Math.PI*1.55 + (seed%17)*.08;
+     const radius=18+i*15;
+     const ex=Math.max(18,Math.min(frame.clientWidth-18,x+Math.cos(a)*radius));
+     const ey=Math.max(18,Math.min(frame.clientHeight-18,y+Math.sin(a)*radius*.72));
+     touches.push({x,y,ex,ey,kind:i%3===0?'tap':'swipe',seed:Math.floor(Math.random()*1e9)});
+     audio(touches.length);
+     paint();
+     shapeEffect(ex,ey,(touches.length-1)%5);
+     ui();
+     if(touches.length>=STEPS){
+       complete=true;
+       setTimeout(()=>{paint();if(typeof finishEffect==='function')finishEffect();ui();storeWork()},220);
+     }
+   },i*145);
+ }
+}
+
 frame.addEventListener('pointerdown',e=>{
  if(complete)return;
+ holdTriggered=false;
+ const hr=frame.getBoundingClientRect();
+ holdStart={x:e.clientX-hr.left,y:e.clientY-hr.top};
+ clearHoldTimer();
+ holdTimer=setTimeout(()=>longPressAutoFill(holdStart.x,holdStart.y),560);
  const r=frame.getBoundingClientRect(),p={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
  gestureStart=p;gesturePoints=[p];lastBrushPoint=p;lastSoundPoint=p;
  frame.setPointerCapture?.(e.pointerId);
@@ -322,6 +360,10 @@ frame.addEventListener('pointerdown',e=>{
  tinyTone(p.x,.2);
 });
 frame.addEventListener('pointermove',e=>{
+ if(holdStart && !holdTriggered){
+   const rr=frame.getBoundingClientRect(),mx=e.clientX-rr.left,my=e.clientY-rr.top;
+   if(Math.hypot(mx-holdStart.x,my-holdStart.y)>12)clearHoldTimer();
+ }
  if(!gestureStart||complete)return;
  const r=frame.getBoundingClientRect(),p={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
  const d=Math.hypot(p.x-lastBrushPoint.x,p.y-lastBrushPoint.y);
@@ -335,6 +377,9 @@ frame.addEventListener('pointermove',e=>{
  if(sd>=28){tinyTone(p.x,sd/Math.max(1,p.t-lastSoundPoint.t));lastSoundPoint=p}
 });
 frame.addEventListener('pointerup',e=>{
+ clearHoldTimer();
+ if(holdTriggered){holdStart=null;gesturePoints=[];lastBrushPoint=null;return;}
+ holdStart=null;
  if(!gestureStart||complete)return;
  const r=frame.getBoundingClientRect(),p={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()};
  if(Math.hypot(p.x-lastBrushPoint.x,p.y-lastBrushPoint.y)>2){liveBrushSegment(lastBrushPoint,p,touches.length);gesturePoints.push(p)}
@@ -359,7 +404,8 @@ frame.addEventListener('pointerup',e=>{
  }else ui();
 });
 function storeWork(){
- let img=canvas.toDataURL('image/jpeg',.82),date=`${today.getMonth()+1}/${today.getDate()}`;archive.unshift({img,date,id:`work-${Date.now()}-${Math.random().toString(36).slice(2,7)}`});archive=archive.slice(0,12);localStorage.setItem(KEY,JSON.stringify(archive));renderArchive();document.querySelector('#workNo').textContent=`WORK ${String(archive.length).padStart(2,'0')}`;
+ let img=canvas.toDataURL('image/jpeg',.82),date=`${today.getMonth()+1}/${today.getDate()}`;archive.unshift({img,date,id:`work-${Date.now()}-${Math.random().toString(36).slice(2,7)}`});archive=archive.slice(0,12);localStorage.setItem(KEY,JSON.stringify(archive));frame.addEventListener('pointercancel',()=>{clearHoldTimer();holdStart=null;holdTriggered=false});
+renderArchive();document.querySelector('#workNo').textContent=`WORK ${String(archive.length).padStart(2,'0')}`;
 }
 let selectedSnapshots=new Set();
 function renderArchive(){
