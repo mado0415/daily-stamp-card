@@ -2852,6 +2852,14 @@
           .sort((a, b) => a - b);
       }
 
+      function confettiMilestones(config, total) {
+        const marks = milestoneMarks(total);
+        if (!hasRelease(config)) {
+          for (let count = 30; count <= total; count += 10) marks.push(count);
+        }
+        return [...new Set(marks)].sort((a, b) => a - b);
+      }
+
       function milestoneState(count, total) {
         const marks = milestoneMarks(total);
         const progress = total > 0 ? Math.min(100, Math.round((count / total) * 100)) : 0;
@@ -3253,7 +3261,7 @@
             ? '（最終日を試す）'
             : hasRelease(config) && day === config.release
               ? '（発売日を試す）'
-              : effectLabels[index] || '';
+              : effectLabels[index] || (!hasRelease(config) && index >= 30 && index % 10 === 0 ? '（紙吹雪）' : '');
           return `<option value="${index}">${index}${special}</option>`;
         }).join('')
           + `<option value="${days.length}">${days.length}（全日）</option>`;
@@ -3274,7 +3282,7 @@
           localStorage.removeItem(listenReadyKey(currentConfig, targetDay));
           setTestToday(targetDay);
           renderParticipant();
-          if (count > previous && [3, 5, 10, 15, 20, campaignDays.length].includes(count)) launchConfetti();
+          if (count > previous && confettiMilestones(currentConfig, campaignDays.length).includes(count)) launchConfetti();
         });
         $('testTemplate').addEventListener('change', () => {
           const template = $('testTemplate').value;
@@ -3520,7 +3528,7 @@
           const isReleaseDay = hasRelease(config) && today === config.release;
           if (isFinalDay) launchSpecialCelebration('final', config, validStampCount === total);
           else if (isReleaseDay) launchSpecialCelebration('release', config, false);
-          else if ([3, 5, 10, 15, 20, total].includes(validStampCount)) launchConfetti();
+          else if (confettiMilestones(config, total).includes(validStampCount)) launchConfetti();
         } else {
           toast('今日のスタンプを取り消しました');
         }
@@ -4127,7 +4135,7 @@
         const days = dateRange(config.start, config.end);
         const stamps = loadStamps(config);
         const count = [...stamps].filter((day) => days.includes(day)).length;
-        const milestones = [...new Set([3, 5, 10, 15, 20, days.length])];
+        const milestones = confettiMilestones(config, days.length);
         const isMilestone = count > 0 && milestones.includes(count) && (isTestMode || stamps.has(currentDay()));
         const kind = imageCelebrationKind(config);
         if (kind === 'final') return count === days.length
