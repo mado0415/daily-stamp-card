@@ -725,7 +725,7 @@
     .template-journey .day.stamped .day-week { color: #24364a; }
     .template-journey .today-tag { top: auto; }
 
-    .postcard-kicker { display: none; }
+    .postcard-kicker, .postcard-airmail { display: none; }
     .card.template-postcard {
       --paper: #fcfaf4;
       --ink: #334943;
@@ -735,10 +735,25 @@
       border-radius: 18px;
       box-shadow: 0 12px 32px rgba(59, 69, 56, .10);
     }
-    .template-postcard::before {
-      height: 9px;
-      background: repeating-linear-gradient(120deg, #64786d 0 15px, #fcfaf4 15px 27px, var(--theme) 27px 42px, #fcfaf4 42px 54px);
+    .template-postcard::before { display: none; }
+    .template-postcard .postcard-airmail {
+      position: absolute;
+      z-index: 1;
+      inset: 0 0 auto;
+      display: flex;
+      height: 12px;
+      overflow: hidden;
+      pointer-events: none;
     }
+    .postcard-airmail span {
+      display: block;
+      flex: 0 0 26px;
+      height: 100%;
+      margin-right: 14px;
+      background: var(--theme);
+      transform: skewX(-30deg);
+    }
+    .postcard-airmail span:nth-child(even) { background: var(--postcard-accent); }
     .template-postcard .hero { padding-top: 25px; text-align: left; }
     .template-postcard .postcard-kicker {
       display: flex;
@@ -747,7 +762,7 @@
       gap: 12px;
       min-height: 42px;
       margin-bottom: 12px;
-      color: #687b70;
+      color: var(--postcard-accent);
       font-family: Georgia, "Times New Roman", serif;
       font-size: 10px;
       letter-spacing: .08em;
@@ -758,15 +773,15 @@
       font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif;
       letter-spacing: .025em;
     }
-    .template-postcard .progress-copy strong { font-family: Georgia, "Times New Roman", serif; }
+    .template-postcard .progress-copy strong { color: var(--postcard-accent); font-family: Georgia, "Times New Roman", serif; }
     .template-postcard .progress-track { height: 7px; background: #e7e5d9; }
-    .template-postcard .progress-bar { background: linear-gradient(90deg, #75877b, var(--theme)); }
+    .template-postcard .progress-bar { background: linear-gradient(90deg, var(--postcard-accent), var(--theme)); }
     .template-postcard .participant-settings,
     .template-postcard .stamp-picker { background: #f4f1e7; border-color: #e2dfd2; }
     .template-postcard .stamp-choice { background: #fcfaf4; }
     .template-postcard .btn-plain { background: #eeece2; color: #4a6054; }
     .template-postcard .btn-soft { background: #e8ede6; color: #334943; }
-    .template-postcard .stage-decoration { color: #8e9a86; }
+    .template-postcard .stage-decoration { color: var(--postcard-accent); }
     .template-postcard .card-divider { background: #d9d8c9; }
     .template-postcard .stamp-section { background: #f1eee4; }
     .template-postcard .section-head { align-items: baseline; flex-wrap: wrap; }
@@ -798,18 +813,18 @@
       pointer-events: none;
     }
     .template-postcard .day > * { position: relative; z-index: 1; }
-    .template-postcard .day.stamped { color: #334943; background-color: #e6eee1; box-shadow: 0 3px 8px rgba(65, 72, 54, .08); }
-    .template-postcard .day.stamped::before { border-color: rgba(var(--theme-rgb), .75); }
+    .template-postcard .day.stamped { color: #334943; background-color: var(--postcard-tint); box-shadow: 0 3px 8px rgba(65, 72, 54, .08); }
+    .template-postcard .day.stamped::before { border-color: var(--postcard-accent); }
     .template-postcard .day.today { color: #334943; background-color: #fffdf6; }
-    .template-postcard .day.today::before { border: 2px solid #687e6b; }
+    .template-postcard .day.today::before { border: 2px solid var(--postcard-accent); }
     .template-postcard .day.prejoin { background-color: #e9e7de; opacity: .52; }
     .template-postcard .day.future { opacity: .72; }
     .template-postcard .day-date { font-family: Georgia, "Times New Roman", serif; font-size: 15px; }
     .template-postcard .day-week { color: #75806e; font-size: 9px; }
     .template-postcard .day-stamp { font-size: 26px; transform: rotate(-8deg); }
-    .template-postcard .today-tag { color: #fffdf6; background: #536c59; border-color: #536c59; box-shadow: none; font-size: 6.5px; }
+    .template-postcard .today-tag { color: #fffdf6; background: var(--postcard-accent); border-color: var(--postcard-accent); box-shadow: none; font-size: 6.5px; }
     .template-postcard .day-inline-action { color: #334943; background: #f2f0df; border-color: #d2d8c5; box-shadow: none; font-size: 8px; }
-    .template-postcard .day-inline-action.stamp-ready { color: #fffdf6; background: #536c59; border-color: #536c59; }
+    .template-postcard .day-inline-action.stamp-ready { color: #fffdf6; background: var(--postcard-accent); border-color: var(--postcard-accent); }
     .template-postcard .day.release-day::before { border-color: #c29b45; }
 
     .listen-links {
@@ -1627,6 +1642,7 @@
     </section>
 
     <section id="participantView" class="card hidden" aria-label="表題曲デイリースタンプカード">
+      <div class="postcard-airmail" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
       <header class="hero">
         <p id="testBadge" class="test-badge hidden">🧪 動作テスト｜仮の今日 <span id="testTodayText"></span></p>
         <div class="postcard-kicker" aria-hidden="true">
@@ -1707,7 +1723,7 @@
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
       <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のない通常期用カードも作れます。</p>
-      <p class="build-version">更新版 2026.10.17｜POSTCARD追加・発売日の任意設定</p>
+      <p class="build-version">更新版 2026.10.17｜POSTCARDの画像・テーマカラー対応</p>
       <p id="adminSyncStatus" class="admin-sync-status" role="status" aria-live="polite"></p>
 
       <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
@@ -2048,7 +2064,20 @@
         document.documentElement.style.setProperty('--theme', hex);
         document.documentElement.style.setProperty('--theme-rgb', `${r}, ${g}, ${b}`);
         document.documentElement.style.setProperty('--theme-text', contrastText(hex));
+        const postcardColors = postcardPalette(hex);
+        document.documentElement.style.setProperty('--postcard-accent', postcardColors.accent);
+        document.documentElement.style.setProperty('--postcard-tint', postcardColors.tint);
         document.querySelector('meta[name="theme-color"]').setAttribute('content', hex);
+      }
+
+      function postcardPalette(hex) {
+        const rgb = colorRgb(hex);
+        const luminance = .299 * rgb[0] + .587 * rgb[1] + .114 * rgb[2];
+        const shade = luminance > 160 ? .48 : .78;
+        const accent = `rgb(${rgb.map((channel) => Math.round(channel * shade)).join(', ')})`;
+        const paper = [252, 250, 244];
+        const tint = `rgb(${rgb.map((channel, index) => Math.round(channel * .22 + paper[index] * .78)).join(', ')})`;
+        return { accent, tint };
       }
 
       function hashText(text) {
@@ -3771,6 +3800,16 @@
           button.replaceWith(stamp);
         });
         clone.querySelectorAll('.listen-reset, .participant-settings, .participant-identity, .participant-color-picker, .listen-links, .stamp-picker, .action-row, .share-row, .web-only').forEach((element) => element.remove());
+        if (currentConfig.template === 'postcard') {
+          const palette = postcardPalette(currentConfig.color);
+          clone.querySelectorAll('.postcard-airmail span').forEach((stripe, index) => {
+            stripe.style.backgroundColor = index % 2 ? palette.accent : currentConfig.color;
+          });
+          clone.querySelectorAll('.day.stamped').forEach((day) => { day.style.backgroundColor = palette.tint; });
+          clone.querySelectorAll('.postcard-kicker, .progress-copy strong, .stage-decoration').forEach((element) => { element.style.color = palette.accent; });
+          clone.querySelectorAll('.postcard-kicker svg path, .postcard-kicker svg circle').forEach((element) => { element.setAttribute('stroke', palette.accent); });
+          clone.querySelectorAll('.postcard-kicker svg text').forEach((element) => { element.setAttribute('fill', palette.accent); });
+        }
         clone.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
         clone.style.width = `${sourceWidth}px`;
         clone.style.maxWidth = 'none';
@@ -4178,6 +4217,7 @@
         const sectionPaper = '#f1eee4';
         const ink = '#334943';
         const muted = '#7d8478';
+        const palette = postcardPalette(config.color);
         const font = '-apple-system, BlinkMacSystemFont, "Noto Sans CJK JP", sans-serif';
         const serif = 'Georgia, "Yu Mincho", "Noto Serif CJK JP", serif';
         ctx.fillStyle = '#eaf2f8';
@@ -4195,25 +4235,25 @@
         ctx.fillRect(38, 388, width - 76, height);
         ctx.save();
         ctx.beginPath();
-        ctx.rect(38, 38, width - 76, 12);
+        ctx.rect(38, 38, width - 76, 26);
         ctx.clip();
         for (let x = 0; x < width + 100; x += 74) {
-          ctx.fillStyle = x % 148 === 0 ? '#64786d' : config.color;
+          ctx.fillStyle = x % 148 === 0 ? palette.accent : config.color;
           ctx.beginPath();
           ctx.moveTo(x, 38); ctx.lineTo(x + 36, 38);
-          ctx.lineTo(x + 22, 50); ctx.lineTo(x - 14, 50);
+          ctx.lineTo(x + 22, 64); ctx.lineTo(x - 14, 64);
           ctx.closePath(); ctx.fill();
         }
         ctx.restore();
         ctx.restore();
 
-        ctx.fillStyle = '#687b70';
+        ctx.fillStyle = palette.accent;
         ctx.textAlign = 'left';
         ctx.font = `500 25px ${serif}`;
         ctx.fillText('A LITTLE MUSIC,', margin, 112);
         ctx.fillText('EVERY DAY.', margin, 145);
         ctx.save();
-        ctx.strokeStyle = '#687b70';
+        ctx.strokeStyle = palette.accent;
         ctx.lineWidth = 2;
         for (const y of [107, 127, 147]) {
           ctx.beginPath();ctx.moveTo(755, y);
@@ -4244,7 +4284,7 @@
         const count = [...stamps].filter((day) => days.includes(day)).length;
         const milestone = milestoneState(count, days.length);
         ctx.textAlign = 'left';
-        ctx.fillStyle = ink;
+        ctx.fillStyle = palette.accent;
         ctx.font = `700 37px ${serif}`;
         ctx.fillText(`${count} STAMP${count === 1 ? '' : 'S'}`, margin, 332);
         ctx.textAlign = 'right';
@@ -4257,7 +4297,7 @@
         if (count) {
           roundRect(ctx, margin, 352, (width - margin * 2) * milestone.progress / 100, 8, 4);
           const gradient = ctx.createLinearGradient(margin, 0, width - margin, 0);
-          gradient.addColorStop(0, '#75877b');gradient.addColorStop(1, config.color);
+          gradient.addColorStop(0, palette.accent);gradient.addColorStop(1, config.color);
           ctx.fillStyle = gradient;ctx.fill();
         }
         milestone.marks.forEach((mark) => {
@@ -4282,9 +4322,9 @@
           const future = day > today;
           ctx.save();
           ctx.globalAlpha = prejoin ? .52 : future ? .72 : 1;
-          ctx.fillStyle = stamped ? '#e6eee1' : prejoin ? '#e9e7de' : paper;
+          ctx.fillStyle = stamped ? palette.tint : prejoin ? '#e9e7de' : paper;
           ctx.fillRect(x, y, cell, cellHeight);
-          ctx.strokeStyle = isToday ? '#687e6b' : isRelease ? '#c29b45' : stamped ? config.color : '#d8ddce';
+          ctx.strokeStyle = isToday ? palette.accent : isRelease ? '#c29b45' : stamped ? palette.accent : '#d8ddce';
           ctx.lineWidth = isToday ? 5 : 2;
           ctx.strokeRect(x + 16, y + 16, cell - 32, cellHeight - 32);
           ctx.fillStyle = sectionPaper;
@@ -4301,7 +4341,7 @@
           ctx.textAlign = 'center';
           if (isToday || isRelease) {
             roundRect(ctx, x + cell / 2 - 43, y + 24, 86, 24, 12);
-            ctx.fillStyle = isRelease ? '#c29b45' : '#536c59';ctx.fill();
+            ctx.fillStyle = isRelease ? '#c29b45' : palette.accent;ctx.fill();
             ctx.fillStyle = paper;ctx.font = `700 15px ${font}`;
             ctx.fillText(isRelease ? 'RELEASE' : 'TODAY', x + cell / 2, y + 41);
           }
@@ -4321,7 +4361,7 @@
           }
           ctx.restore();
         });
-        ctx.textAlign = 'center';ctx.fillStyle = '#687b70';ctx.font = `500 21px ${serif}`;
+        ctx.textAlign = 'center';ctx.fillStyle = palette.accent;ctx.font = `500 21px ${serif}`;
         ctx.fillText('ONE LISTEN A DAY, KEEP THE MUSIC PLAYING', width / 2, height - 74);
         return canvas;
       }
