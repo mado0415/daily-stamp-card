@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- LIGHTWEIGHT TEST BUILD: participant cache + lazy html2canvas; production index.html unchanged -->
+<!-- DAILY STAMP: optional release date, 2026-10-17 -->
 <!-- VERIFIED LATEST: 2026-09-25 / participant UX feedback + shared workspace + separate drafts -->
 <html lang="ja">
 <head>
@@ -1542,7 +1542,7 @@
       <header class="hero">
         <p id="testBadge" class="test-badge hidden">🧪 動作テスト｜仮の今日 <span id="testTodayText"></span></p>
         <h1 id="campaignTitle"></h1>
-        <p class="release-line"><strong id="releaseDateText"></strong> CD RELEASE</p>
+        <p id="releaseLine" class="release-line"><strong id="releaseDateText"></strong> CD RELEASE</p>
       </header>
 
       <div class="progress-area">
@@ -1609,8 +1609,8 @@
     <section id="adminView" class="card admin-card hidden" aria-label="スタンプカード管理設定">
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
-      <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日以降まで続ける場合は、カード終了日を発売日より後に設定できます。</p>
-      <p class="build-version">更新版 2026.09.26 00:26</p>
+      <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のない通常期用カードも作れます。</p>
+      <p class="build-version">更新版 2026.10.17｜発売日の設定を任意に</p>
       <p id="adminSyncStatus" class="admin-sync-status" role="status" aria-live="polite"></p>
 
       <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
@@ -1645,12 +1645,18 @@
           <label for="adminStart">開始日</label>
           <input id="adminStart" type="date">
         </div>
-        <div class="field">
+        <div class="field wide">
+          <label style="display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;">
+            <input id="adminReleaseEnabled" type="checkbox" checked style="width:20px;height:20px;flex:0 0 20px;">
+            発売日を設定する
+          </label>
+        </div>
+        <div id="adminReleaseField" class="field">
           <label for="adminRelease">CD発売日</label>
           <input id="adminRelease" type="date">
         </div>
         <div class="field">
-          <label for="adminEnd">カード終了日（発売日以降）</label>
+          <label id="adminEndLabel" for="adminEnd">カード終了日（発売日以降）</label>
           <input id="adminEnd" type="date">
         </div>
         <div class="field wide">
@@ -2078,12 +2084,38 @@
         return [...values].map((value) => value.toString(16).padStart(2, '0')).join('');
       }
 
+      function hasRelease(config) {
+        return config.releaseEnabled !== false && /^\d{4}-\d{2}-\d{2}$/.test(config.release || '');
+      }
+
+      function releaseStatus(config, today = currentDay()) {
+        if (today > config.end) return 'イベント終了';
+        if (!hasRelease(config)) return '';
+        const distance = Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000);
+        return today === config.release ? '本日発売！'
+          : today < config.release ? `発売日まであと${distance}日`
+          : `発売から${Math.abs(distance)}日`;
+      }
+
+      function syncReleaseFields() {
+        const enabled = $('adminReleaseEnabled').checked;
+        $('adminReleaseField').classList.toggle('hidden', !enabled);
+        $('adminRelease').disabled = !enabled;
+        $('adminRelease').required = enabled;
+        $('adminEndLabel').textContent = enabled ? 'カード終了日（発売日以降）' : 'カード終了日';
+        $('adminRelease').min = $('adminStart').value;
+        const minimum = enabled ? ($('adminRelease').value || $('adminStart').value) : $('adminStart').value;
+        $('adminEnd').min = minimum;
+        if (minimum && (!$('adminEnd').value || $('adminEnd').value < minimum)) $('adminEnd').value = minimum;
+      }
+
       function sharedConfigPayload(config) {
         return {
           title: config.title,
           song: config.song || config.title,
           start: config.start,
-          release: config.release,
+          release: hasRelease(config) ? config.release : '',
+          releaseEnabled: hasRelease(config),
           end: config.end,
           stamp: config.stamp,
           stamps: [...config.stamps],
@@ -2590,7 +2622,8 @@
         const title = firstParam(source, 't', 'title').trim();
         const song = (firstParam(source, 'q', 'song') || title).trim();
         const start = firstParam(source, 's', 'start');
-        const release = firstParam(source, 'r', 'release');
+        const releaseEnabled = firstParam(source, 're', 'releaseEnabled') !== '0';
+        const release = releaseEnabled ? firstParam(source, 'r', 'release') : '';
         const end = firstParam(source, 'f', 'end') || release;
         const templateRaw = firstParam(source, 'v', 'template');
         const templateAlias = { h: 'hotel', c: 'classic', j: 'journey' }[templateRaw] || templateRaw;
@@ -2616,8 +2649,8 @@
         const shareTemplate = (firstParam(source, 'm', 'message') || DEFAULT_SHARE_TEMPLATE).slice(0, 500);
         const seed = `${title}|${song}|${start}|${release}|${end}`;
         const id = (firstParam(source, 'i', 'cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
-        if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(release) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || release < start || end < release) return null;
-        return { title, song, start, release, end, stamp, stamps, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id };
+        if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || end < start || (releaseEnabled && (!/^\d{4}-\d{2}-\d{2}$/.test(release) || release < start || end < release))) return null;
+        return { title, song, start, release, releaseEnabled, end, stamp, stamps, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id };
       }
 
       function configFromForm(options = {}) {
@@ -2628,8 +2661,9 @@
         const title = enteredTitle || (allowIncomplete ? '作成途中のカード' : '');
         const song = enteredSong || (allowIncomplete ? '曲名未入力' : '');
         const start = $('adminStart').value || (allowIncomplete ? today : '');
-        const release = $('adminRelease').value || (allowIncomplete ? start : '');
-        const end = $('adminEnd').value || release;
+        const releaseEnabled = $('adminReleaseEnabled').checked;
+        const release = releaseEnabled ? ($('adminRelease').value || (allowIncomplete ? start : '')) : '';
+        const end = $('adminEnd').value || release || (allowIncomplete ? start : '');
         const rawLink = $('adminLink').value.trim();
         const link = safeUrl(rawLink);
         const rawApple = $('adminApple').value.trim();
@@ -2656,9 +2690,10 @@
         let error = '';
         if (!title) error = 'カードタイトルを入力してください。';
         else if (!song) error = '1日1回聴く曲名を入力してください。';
-        else if (!start || !release || !end) error = '開始日・CD発売日・カード終了日を入力してください。';
-        else if (release < start) error = 'CD発売日は開始日以降にしてください。';
-        else if (end < release) error = 'カード終了日はCD発売日以降にしてください。';
+        else if (!start || !end || (releaseEnabled && !release)) error = releaseEnabled ? '開始日・CD発売日・カード終了日を入力してください。' : '開始日・カード終了日を入力してください。';
+        else if (end < start) error = 'カード終了日は開始日以降にしてください。';
+        else if (releaseEnabled && release < start) error = 'CD発売日は開始日以降にしてください。';
+        else if (releaseEnabled && end < release) error = 'カード終了日はCD発売日以降にしてください。';
         else if (dateRange(start, end).length > 366) error = '期間は366日以内にしてください。';
         else if ([rawLink && !link, rawApple && !apple, rawSpotify && !spotify, rawLine && !line, rawYoutube && !youtube, rawAmazon && !amazon, rawAwa && !awa].some(Boolean)) error = '再生先は https:// で始まるURLにしてください。';
         else if (!allowIncomplete && ![link, apple, spotify, line, youtube, amazon, awa].some(Boolean)) error = '曲を聴くためのURLを1つ以上入力してください。';
@@ -2669,7 +2704,7 @@
           ? currentConfig.id
           : hashText(`${title}|${song}|${start}|${release}|${end}`);
         const stampSetName = $('adminSavedStampSet').value || editingStampSetOriginalName || 'AMENITY';
-        return { title, song, start, release, end, stamp, stamps, stampSets, stampSetName, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id, apiUrl };
+        return { title, song, start, release, releaseEnabled, end, stamp, stamps, stampSets, stampSetName, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id, apiUrl };
       }
 
       function configUrl(config, testMode = false) {
@@ -2682,8 +2717,9 @@
         url.searchParams.set('t', config.title);
         if (config.song && config.song !== config.title) url.searchParams.set('q', config.song);
         url.searchParams.set('s', config.start);
-        url.searchParams.set('r', config.release);
-        if (config.end !== config.release) url.searchParams.set('f', config.end);
+        if (hasRelease(config)) url.searchParams.set('r', config.release);
+        else url.searchParams.set('re', '0');
+        if (!hasRelease(config) || config.end !== config.release) url.searchParams.set('f', config.end);
         if (config.link) url.searchParams.set('u', config.link);
         if (config.apple) url.searchParams.set('a', config.apple);
         if (config.spotify) url.searchParams.set('p', config.spotify);
@@ -2875,8 +2911,10 @@
       function initAdminDefaults() {
         const today = isoLocal();
         $('adminStart').value = firstParam(params, 's', 'start') || today;
+        $('adminReleaseEnabled').checked = firstParam(params, 're', 'releaseEnabled') !== '0';
         $('adminRelease').value = firstParam(params, 'r', 'release') || addDays(today, 13);
         $('adminEnd').value = firstParam(params, 'f', 'end') || $('adminRelease').value;
+        syncReleaseFields();
         $('adminTitle').value = firstParam(params, 't', 'title');
         $('adminSong').value = firstParam(params, 'q', 'song') || $('adminTitle').value;
         $('adminLink').value = firstParam(params, 'u', 'link');
@@ -2949,7 +2987,7 @@
           workspaceCards.forEach((item) => {
             const option = document.createElement('option');
             option.value = item.id;
-            option.textContent = `${item.config.title || '無題のカード'}（${formatDate(item.config.release, false)}発売）${item.isDraft ? '［下書き］' : ''}`;
+            option.textContent = `${item.config.title || '無題のカード'}${hasRelease(item.config) ? `（${formatDate(item.config.release, false)}発売）` : '（通常期用）'}${item.isDraft ? '［下書き］' : ''}`;
             select.appendChild(option);
           });
           select.value = workspaceCards.some((item) => item.id === selectedId)
@@ -3172,8 +3210,10 @@
         $('adminTitle').value = config.title;
         $('adminSong').value = config.song || config.title;
         $('adminStart').value = config.start;
-        $('adminRelease').value = config.release;
+        $('adminReleaseEnabled').checked = hasRelease(config);
+        $('adminRelease').value = hasRelease(config) ? config.release : '';
         $('adminEnd').value = config.end || config.release;
+        syncReleaseFields();
         $('adminLink').value = config.link;
         $('adminApple').value = config.apple || '';
         $('adminSpotify').value = config.spotify || '';
@@ -3211,7 +3251,7 @@
         $('testCount').innerHTML = days.map((day, index) => {
           const special = day === config.end
             ? '（最終日を試す）'
-            : day === config.release
+            : hasRelease(config) && day === config.release
               ? '（発売日を試す）'
               : effectLabels[index] || '';
           return `<option value="${index}">${index}${special}</option>`;
@@ -3352,7 +3392,8 @@
         const validStamps = new Set([...stamps].filter((day) => days.includes(day)));
 
         $('campaignTitle').textContent = config.title;
-        $('releaseDateText').textContent = formatDate(config.release);
+        $('releaseLine').classList.toggle('hidden', !hasRelease(config));
+        $('releaseDateText').textContent = hasRelease(config) ? formatDate(config.release) : '';
         $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.end, false)}`;
         $('testBadge').classList.toggle('hidden', !isTestMode);
         $('testTodayText').textContent = isTestMode ? formatDate(today, false) : '';
@@ -3368,16 +3409,10 @@
           $('testTemplate').value = config.template;
         }
         const milestone = milestoneState(count, days.length);
-        const releaseDistance = Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000);
         $('participantView').dataset.stage = String(milestone.stage);
         $('progressCount').textContent = `${count} STAMP${count === 1 ? '' : 'S'}`;
-        $('daysLeftText').textContent = today > config.end
-          ? 'イベント終了'
-          : today === config.release
-            ? '本日発売！'
-            : today < config.release
-              ? `発売日まであと${releaseDistance}日`
-              : `発売から${Math.abs(releaseDistance)}日`;
+        $('daysLeftText').textContent = releaseStatus(config, today);
+        $('daysLeftText').classList.toggle('hidden', !releaseStatus(config, today));
         $('progressBar').style.width = `${milestone.progress}%`;
         renderProgressMilestones(count, days.length);
         const progressTrack = document.querySelector('.progress-track');
@@ -3403,7 +3438,7 @@
         days.forEach((day) => {
           const date = parseLocalDate(day);
           const isToday = day === today;
-          const isRelease = day === config.release;
+          const isRelease = hasRelease(config) && day === config.release;
           const isStamped = validStamps.has(day);
           const isFuture = day > today;
           const isPrejoin = day < today && day < meta.joinedOn && !isStamped;
@@ -3482,7 +3517,7 @@
           else toast(`${stampIcons[today]} 今日のスタンプを押しました`);
           const validStampCount = [...stamps].filter((day) => campaignDays.includes(day)).length;
           const isFinalDay = today === config.end;
-          const isReleaseDay = today === config.release;
+          const isReleaseDay = hasRelease(config) && today === config.release;
           if (isFinalDay) launchSpecialCelebration('final', config, validStampCount === total);
           else if (isReleaseDay) launchSpecialCelebration('release', config, false);
           else if ([3, 5, 10, 15, 20, total].includes(validStampCount)) launchConfetti();
@@ -3788,7 +3823,7 @@
         drawCenteredText(ctx, config.title, width / 2, 145, width - 190, 56);
         ctx.fillStyle = isHotel ? '#f3d58d' : muted;
         ctx.font = '500 26px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 210);
+        if (hasRelease(config)) ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 210);
         const participantName = loadParticipantName(config);
         if (participantName) {
           ctx.textAlign = 'right';
@@ -3799,7 +3834,6 @@
 
         const count = [...stamps].filter((day) => days.includes(day)).length;
         const milestone = milestoneState(count, days.length);
-        const releaseDistance = Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000);
         ctx.textAlign = 'left';
         ctx.fillStyle = ink;
         ctx.font = '700 39px -apple-system, BlinkMacSystemFont, sans-serif';
@@ -3807,7 +3841,8 @@
         ctx.textAlign = 'right';
         ctx.fillStyle = muted;
         ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(today > config.end ? 'イベント終了' : today === config.release ? '本日発売！' : today < config.release ? `発売日まであと${releaseDistance}日` : `発売から${Math.abs(releaseDistance)}日`, width - margin, 350);
+        const status = releaseStatus(config, today);
+        if (status) ctx.fillText(status, width - margin, 350);
         roundRect(ctx, margin, 378, width - margin * 2, 18, 9);
         ctx.fillStyle = '#e8eef3';
         ctx.fill();
@@ -3922,7 +3957,7 @@
           const prejoin = day < today && !stamped;
           const future = day > today;
           const isToday = day === today;
-          const isRelease = day === config.release;
+          const isRelease = hasRelease(config) && day === config.release;
           const dayStamp = stamped ? (stampIcons[day] || config.stamp) : (isToday ? activeStamp : config.stamp);
           const radius = isJourney ? cell / 2 : isHotel ? 16 : 23;
           if (isHotel) archRect(ctx, x, y, cell, cellHeight);
@@ -4084,7 +4119,7 @@
         const justStampedDay = isTestMode ? addDays(today, -1) : today;
         const effectiveDay = isTestMode && stamps.has(justStampedDay) ? justStampedDay : today;
         if (effectiveDay === config.end && stamps.has(config.end)) return 'final';
-        if (effectiveDay === config.release && stamps.has(config.release)) return 'release';
+        if (hasRelease(config) && effectiveDay === config.release && stamps.has(config.release)) return 'release';
         return 'milestone';
       }
 
@@ -4612,11 +4647,8 @@
         $('adminTemplate').addEventListener('change', () => {
           renderAdminStampChoices($('adminTemplate').value, adminSelectedStamps, adminSelectedStamps[0]);
         });
-        const syncDateLimits = () => {
-          $('adminRelease').min = $('adminStart').value;
-          $('adminEnd').min = $('adminRelease').value;
-          if (!$('adminEnd').value || $('adminEnd').value < $('adminRelease').value) $('adminEnd').value = $('adminRelease').value;
-        };
+        const syncDateLimits = syncReleaseFields;
+        $('adminReleaseEnabled').addEventListener('change', syncReleaseFields);
         $('adminStart').addEventListener('change', syncDateLimits);
         $('adminRelease').addEventListener('change', syncDateLimits);
         syncDateLimits();
