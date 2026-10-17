@@ -725,6 +725,93 @@
     .template-journey .day.stamped .day-week { color: #24364a; }
     .template-journey .today-tag { top: auto; }
 
+    .postcard-kicker { display: none; }
+    .card.template-postcard {
+      --paper: #fcfaf4;
+      --ink: #334943;
+      --muted: #7d8478;
+      --line: #dddccf;
+      border-color: #d9d8c9;
+      border-radius: 18px;
+      box-shadow: 0 12px 32px rgba(59, 69, 56, .10);
+    }
+    .template-postcard::before {
+      height: 9px;
+      background: repeating-linear-gradient(120deg, #64786d 0 15px, #fcfaf4 15px 27px, var(--theme) 27px 42px, #fcfaf4 42px 54px);
+    }
+    .template-postcard .hero { padding-top: 25px; text-align: left; }
+    .template-postcard .postcard-kicker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 42px;
+      margin-bottom: 12px;
+      color: #687b70;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 10px;
+      letter-spacing: .08em;
+      line-height: 1.6;
+    }
+    .postcard-kicker svg { width: 94px; height: 42px; flex: 0 0 94px; }
+    .template-postcard h1 {
+      font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif;
+      letter-spacing: .025em;
+    }
+    .template-postcard .progress-copy strong { font-family: Georgia, "Times New Roman", serif; }
+    .template-postcard .progress-track { height: 7px; background: #e7e5d9; }
+    .template-postcard .progress-bar { background: linear-gradient(90deg, #75877b, var(--theme)); }
+    .template-postcard .participant-settings,
+    .template-postcard .stamp-picker { background: #f4f1e7; border-color: #e2dfd2; }
+    .template-postcard .stamp-choice { background: #fcfaf4; }
+    .template-postcard .btn-plain { background: #eeece2; color: #4a6054; }
+    .template-postcard .btn-soft { background: #e8ede6; color: #334943; }
+    .template-postcard .stage-decoration { color: #8e9a86; }
+    .template-postcard .card-divider { background: #d9d8c9; }
+    .template-postcard .stamp-section { background: #f1eee4; }
+    .template-postcard .section-head { align-items: baseline; flex-wrap: wrap; }
+    .template-postcard .section-head h2 { font-family: Georgia, "Times New Roman", serif; letter-spacing: .04em; font-size: 14px; }
+    .template-postcard .stamp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 10px; }
+    .template-postcard .day {
+      aspect-ratio: 1 / 1.3;
+      min-height: 96px;
+      overflow: hidden;
+      border: 0;
+      border-radius: 1px;
+      padding: 7px 5px 6px;
+      color: #526458;
+      background-color: #fcfaf4;
+      background-image:
+        radial-gradient(circle at 0 50%, #f1eee4 2.5px, transparent 3px),
+        radial-gradient(circle at 100% 50%, #f1eee4 2.5px, transparent 3px),
+        radial-gradient(circle at 50% 0, #f1eee4 2.5px, transparent 3px),
+        radial-gradient(circle at 50% 100%, #f1eee4 2.5px, transparent 3px);
+      background-size: 100% 10px, 100% 10px, 10px 100%, 10px 100%;
+      background-repeat: repeat-y, repeat-y, repeat-x, repeat-x;
+      box-shadow: 0 2px 3px rgba(65, 72, 54, .06);
+    }
+    .template-postcard .day::before {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border: 1px solid #d8ddce;
+      pointer-events: none;
+    }
+    .template-postcard .day > * { position: relative; z-index: 1; }
+    .template-postcard .day.stamped { color: #334943; background-color: #e6eee1; box-shadow: 0 3px 8px rgba(65, 72, 54, .08); }
+    .template-postcard .day.stamped::before { border-color: rgba(var(--theme-rgb), .75); }
+    .template-postcard .day.today { color: #334943; background-color: #fffdf6; }
+    .template-postcard .day.today::before { border: 2px solid #687e6b; }
+    .template-postcard .day.prejoin { background-color: #e9e7de; opacity: .52; }
+    .template-postcard .day.future { opacity: .72; }
+    .template-postcard .day-date { font-family: Georgia, "Times New Roman", serif; font-size: 15px; }
+    .template-postcard .day-week { color: #75806e; font-size: 9px; }
+    .template-postcard .day-stamp { font-size: 26px; transform: rotate(-8deg); }
+    .template-postcard .today-tag { color: #fffdf6; background: #536c59; border-color: #536c59; box-shadow: none; font-size: 6.5px; }
+    .template-postcard .day-inline-action { color: #334943; background: #f2f0df; border-color: #d2d8c5; box-shadow: none; font-size: 8px; }
+    .template-postcard .day-inline-action.stamp-ready { color: #fffdf6; background: #536c59; border-color: #536c59; }
+    .template-postcard .day.release-day::before { border-color: #c29b45; }
+
     .listen-links {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1532,6 +1619,7 @@
             <option value="hotel">🏨 HOTEL ALL SUITE</option>
             <option value="classic">◯ STAMP</option>
             <option value="journey">🚏 JOURNEY</option>
+            <option value="postcard">✉ POSTCARD</option>
           </select>
         </div>
         <button id="testReset" class="btn btn-plain" type="button">リセット</button>
@@ -1541,6 +1629,15 @@
     <section id="participantView" class="card hidden" aria-label="表題曲デイリースタンプカード">
       <header class="hero">
         <p id="testBadge" class="test-badge hidden">🧪 動作テスト｜仮の今日 <span id="testTodayText"></span></p>
+        <div class="postcard-kicker" aria-hidden="true">
+          <span>A LITTLE MUSIC,<br>EVERY DAY.</span>
+          <svg viewBox="0 0 94 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 12 Q9 7 18 12 T36 12 M0 20 Q9 15 18 20 T36 20 M0 28 Q9 23 18 28 T36 28" stroke="currentColor" stroke-width=".8"/>
+            <circle cx="65" cy="21" r="19" stroke="currentColor" stroke-width=".8"/>
+            <circle cx="65" cy="21" r="16" stroke="currentColor" stroke-width=".6"/>
+            <text x="65" y="27" text-anchor="middle" fill="currentColor" font-size="22" font-family="Georgia,serif">♪</text>
+          </svg>
+        </div>
         <h1 id="campaignTitle"></h1>
         <p id="releaseLine" class="release-line"><strong id="releaseDateText"></strong> CD RELEASE</p>
       </header>
@@ -1610,7 +1707,7 @@
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
       <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のない通常期用カードも作れます。</p>
-      <p class="build-version">更新版 2026.10.17｜発売日の設定を任意に</p>
+      <p class="build-version">更新版 2026.10.17｜POSTCARD追加・発売日の任意設定</p>
       <p id="adminSyncStatus" class="admin-sync-status" role="status" aria-live="polite"></p>
 
       <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
@@ -1688,6 +1785,7 @@
             <option value="hotel">🏨 HOTEL ALL SUITE｜ホテル</option>
             <option value="classic">◯ STAMP｜ポイントカード</option>
             <option value="journey">🚏 JOURNEY｜発売日への道</option>
+            <option value="postcard">✉ POSTCARD｜音楽の便り</option>
           </select>
         </div>
         <div class="field wide">
@@ -1844,7 +1942,8 @@
       const TEMPLATE_STAMPS = {
         hotel: ['⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🔑', '🛎️', '🧳', '☕️', '🪥', '🪮', '🏨', '🎈', '🔫', '🤖', '🕺', ...HEART_STAMPS],
         classic: ['⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🎈', '🔫', '🤖', '🕺', ...HEART_STAMPS],
-        journey: ['⛄️', '🎵', '💿', '⭐️', '🧳', '🎈', '🔫', '🤖', '🕺', ...HEART_STAMPS]
+        journey: ['⛄️', '🎵', '💿', '⭐️', '🧳', '🎈', '🔫', '🤖', '🕺', ...HEART_STAMPS],
+        postcard: ['⛄️', '🎵', '💿', '⭐️', '☕️', ...HEART_STAMPS]
       };
       const STAMP_NAMES = {
         '⛄️': '雪だるま', '🎵': '音符', '💿': 'CD', '⭐️': '星', '🍎': 'りんご', '🥖': 'パン',
@@ -2626,8 +2725,8 @@
         const release = releaseEnabled ? firstParam(source, 'r', 'release') : '';
         const end = firstParam(source, 'f', 'end') || release;
         const templateRaw = firstParam(source, 'v', 'template');
-        const templateAlias = { h: 'hotel', c: 'classic', j: 'journey' }[templateRaw] || templateRaw;
-        const template = ['classic', 'hotel', 'journey'].includes(templateAlias) ? templateAlias : 'hotel';
+        const templateAlias = { h: 'hotel', c: 'classic', j: 'journey', p: 'postcard' }[templateRaw] || templateRaw;
+        const template = ['classic', 'hotel', 'journey', 'postcard'].includes(templateAlias) ? templateAlias : 'hotel';
         const incomingStampRaw = firstParam(source, 'e', 'stamp') || '⛄️';
         const incomingStamp = incomingStampRaw === '🩵' ? '💙' : incomingStampRaw;
         const directStampSet = firstParam(source, 'g', 'stampSet');
@@ -2731,7 +2830,7 @@
         url.searchParams.set('e', config.stamp);
         url.searchParams.set('x', encodeStampSet(config.stamps));
         url.searchParams.set('g', config.stamps.join(' '));
-        url.searchParams.set('v', { hotel: 'h', classic: 'c', journey: 'j' }[config.template] || 'h');
+        url.searchParams.set('v', { hotel: 'h', classic: 'c', journey: 'j', postcard: 'p' }[config.template] || 'h');
         url.searchParams.set('i', config.id);
         if (testMode) {
           url.searchParams.set('z', '1');
@@ -2935,8 +3034,8 @@
         $('adminShareTemplate').value = firstParam(params, 'm', 'message') || loadSavedShareTemplate() || DEFAULT_SHARE_TEMPLATE;
         $('adminApiUrl').value = safeSharedApiUrl(incomingSharedApiUrl) || loadSavedSharedApiUrl();
         const templateRaw = firstParam(params, 'v', 'template');
-        const template = { h: 'hotel', c: 'classic', j: 'journey' }[templateRaw] || templateRaw;
-        $('adminTemplate').value = ['classic', 'hotel', 'journey'].includes(template) ? template : 'hotel';
+        const template = { h: 'hotel', c: 'classic', j: 'journey', p: 'postcard' }[templateRaw] || templateRaw;
+        $('adminTemplate').value = ['classic', 'hotel', 'journey', 'postcard'].includes(template) ? template : 'hotel';
         const incomingStamp = firstParam(params, 'e', 'stamp') || '⛄️';
         const directStampSet = firstParam(params, 'g', 'stampSet');
         const incomingStamps = directStampSet
@@ -3188,7 +3287,7 @@
         currentConfig = { ...config, color: participantColor };
         config = currentConfig;
         applyTheme(participantColor);
-        $('participantView').classList.remove('template-classic', 'template-hotel', 'template-journey');
+        $('participantView').classList.remove('template-classic', 'template-hotel', 'template-journey', 'template-postcard');
         $('participantView').classList.add(`template-${config.template}`);
         $('adminView').classList.add('hidden');
         $('participantView').classList.remove('hidden');
@@ -3760,6 +3859,7 @@
       }
 
       function buildFallbackCanvas(config) {
+        if (config.template === 'postcard') return buildPostcardCanvas(config);
         const days = dateRange(config.start, config.end);
         const stamps = loadStamps(config);
         const stampIcons = loadStampIcons(config);
@@ -4052,6 +4152,177 @@
         ctx.fillStyle = isHotel ? '#dfbd6e' : `rgba(${r}, ${g}, ${b}, .85)`;
         ctx.font = '700 22px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillText('ONE LISTEN A DAY, KEEP THE MUSIC PLAYING', width / 2, height - 75);
+        return canvas;
+      }
+
+      function buildPostcardCanvas(config) {
+        const days = dateRange(config.start, config.end);
+        const stamps = loadStamps(config);
+        const icons = loadStampIcons(config);
+        const meta = loadMeta(config);
+        const today = currentDay();
+        const width = 1080;
+        const margin = 72;
+        const gap = 24;
+        const cols = 4;
+        const cell = (width - margin * 2 - gap * 3) / cols;
+        const cellHeight = Math.round(cell * 1.3);
+        const rows = Math.ceil(days.length / cols);
+        const gridTop = 468;
+        const height = gridTop + rows * cellHeight + Math.max(0, rows - 1) * gap + 110;
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        const paper = '#fcfaf4';
+        const sectionPaper = '#f1eee4';
+        const ink = '#334943';
+        const muted = '#7d8478';
+        const font = '-apple-system, BlinkMacSystemFont, "Noto Sans CJK JP", sans-serif';
+        const serif = 'Georgia, "Yu Mincho", "Noto Serif CJK JP", serif';
+        ctx.fillStyle = '#eaf2f8';
+        ctx.fillRect(0, 0, width, height);
+        roundRect(ctx, 38, 38, width - 76, height - 76, 22);
+        ctx.fillStyle = paper;
+        ctx.fill();
+        ctx.strokeStyle = '#d9d8c9';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.save();
+        roundRect(ctx, 38, 38, width - 76, height - 76, 22);
+        ctx.clip();
+        ctx.fillStyle = sectionPaper;
+        ctx.fillRect(38, 388, width - 76, height);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(38, 38, width - 76, 12);
+        ctx.clip();
+        for (let x = 0; x < width + 100; x += 74) {
+          ctx.fillStyle = x % 148 === 0 ? '#64786d' : config.color;
+          ctx.beginPath();
+          ctx.moveTo(x, 38); ctx.lineTo(x + 36, 38);
+          ctx.lineTo(x + 22, 50); ctx.lineTo(x - 14, 50);
+          ctx.closePath(); ctx.fill();
+        }
+        ctx.restore();
+        ctx.restore();
+
+        ctx.fillStyle = '#687b70';
+        ctx.textAlign = 'left';
+        ctx.font = `500 25px ${serif}`;
+        ctx.fillText('A LITTLE MUSIC,', margin, 112);
+        ctx.fillText('EVERY DAY.', margin, 145);
+        ctx.save();
+        ctx.strokeStyle = '#687b70';
+        ctx.lineWidth = 2;
+        for (const y of [107, 127, 147]) {
+          ctx.beginPath();ctx.moveTo(755, y);
+          ctx.bezierCurveTo(780, y - 15, 800, y + 15, 825, y);
+          ctx.stroke();
+        }
+        for (const radius of [49, 41]) {
+          ctx.beginPath();ctx.arc(913, 128, radius, 0, Math.PI * 2);ctx.stroke();
+        }
+        ctx.textAlign = 'center';
+        ctx.font = `500 57px ${serif}`;
+        ctx.fillText('♪', 913, 148);
+        ctx.restore();
+        ctx.fillStyle = ink;
+        ctx.font = `700 50px ${serif}`;
+        ctx.textAlign = 'left';
+        drawCenteredText(ctx, config.title, margin, 226, width - margin * 2, 55);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = muted;
+        ctx.font = `500 24px ${font}`;
+        if (hasRelease(config)) ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 278);
+        const name = loadParticipantName(config);
+        if (name) {
+          ctx.textAlign = 'right';
+          ctx.font = `500 21px ${font}`;
+          ctx.fillText(name, width - margin, 300);
+        }
+        const count = [...stamps].filter((day) => days.includes(day)).length;
+        const milestone = milestoneState(count, days.length);
+        ctx.textAlign = 'left';
+        ctx.fillStyle = ink;
+        ctx.font = `700 37px ${serif}`;
+        ctx.fillText(`${count} STAMP${count === 1 ? '' : 'S'}`, margin, 332);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = muted;
+        ctx.font = `500 23px ${font}`;
+        const status = releaseStatus(config, today);
+        if (status) ctx.fillText(status, width - margin, 332);
+        roundRect(ctx, margin, 352, width - margin * 2, 8, 4);
+        ctx.fillStyle = '#e7e5d9';ctx.fill();
+        if (count) {
+          roundRect(ctx, margin, 352, (width - margin * 2) * milestone.progress / 100, 8, 4);
+          const gradient = ctx.createLinearGradient(margin, 0, width - margin, 0);
+          gradient.addColorStop(0, '#75877b');gradient.addColorStop(1, config.color);
+          ctx.fillStyle = gradient;ctx.fill();
+        }
+        milestone.marks.forEach((mark) => {
+          ctx.save();ctx.translate(margin + (width - margin * 2) * mark / days.length, 356);ctx.rotate(Math.PI / 4);
+          ctx.fillStyle = count >= mark ? config.color : '#cbd6cf';
+          ctx.fillRect(-5, -5, 10, 10);ctx.restore();
+        });
+        ctx.textAlign = 'left';ctx.fillStyle = ink;
+        ctx.font = `700 30px ${serif}`;
+        ctx.fillText('LISTENING CARD', margin, 434);
+        ctx.textAlign = 'right';ctx.fillStyle = muted;
+        ctx.font = `500 23px ${font}`;
+        ctx.fillText(`${formatDate(config.start, false)} — ${formatDate(config.end, false)}`, width - margin, 434);
+
+        days.forEach((day, index) => {
+          const x = margin + (index % cols) * (cell + gap);
+          const y = gridTop + Math.floor(index / cols) * (cellHeight + gap);
+          const stamped = stamps.has(day);
+          const isToday = day === today;
+          const isRelease = hasRelease(config) && day === config.release;
+          const prejoin = day < meta.joinedOn && !stamped;
+          const future = day > today;
+          ctx.save();
+          ctx.globalAlpha = prejoin ? .52 : future ? .72 : 1;
+          ctx.fillStyle = stamped ? '#e6eee1' : prejoin ? '#e9e7de' : paper;
+          ctx.fillRect(x, y, cell, cellHeight);
+          ctx.strokeStyle = isToday ? '#687e6b' : isRelease ? '#c29b45' : stamped ? config.color : '#d8ddce';
+          ctx.lineWidth = isToday ? 5 : 2;
+          ctx.strokeRect(x + 16, y + 16, cell - 32, cellHeight - 32);
+          ctx.fillStyle = sectionPaper;
+          for (let dy = 13; dy < cellHeight; dy += 26) {
+            for (const dx of [0, cell]) {
+              ctx.beginPath();ctx.arc(x + dx, y + dy, 7, 0, Math.PI * 2);ctx.fill();
+            }
+          }
+          for (let dx = 13; dx < cell; dx += 26) {
+            for (const dy of [0, cellHeight]) {
+              ctx.beginPath();ctx.arc(x + dx, y + dy, 7, 0, Math.PI * 2);ctx.fill();
+            }
+          }
+          ctx.textAlign = 'center';
+          if (isToday || isRelease) {
+            roundRect(ctx, x + cell / 2 - 43, y + 24, 86, 24, 12);
+            ctx.fillStyle = isRelease ? '#c29b45' : '#536c59';ctx.fill();
+            ctx.fillStyle = paper;ctx.font = `700 15px ${font}`;
+            ctx.fillText(isRelease ? 'RELEASE' : 'TODAY', x + cell / 2, y + 41);
+          }
+          const date = parseLocalDate(day);
+          ctx.fillStyle = ink;ctx.font = `700 43px ${serif}`;
+          ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x + cell / 2, y + 96);
+          ctx.fillStyle = '#75806e';ctx.font = `500 25px ${font}`;
+          ctx.fillText(WEEKDAYS[date.getDay()], x + cell / 2, y + 132);
+          if (stamped) {
+            drawTiltedStamp(ctx, icons[day] || config.stamp, x + cell / 2, y + cellHeight * .76, 70, 1);
+          } else if (prejoin) {
+            ctx.font = `500 23px ${font}`;
+            ctx.fillText('開催済み', x + cell / 2, y + cellHeight * .78);
+          } else {
+            ctx.globalAlpha *= .10;
+            drawTiltedStamp(ctx, config.stamp, x + cell / 2, y + cellHeight * .76, 60, .8);
+          }
+          ctx.restore();
+        });
+        ctx.textAlign = 'center';ctx.fillStyle = '#687b70';ctx.font = `500 21px ${serif}`;
+        ctx.fillText('ONE LISTEN A DAY, KEEP THE MUSIC PLAYING', width / 2, height - 74);
         return canvas;
       }
 
