@@ -1723,7 +1723,7 @@
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
       <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のない通常期用カードも作れます。</p>
-      <p class="build-version">更新版 2026.10.17｜POSTCARDの画像・テーマカラー対応</p>
+      <p class="build-version">更新版 2026.10.17｜カードのコピー作成に対応</p>
       <p id="adminSyncStatus" class="admin-sync-status" role="status" aria-live="polite"></p>
 
       <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
@@ -1742,6 +1742,7 @@
           <button id="workspaceOpenButton" class="btn btn-soft" type="button">編集</button>
           <button id="workspaceDeleteButton" class="btn btn-danger" type="button">削除</button>
         </div>
+        <button id="workspaceCopyCardButton" class="btn btn-soft btn-full" style="margin-top:10px;min-height:44px" type="button">このカードをコピーして新規作成</button>
         <p id="workspaceNote" class="workspace-note"></p>
       </section>
 
@@ -3132,6 +3133,7 @@
         }
         $('workspaceOpenButton').disabled = !select.value;
         $('workspaceDeleteButton').disabled = !select.value;
+        $('workspaceCopyCardButton').disabled = !select.value;
         $('workspaceNote').textContent = workspaceCards.length
           ? `${workspaceCards.length}件のカードがあります。カード名を選ぶと編集対象が切り替わります。`
           : '最初のカードを入力して保存してください。この共同管理URLは次回以降も同じです。';
@@ -3198,6 +3200,31 @@
         $('urlBox').classList.remove('show');
         showAdmin();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function copyWorkspaceCard() {
+        if (sharedSaveBusy) return toast('保存が終わってからコピーしてください');
+        const sourceId = $('workspaceCardSelect').value;
+        const source = workspaceCards.find((card) => card.id === sourceId);
+        if (!source) return toast('コピーするカードを選んでください');
+        const sourceConfig = currentConfig && currentConfig.sharedCardId === sourceId
+          ? configFromForm({ allowIncomplete: true })
+          : workspaceItemConfig(source);
+        if (!sourceConfig) return;
+        const apiUrl = safeSharedApiUrl($('adminApiUrl').value);
+        const copy = { ...sharedConfigPayload(sourceConfig), id: randomToken(12), apiUrl };
+        const suffix = '（コピー）';
+        copy.title = (copy.title || '無題のカード').slice(0, 60 - suffix.length) + suffix;
+        // 元カードのID・公開状態・リビジョンを引き継がず、新規として保存します。
+        editingWorkspaceCardId = '';
+        currentConfig = null;
+        generatedWorkspaceUrl = '';
+        fillForm(copy);
+        $('urlBox').classList.remove('show');
+        showAdmin();
+        setAdminSyncStatus('設定をコピーしました。日付などを確認して保存すると、新しい参加者用URLを発行します。');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        toast('設定をコピーして、新しいカードを作成します');
       }
 
       async function deleteWorkspaceCard() {
@@ -4978,6 +5005,7 @@
         $('workspaceCardSelect').addEventListener('change', (event) => openWorkspaceCard(event.target.value));
         $('workspaceDeleteButton').addEventListener('click', deleteWorkspaceCard);
         $('workspaceNewButton').addEventListener('click', startNewWorkspaceCard);
+        $('workspaceCopyCardButton').addEventListener('click', copyWorkspaceCard);
         $('workspaceCopyAdminButton').addEventListener('click', copyCurrentAdminUrl);
         $('sharedReloadButton').addEventListener('click', () => location.reload());
         $('saveShareTemplateButton').addEventListener('click', saveShareTemplate);
