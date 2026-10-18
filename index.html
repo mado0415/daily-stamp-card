@@ -1723,7 +1723,7 @@
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
       <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のない通常期用カードも作れます。</p>
-      <p class="build-version">更新版 2026.10.17｜カードのコピー作成に対応</p>
+      <p class="build-version">更新版 2026.10.18｜POSTCARDの切手枠を修正</p>
       <p id="adminSyncStatus" class="admin-sync-status" role="status" aria-live="polite"></p>
 
       <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
@@ -3811,6 +3811,32 @@
         });
       }
 
+      function paintPostcardPerforations(canvas, edges, scale) {
+        if (!edges.length) return canvas;
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.setTransform(scale, 0, 0, scale, 0, 0);
+        edges.forEach(({ x, y, width, height, paper }) => {
+          ctx.fillStyle = paper;
+          for (let offset = 5; offset < height; offset += 10) {
+            for (const side of [x, x + width]) {
+              ctx.beginPath();
+              ctx.arc(side, y + offset, 2.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          for (let offset = 5; offset < width; offset += 10) {
+            for (const side of [y, y + height]) {
+              ctx.beginPath();
+              ctx.arc(x + offset, side, 2.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+        });
+        ctx.restore();
+        return canvas;
+      }
+
       async function buildScreenCanvas() {
         const source = $('participantView');
         const sourceWidth = Math.max(320, Math.round(source.getBoundingClientRect().width));
@@ -3858,6 +3884,19 @@
 
         const width = Math.ceil(clone.getBoundingClientRect().width);
         const height = Math.ceil(clone.scrollHeight);
+        const cardRect = clone.getBoundingClientRect();
+        const postcardEdges = clone.classList.contains('template-postcard')
+          ? [...clone.querySelectorAll('.day')].map((day) => {
+            const rect = day.getBoundingClientRect();
+            return {
+              x: rect.left - cardRect.left,
+              y: rect.top - cardRect.top,
+              width: rect.width,
+              height: rect.height,
+              paper: getComputedStyle(clone.querySelector('.stamp-section')).backgroundColor || '#f1eee4'
+            };
+          })
+          : [];
 
         await ensureHtml2CanvasLoaded();
         if (typeof window.html2canvas === 'function') {
@@ -3884,7 +3923,7 @@
               }
             });
             sandbox.remove();
-            return canvas;
+            return paintPostcardPerforations(canvas, postcardEdges, 1080 / width);
           } catch (error) {
             console.warn('カードの直接画像化を再試行します', error);
           }
@@ -3907,6 +3946,7 @@
           ctx.fillStyle = '#eaf2f8';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          paintPostcardPerforations(canvas, postcardEdges, scale);
           const sample = ctx.getImageData(Math.floor(canvas.width / 2), Math.min(canvas.height - 1, 20), 1, 1).data;
           if (sample[3] === 0) throw new Error('カード画像が空です');
           return canvas;
