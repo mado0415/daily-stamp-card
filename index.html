@@ -133,6 +133,36 @@
 
     .release-line strong { color: var(--ink); }
 
+    .annual-deadline-schedule {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px auto 0;
+      max-width: 92%;
+    }
+    .annual-deadline-schedule.hidden { display: none; }
+    .annual-deadline-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid rgba(255,255,255,.42);
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: inherit;
+      background: rgba(70, 25, 21, .20);
+      font-size: 9px;
+      font-weight: 800;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+    .annual-deadline-chip b { font-size: 10px; }
+    .annual-deadline-chip em {
+      font-style: normal;
+      opacity: .74;
+      font-weight: 700;
+    }
+
     .progress-area {
       padding: 0 24px 20px;
     }
@@ -758,6 +788,25 @@
       pointer-events: none;
     }
     .template-lastspurt .day > * { position: relative; z-index: 1; }
+    .template-lastspurt .annual-deadline-mini {
+      position: absolute;
+      z-index: 4;
+      top: 5px;
+      left: 5px;
+      border: 1px solid rgba(224, 118, 48, .38);
+      border-radius: 999px;
+      padding: 1px 4px;
+      color: #8b382d;
+      background: rgba(255, 248, 232, .94);
+      font-size: 5px;
+      font-weight: 950;
+      line-height: 1.15;
+      letter-spacing: .01em;
+      white-space: nowrap;
+    }
+    .template-lastspurt .day.annual-deadline-day {
+      box-shadow: inset 0 0 0 2px rgba(239, 126, 39, .14);
+    }
     .template-lastspurt .day.today {
       border-color: var(--theme);
       box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .15), 0 8px 20px rgba(238, 91, 35, .12);
@@ -787,7 +836,7 @@
       letter-spacing: 0;
     }
     .template-lastspurt .stage-decoration::before {
-      content: "🔥　あと少し！がんばれ！　🔥";
+      content: "🔥　年間チャートへ ラストスパート！　🔥";
       font-size: 12px;
       font-weight: 900;
       letter-spacing: .08em;
@@ -799,6 +848,45 @@
       color: #7f2b25;
       background: linear-gradient(135deg, #fff3ca, rgba(var(--theme-rgb), .12));
       border: 1px solid rgba(238, 138, 43, .28);
+    }
+
+    .deadline-options {
+      margin: 4px 0 2px;
+      border: 1px solid #dbe5ec;
+      border-radius: 14px;
+      background: #f8fbfd;
+      overflow: hidden;
+    }
+    .deadline-options.hidden { display: none; }
+    .deadline-options summary {
+      cursor: pointer;
+      padding: 12px 14px;
+      color: #33475b;
+      font-size: 12px;
+      font-weight: 850;
+      list-style: none;
+    }
+    .deadline-options summary::-webkit-details-marker { display: none; }
+    .deadline-options summary::before { content: "▶"; margin-right: 7px; font-size: 9px; }
+    .deadline-options[open] summary::before { content: "▼"; }
+    .deadline-options-body {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 0 12px 12px;
+    }
+    .deadline-options .deadline-note {
+      grid-column: 1 / -1;
+      margin: 0;
+      color: #708090;
+      font-size: 10px;
+      line-height: 1.6;
+    }
+    .deadline-options .deadline-fill { grid-column: 1 / -1; }
+    @media (max-width: 520px) {
+      .deadline-options-body { grid-template-columns: 1fr; }
+      .deadline-options .deadline-note,
+      .deadline-options .deadline-fill { grid-column: 1; }
     }
 
     .test-badge {
@@ -1799,6 +1887,7 @@
         </div>
         <h1 id="campaignTitle"></h1>
         <p id="releaseLine" class="release-line"><strong id="releaseDateText"></strong> <span id="releaseLabel">CD RELEASE</span></p>
+        <div id="annualDeadlineSchedule" class="annual-deadline-schedule hidden" aria-label="年間チャート締切予定"></div>
       </header>
 
       <div class="progress-area">
@@ -1866,7 +1955,7 @@
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
       <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のない通常期用カードも作れます。</p>
-      <p class="build-version">更新版 2026.11.09｜LAST SPURT追加</p>
+      <p class="build-version">更新版 2026.11.10｜LAST SPURT年間締切予定対応</p>
       <p id="adminSyncStatus" class="admin-sync-status" role="status" aria-live="polite"></p>
 
       <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
@@ -1916,6 +2005,21 @@
           <label id="adminEndLabel" for="adminEnd">カード終了日（発売日以降）</label>
           <input id="adminEnd" type="date">
         </div>
+        <details id="annualDeadlineOptions" class="deadline-options field wide hidden">
+          <summary>📅 年間チャート締切（見込み）を表示（任意）</summary>
+          <div class="deadline-options-body">
+            <div class="field">
+              <label for="adminBillboardDeadline">Billboard JAPAN 年間締切（見込み）</label>
+              <input id="adminBillboardDeadline" type="date">
+            </div>
+            <div class="field">
+              <label for="adminOriconDeadline">ORICON 年間締切（見込み）</label>
+              <input id="adminOriconDeadline" type="date">
+            </div>
+            <button id="fill2026DeadlineEstimate" class="btn btn-soft deadline-fill" type="button">2026年の見込み日を入れる</button>
+            <p class="deadline-note">公式の年間集計期間が確定する前の目安です。空欄なら参加者カードには表示されません。カード期間外の日付でも、上部の予定には表示できます。</p>
+          </div>
+        </details>
         <div class="field wide">
           <label for="adminLink">共通の再生ページURL（任意）</label>
           <input id="adminLink" type="url" inputmode="url" placeholder="公式スマートリンクなど https://...">
@@ -2363,6 +2467,28 @@
         return config.releaseEnabled !== false && /^\d{4}-\d{2}-\d{2}$/.test(config.release || '');
       }
 
+      function annualDeadlines(config) {
+        if (!config || config.template !== 'lastspurt') return [];
+        return [
+          { key: 'billboard', short: 'BB', label: 'Billboard JAPAN', date: config.billboardDeadline || '' },
+          { key: 'oricon', short: 'ORICON', label: 'ORICON', date: config.oriconDeadline || '' }
+        ].filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(item.date));
+      }
+
+      function annualDeadlineForDay(config, day) {
+        return annualDeadlines(config).filter((item) => item.date === day);
+      }
+
+      function renderAnnualDeadlineSchedule(config) {
+        const host = $('annualDeadlineSchedule');
+        if (!host) return;
+        const items = annualDeadlines(config);
+        host.classList.toggle('hidden', !items.length);
+        host.innerHTML = items.map((item) =>
+          `<span class="annual-deadline-chip"><span>${item.label}</span><b>${formatDate(item.date, false)}</b><em>見込み</em></span>`
+        ).join('');
+      }
+
       function releaseStatus(config, today = currentDay()) {
         if (today > config.end) return config.template === 'lastspurt' ? '追い込み終了' : 'イベント終了';
         if (!hasRelease(config)) return '';
@@ -2395,6 +2521,7 @@
             ? '曲名・追い込み期間・締切日・再生先を設定して、参加者に配る専用URLを作成します。'
             : '曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のない通常期用カードも作れます。';
         }
+        if ($('annualDeadlineOptions')) $('annualDeadlineOptions').classList.toggle('hidden', !lastSpurt);
         $('adminRelease').min = $('adminStart').value;
         const minimum = enabled ? ($('adminRelease').value || $('adminStart').value) : $('adminStart').value;
         $('adminEnd').min = minimum;
@@ -2409,6 +2536,8 @@
           release: hasRelease(config) ? config.release : '',
           releaseEnabled: hasRelease(config),
           end: config.end,
+          billboardDeadline: config.template === 'lastspurt' ? (config.billboardDeadline || '') : '',
+          oriconDeadline: config.template === 'lastspurt' ? (config.oriconDeadline || '') : '',
           stamp: config.stamp,
           stamps: [...config.stamps],
           color: config.color || '#4ea8de',
@@ -2917,6 +3046,10 @@
         const releaseEnabled = firstParam(source, 're', 'releaseEnabled') !== '0';
         const release = releaseEnabled ? firstParam(source, 'r', 'release') : '';
         const end = firstParam(source, 'f', 'end') || release;
+        const billboardDeadlineRaw = firstParam(source, 'bbd', 'billboardDeadline');
+        const oriconDeadlineRaw = firstParam(source, 'ord', 'oriconDeadline');
+        const billboardDeadline = /^\d{4}-\d{2}-\d{2}$/.test(billboardDeadlineRaw) ? billboardDeadlineRaw : '';
+        const oriconDeadline = /^\d{4}-\d{2}-\d{2}$/.test(oriconDeadlineRaw) ? oriconDeadlineRaw : '';
         const templateRaw = firstParam(source, 'v', 'template');
         const templateAlias = { h: 'hotel', c: 'classic', j: 'journey', p: 'postcard', l: 'lastspurt' }[templateRaw] || templateRaw;
         const template = ['classic', 'hotel', 'journey', 'postcard', 'lastspurt'].includes(templateAlias) ? templateAlias : 'hotel';
@@ -2942,7 +3075,7 @@
         const seed = `${title}|${song}|${start}|${release}|${end}`;
         const id = (firstParam(source, 'i', 'cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
         if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || end < start || (releaseEnabled && (!/^\d{4}-\d{2}-\d{2}$/.test(release) || release < start || end < release))) return null;
-        return { title, song, start, release, releaseEnabled, end, stamp, stamps, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id };
+        return { title, song, start, release, releaseEnabled, end, billboardDeadline, oriconDeadline, stamp, stamps, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id };
       }
 
       function configFromForm(options = {}) {
@@ -2956,6 +3089,9 @@
         const releaseEnabled = $('adminReleaseEnabled').checked;
         const release = releaseEnabled ? ($('adminRelease').value || (allowIncomplete ? start : '')) : '';
         const end = $('adminEnd').value || release || (allowIncomplete ? start : '');
+        const template = $('adminTemplate').value;
+        const billboardDeadline = template === 'lastspurt' ? $('adminBillboardDeadline').value : '';
+        const oriconDeadline = template === 'lastspurt' ? $('adminOriconDeadline').value : '';
         const rawLink = $('adminLink').value.trim();
         const link = safeUrl(rawLink);
         const rawApple = $('adminApple').value.trim();
@@ -2971,7 +3107,6 @@
         const amazon = safeUrl(rawAmazon);
         const awa = safeUrl(rawAwa);
         const shareTemplate = $('adminShareTemplate').value.trim() || DEFAULT_SHARE_TEMPLATE;
-        const template = $('adminTemplate').value;
         const rawApiUrl = $('adminApiUrl').value.trim();
         const apiUrl = safeSharedApiUrl(rawApiUrl);
         const availableStamps = adminSelectedStamps.length ? [...adminSelectedStamps] : stampsForTemplate(template);
@@ -2997,7 +3132,7 @@
           ? currentConfig.id
           : hashText(`${title}|${song}|${start}|${release}|${end}`);
         const stampSetName = $('adminSavedStampSet').value || editingStampSetOriginalName || 'AMENITY';
-        return { title, song, start, release, releaseEnabled, end, stamp, stamps, stampSets, stampSetName, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id, apiUrl };
+        return { title, song, start, release, releaseEnabled, end, billboardDeadline, oriconDeadline, stamp, stamps, stampSets, stampSetName, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id, apiUrl };
       }
 
       function configUrl(config, testMode = false) {
@@ -3013,6 +3148,8 @@
         if (hasRelease(config)) url.searchParams.set('r', config.release);
         else url.searchParams.set('re', '0');
         if (!hasRelease(config) || config.end !== config.release) url.searchParams.set('f', config.end);
+        if (config.template === 'lastspurt' && config.billboardDeadline) url.searchParams.set('bbd', config.billboardDeadline);
+        if (config.template === 'lastspurt' && config.oriconDeadline) url.searchParams.set('ord', config.oriconDeadline);
         if (config.link) url.searchParams.set('u', config.link);
         if (config.apple) url.searchParams.set('a', config.apple);
         if (config.spotify) url.searchParams.set('p', config.spotify);
@@ -3215,6 +3352,8 @@
         $('adminReleaseEnabled').checked = firstParam(params, 're', 'releaseEnabled') !== '0';
         $('adminRelease').value = firstParam(params, 'r', 'release') || addDays(today, 13);
         $('adminEnd').value = firstParam(params, 'f', 'end') || $('adminRelease').value;
+        $('adminBillboardDeadline').value = firstParam(params, 'bbd', 'billboardDeadline');
+        $('adminOriconDeadline').value = firstParam(params, 'ord', 'oriconDeadline');
         syncReleaseFields();
         $('adminTitle').value = firstParam(params, 't', 'title');
         $('adminSong').value = firstParam(params, 'q', 'song') || $('adminTitle').value;
@@ -3541,6 +3680,8 @@
         $('adminReleaseEnabled').checked = hasRelease(config);
         $('adminRelease').value = hasRelease(config) ? config.release : '';
         $('adminEnd').value = config.end || config.release;
+        $('adminBillboardDeadline').value = config.billboardDeadline || '';
+        $('adminOriconDeadline').value = config.oriconDeadline || '';
         syncReleaseFields();
         $('adminLink').value = config.link;
         $('adminApple').value = config.apple || '';
@@ -3724,6 +3865,7 @@
         $('releaseLine').classList.toggle('hidden', !hasRelease(config));
         $('releaseDateText').textContent = hasRelease(config) ? formatDate(config.release) : '';
         $('releaseLabel').textContent = config.template === 'lastspurt' ? 'GOAL / 締切' : 'CD RELEASE';
+        renderAnnualDeadlineSchedule(config);
         $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.end, false)}`;
         $('testBadge').classList.toggle('hidden', !isTestMode);
         $('testTodayText').textContent = isTestMode ? formatDate(today, false) : '';
@@ -3773,6 +3915,8 @@
           const date = parseLocalDate(day);
           const isToday = day === today;
           const isRelease = hasRelease(config) && day === config.release;
+          const dayDeadlines = annualDeadlineForDay(config, day);
+          const isAnnualDeadline = dayDeadlines.length > 0;
           const isStamped = validStamps.has(day);
           const isFuture = day > today;
           const isPrejoin = day < today && day < meta.joinedOn && !isStamped;
@@ -3782,9 +3926,9 @@
           const listenReady = getListenLinks(config).length === 0 || hasOpenedListenPage(config, day);
           const element = document.createElement(isToday && isStamped ? 'button' : 'div');
           if (isToday && isStamped) element.type = 'button';
-          element.className = `day${isToday ? ' today' : ''}${isRelease ? ' release-day' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}${isPrejoin ? ' prejoin' : ''}${needsAction ? ' day-action' : ''}`;
+          element.className = `day${isToday ? ' today' : ''}${isRelease ? ' release-day' : ''}${isAnnualDeadline ? ' annual-deadline-day' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}${isPrejoin ? ' prejoin' : ''}${needsAction ? ' day-action' : ''}`;
           const state = isPrejoin ? '参加前・開催済み' : isPastMissed ? '開催済み・未スタンプ' : isStamped ? 'スタンプ済み' : '未スタンプ';
-          element.setAttribute('aria-label', `${formatDate(day)} ${state}${isRelease ? (config.template === 'lastspurt' ? ' 締切日' : ' CD発売日') : ''}${isToday ? ' 今日' : ''}${isTestMode ? ' テスト操作' : ''}`);
+          element.setAttribute('aria-label', `${formatDate(day)} ${state}${isRelease ? (config.template === 'lastspurt' ? ' 締切日' : ' CD発売日') : ''}${isAnnualDeadline ? ` ${dayDeadlines.map((item) => item.label + '年間締切見込み').join('・')}` : ''}${isToday ? ' 今日' : ''}${isTestMode ? ' テスト操作' : ''}`);
           if (isToday && isStamped) element.addEventListener('click', () => toggleToday(config));
           if (needsAction) {
             element.setAttribute('role', 'button');
@@ -3805,6 +3949,7 @@
             <span class="day-tag-slot">${isRelease ? `<span class="release-tag">${config.template === 'lastspurt' ? 'GOAL' : 'RELEASE'}</span>` : isToday ? '<span class="today-tag">TODAY</span>' : ''}</span>
             <span class="day-date">${date.getMonth() + 1}/${date.getDate()}</span>
             <span class="day-week">${WEEKDAYS[date.getDay()]}</span>
+            ${isAnnualDeadline ? `<span class="annual-deadline-mini">${dayDeadlines.map((item) => item.short).join(' / ')} 見込</span>` : ''}
             ${isPrejoin ? '<span class="day-state">開催済み</span>' : dayAction}
           `;
           const resetListen = element.querySelector('.listen-reset');
@@ -4233,6 +4378,12 @@
         ctx.fillStyle = isHotel ? '#f3d58d' : isLastSpurt ? '#fff1b8' : muted;
         ctx.font = '500 26px -apple-system, BlinkMacSystemFont, sans-serif';
         if (hasRelease(config)) ctx.fillText(`${formatDate(config.release)} ${isLastSpurt ? 'GOAL / 締切' : 'CD RELEASE'}`, width / 2, 210);
+        const deadlineItems = annualDeadlines(config);
+        if (isLastSpurt && deadlineItems.length) {
+          ctx.fillStyle = '#fff1d8';
+          ctx.font = '700 18px -apple-system, BlinkMacSystemFont, sans-serif';
+          ctx.fillText(deadlineItems.map((item) => `${item.label} ${formatDate(item.date, false)}（見込み）`).join('　｜　'), width / 2, 246);
+        }
         const participantName = loadParticipantName(config);
         if (participantName) {
           ctx.textAlign = 'right';
@@ -4302,7 +4453,7 @@
         ctx.textAlign = 'center';
         ctx.fillStyle = isHotel ? '#c79e45' : isLastSpurt ? '#d8422e' : config.color;
         ctx.font = `${isLastSpurt ? '900 27px' : '700 36px'} -apple-system, BlinkMacSystemFont, sans-serif`;
-        ctx.fillText(isLastSpurt ? '🔥　あと少し！がんばれ！　🔥' : '✦　✦　✦', width / 2, 475);
+        ctx.fillText(isLastSpurt ? '🔥　年間チャートへ ラストスパート！　🔥' : '✦　✦　✦', width / 2, 475);
         ctx.restore();
 
         ctx.save();
@@ -4383,6 +4534,8 @@
           const future = day > today;
           const isToday = day === today;
           const isRelease = hasRelease(config) && day === config.release;
+          const dayDeadlines = annualDeadlineForDay(config, day);
+          const isAnnualDeadline = dayDeadlines.length > 0;
           const dayStamp = stamped ? (stampIcons[day] || config.stamp) : (isToday ? activeStamp : config.stamp);
           const radius = isJourney ? cell / 2 : isHotel ? 16 : isLastSpurt ? 18 : 23;
           if (isHotel) archRect(ctx, x, y, cell, cellHeight);
@@ -4466,6 +4619,22 @@
             ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x + cell / 2, y + 80);
             ctx.font = '700 27px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillText(WEEKDAYS[date.getDay()], x + cell / 2, y + 116);
+          }
+          if (isLastSpurt && isAnnualDeadline) {
+            const badgeText = `${dayDeadlines.map((item) => item.short).join('/')} 見込`;
+            ctx.save();
+            ctx.textAlign = 'left';
+            ctx.font = '800 12px -apple-system, BlinkMacSystemFont, sans-serif';
+            const badgeWidth = Math.min(cell - 20, Math.max(54, ctx.measureText(badgeText).width + 16));
+            roundRect(ctx, x + 8, y + 8, badgeWidth, 23, 12);
+            ctx.fillStyle = 'rgba(255,248,232,.96)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(224,118,48,.55)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = '#8b382d';
+            ctx.fillText(badgeText, x + 16, y + 24);
+            ctx.restore();
           }
           if (stamped) {
             drawTiltedStamp(ctx, dayStamp, x + cell / 2, y + cellHeight * .76, 68, 1);
@@ -5228,6 +5397,8 @@
             start: '2026-10-01',
             release: '2026-10-14',
             end: '2026-10-20',
+            billboardDeadline: '',
+            oriconDeadline: '',
             stamp: '⛄️',
             color: '#4ea8de',
             link: '',
@@ -5262,6 +5433,12 @@
         });
         const syncDateLimits = syncReleaseFields;
         $('adminReleaseEnabled').addEventListener('change', syncReleaseFields);
+        $('fill2026DeadlineEstimate').addEventListener('click', () => {
+          $('adminBillboardDeadline').value = '2026-11-22';
+          $('adminOriconDeadline').value = '2026-12-06';
+          $('annualDeadlineOptions').open = true;
+          toast('2026年の年間締切見込み日を入力しました');
+        });
         $('adminStart').addEventListener('change', syncDateLimits);
         $('adminRelease').addEventListener('change', syncDateLimits);
         syncDateLimits();
