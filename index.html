@@ -659,6 +659,148 @@
     .template-hotel .stamp-section .section-head span { color: #dfbd6e; }
     .template-hotel .stage-decoration { color: #c79e45; }
 
+    /* LAST SPURT｜追い込み用 */
+    .card.template-lastspurt {
+      --paper: #fff8ed;
+      --ink: #3b2028;
+      --muted: #8c6265;
+      --line: #e9b66c;
+      --wash: #fff0d8;
+      background: #fff8ed;
+      border: 1px solid rgba(224, 111, 55, .34);
+      box-shadow: 0 20px 55px rgba(177, 48, 28, .14), 0 0 0 3px rgba(var(--theme-rgb), .10);
+    }
+    .template-lastspurt .progress-area { background: #fff8ed; }
+    .template-lastspurt::before {
+      background: linear-gradient(90deg, #e4342f 0 30%, #ff8a24 30% 46%, var(--theme) 46% 54%, #ff8a24 54% 70%, #e4342f 70% 100%);
+    }
+    .template-lastspurt .hero {
+      color: #fffaf0;
+      background:
+        radial-gradient(circle at 82% 16%, rgba(var(--theme-rgb), .42), transparent 27%),
+        repeating-linear-gradient(115deg, rgba(255,255,255,.075) 0 5px, transparent 5px 18px),
+        linear-gradient(135deg, #cf2829 0%, #ef4c25 46%, #ff8b24 100%);
+      border-bottom: 3px solid #ffc85b;
+    }
+    .template-lastspurt .release-line,
+    .template-lastspurt .release-line strong { color: #fff1b8; }
+    .template-lastspurt .progress-bar {
+      position: absolute;
+      background: linear-gradient(90deg, #d62d2d 0%, #ff8128 58%, var(--theme) 100%);
+    }
+    .template-lastspurt .progress-bar::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 0;
+      width: 9px;
+      height: 9px;
+      border: 2px solid #fff8e4;
+      border-radius: 50%;
+      background: var(--theme);
+      box-shadow: 0 0 0 2px rgba(255, 125, 32, .28);
+      transform: translate(50%, -50%);
+    }
+    .template-lastspurt .progress-milestone.reached { background: #ef6330; }
+    .template-lastspurt .btn-primary {
+      color: white;
+      background: linear-gradient(135deg, #d92f2f, #f56b25);
+      border: 1px solid rgba(173, 45, 30, .18);
+    }
+    .template-lastspurt .btn-soft {
+      color: #7d362d;
+      background: #fff0d4;
+      border: 1px solid rgba(232, 139, 62, .35);
+    }
+    .template-lastspurt .participant-settings,
+    .template-lastspurt .stamp-picker {
+      background: #fff4df;
+      border-color: #edd1a7;
+    }
+    .template-lastspurt .stamp-choice { background: #fffaf1; }
+    .template-lastspurt .today-tag,
+    .template-lastspurt .day.stamped .today-tag {
+      color: #8b2f25;
+      background: #fff5cf;
+      border-color: #f0b647;
+    }
+    .template-lastspurt .stamp-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 13px 10px;
+    }
+    .template-lastspurt .stamp-section {
+      background:
+        linear-gradient(135deg, rgba(var(--theme-rgb), .055), transparent 34%),
+        repeating-linear-gradient(135deg, rgba(239, 93, 37, .035) 0 7px, transparent 7px 17px),
+        #fff7e9;
+    }
+    .template-lastspurt .stamp-section .section-head h2 { color: #9b332a; }
+    .template-lastspurt .stamp-section .section-head span { color: #a97568; }
+    .template-lastspurt .participant-name-card { color: #a24a3c; }
+    .template-lastspurt .day {
+      aspect-ratio: 1;
+      overflow: hidden;
+      border-radius: 18px 18px 12px 12px;
+      color: #6d4b48;
+      background: #fffdf7;
+      border: 2px solid #f0c58d;
+      box-shadow: 0 5px 13px rgba(140, 72, 42, .07);
+    }
+    .template-lastspurt .day::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 7px;
+      background: linear-gradient(90deg, #e84732, #ff8b26 62%, var(--theme));
+      opacity: .86;
+      pointer-events: none;
+    }
+    .template-lastspurt .day > * { position: relative; z-index: 1; }
+    .template-lastspurt .day.today {
+      border-color: var(--theme);
+      box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .15), 0 8px 20px rgba(238, 91, 35, .12);
+    }
+    .template-lastspurt .day.release-day {
+      border-color: #ef9e28;
+      box-shadow: 0 0 0 3px rgba(255, 177, 50, .25), 0 0 24px rgba(255, 120, 31, .18);
+    }
+    .template-lastspurt .day.stamped {
+      color: #4a2b30;
+      background: linear-gradient(145deg, #fff7d8, rgba(var(--theme-rgb), .16));
+      border-color: var(--theme);
+      box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .09), 0 8px 18px rgba(220, 88, 38, .10);
+    }
+    .template-lastspurt .day.prejoin,
+    .template-lastspurt .day.past-missed {
+      color: #a58f89;
+      background: #f5eee6;
+      border-color: #dfd0c2;
+    }
+    .template-lastspurt .day.future { opacity: .72; }
+    .template-lastspurt .stage-decoration {
+      min-height: 30px;
+      color: #d8422e;
+      font-size: 0;
+      opacity: .62;
+      letter-spacing: 0;
+    }
+    .template-lastspurt .stage-decoration::before {
+      content: "🔥　あと少し！がんばれ！　🔥";
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .08em;
+    }
+    .template-lastspurt[data-stage="2"] .stage-decoration,
+    .template-lastspurt[data-stage="3"] .stage-decoration,
+    .template-lastspurt[data-stage="4"] .stage-decoration { color: #cf3028; }
+    .template-lastspurt .completion.show {
+      color: #7f2b25;
+      background: linear-gradient(135deg, #fff3ca, rgba(var(--theme-rgb), .12));
+      border: 1px solid rgba(238, 138, 43, .28);
+    }
+
     .test-badge {
       display: inline-flex;
       align-items: center;
@@ -1635,6 +1777,7 @@
             <option value="classic">◯ STAMP</option>
             <option value="journey">🚏 JOURNEY</option>
             <option value="postcard">✉ POSTCARD</option>
+            <option value="lastspurt">🔥 LAST SPURT</option>
           </select>
         </div>
         <button id="testReset" class="btn btn-plain" type="button">リセット</button>
@@ -1655,7 +1798,7 @@
           </svg>
         </div>
         <h1 id="campaignTitle"></h1>
-        <p id="releaseLine" class="release-line"><strong id="releaseDateText"></strong> CD RELEASE</p>
+        <p id="releaseLine" class="release-line"><strong id="releaseDateText"></strong> <span id="releaseLabel">CD RELEASE</span></p>
       </header>
 
       <div class="progress-area">
@@ -1723,7 +1866,7 @@
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
       <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のない通常期用カードも作れます。</p>
-      <p class="build-version">更新版 2026.10.18｜POSTCARDの切手枠を修正</p>
+      <p class="build-version">更新版 2026.11.09｜LAST SPURT追加</p>
       <p id="adminSyncStatus" class="admin-sync-status" role="status" aria-live="polite"></p>
 
       <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
@@ -1762,11 +1905,11 @@
         <div class="field wide">
           <label style="display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;">
             <input id="adminReleaseEnabled" type="checkbox" checked style="width:20px;height:20px;flex:0 0 20px;">
-            発売日を設定する
+            <span id="adminReleaseToggleLabel">発売日を設定する</span>
           </label>
         </div>
         <div id="adminReleaseField" class="field">
-          <label for="adminRelease">CD発売日</label>
+          <label id="adminReleaseLabel" for="adminRelease">CD発売日</label>
           <input id="adminRelease" type="date">
         </div>
         <div class="field">
@@ -1803,6 +1946,7 @@
             <option value="classic">◯ STAMP｜ポイントカード</option>
             <option value="journey">🚏 JOURNEY｜発売日への道</option>
             <option value="postcard">✉ POSTCARD｜音楽の便り</option>
+            <option value="lastspurt">🔥 LAST SPURT｜追い込み</option>
           </select>
         </div>
         <div class="field wide">
@@ -1952,7 +2096,7 @@
       ];
       const STAMPS = [
         '⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🔑', '🛎️', '🧳', '☕️', '🪥', '🪮', '🏨',
-        '💛', '💜', '🤍', '💙', '🧡', '💚', '🖤', '❤️', '🩷', '🎈', '🔫', '🤖', '🕺'
+        '💛', '💜', '🤍', '💙', '🧡', '💚', '🖤', '❤️', '🩷', '🎈', '🔫', '🤖', '🕺', '🔥', '📣', '🚩', '💪', '🎧', '❤️‍🔥'
       ];
       const AMENITY_STAMPS = [...STAMPS];
       const HEART_STAMPS = ['💛', '💜', '🤍', '💙', '🧡', '💚', '🖤', '❤️', '🩷'];
@@ -1960,14 +2104,16 @@
         hotel: ['⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🔑', '🛎️', '🧳', '☕️', '🪥', '🪮', '🏨', '🎈', '🔫', '🤖', '🕺', ...HEART_STAMPS],
         classic: ['⛄️', '🎵', '💿', '⭐️', '🍎', '🥖', '🎈', '🔫', '🤖', '🕺', ...HEART_STAMPS],
         journey: ['⛄️', '🎵', '💿', '⭐️', '🧳', '🎈', '🔫', '🤖', '🕺', ...HEART_STAMPS],
-        postcard: ['⛄️', '🎵', '💿', '⭐️', '☕️', ...HEART_STAMPS]
+        postcard: ['⛄️', '🎵', '💿', '⭐️', '☕️', ...HEART_STAMPS],
+        lastspurt: ['🔥', '📣', '🚩', '💪', '🎧', '❤️‍🔥', '⛄️', '🎵', '💿', '⭐️', '🎈', '🕺', ...HEART_STAMPS]
       };
       const STAMP_NAMES = {
         '⛄️': '雪だるま', '🎵': '音符', '💿': 'CD', '⭐️': '星', '🍎': 'りんご', '🥖': 'パン',
         '🔑': 'ホテルキー', '🛎️': 'ベル', '🧳': 'トランク', '☕️': 'カップ', '🪥': '歯ブラシ',
         '🪮': 'コーム', '🏨': 'ホテル', '💛': 'イエロー', '💜': 'パープル', '🤍': 'ホワイト',
         '💙': 'ブルー', '🧡': 'オレンジ', '💚': 'グリーン', '🖤': 'ブラック', '❤️': 'レッド',
-        '🩷': 'ピンク', '🎈': '風船', '🔫': '水鉄砲', '🤖': 'ロボット', '🕺': 'ダンス'
+        '🩷': 'ピンク', '🎈': '風船', '🔫': '水鉄砲', '🤖': 'ロボット', '🕺': 'ダンス',
+        '🔥': '炎', '📣': 'メガホン', '🚩': 'フラッグ', '💪': 'ファイト', '🎧': 'ヘッドホン', '❤️‍🔥': '燃えるハート'
       };
       const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
       const DEFAULT_SHARE_TEMPLATE = '⛄️ {カードタイトル}\n「{曲名}」を1日1回聴いています！\n【{スタンプ数} STAMPS】\n{参加者用URL}\n#SnowMan';
@@ -2218,20 +2364,37 @@
       }
 
       function releaseStatus(config, today = currentDay()) {
-        if (today > config.end) return 'イベント終了';
+        if (today > config.end) return config.template === 'lastspurt' ? '追い込み終了' : 'イベント終了';
         if (!hasRelease(config)) return '';
         const distance = Math.round((parseLocalDate(config.release) - parseLocalDate(today)) / 86400000);
+        if (config.template === 'lastspurt') {
+          return today === config.release ? '本日締切！🔥'
+            : today < config.release ? `締切まであと${distance}日`
+            : `締切から${Math.abs(distance)}日`;
+        }
         return today === config.release ? '本日発売！'
           : today < config.release ? `発売日まであと${distance}日`
           : `発売から${Math.abs(distance)}日`;
       }
 
       function syncReleaseFields() {
+        const lastSpurt = $('adminTemplate').value === 'lastspurt';
+        if (lastSpurt) $('adminReleaseEnabled').checked = true;
         const enabled = $('adminReleaseEnabled').checked;
+        $('adminReleaseEnabled').disabled = lastSpurt;
+        if ($('adminReleaseToggleLabel')) $('adminReleaseToggleLabel').textContent = lastSpurt ? '締切日を設定する（必須）' : '発売日を設定する';
+        if ($('adminReleaseLabel')) $('adminReleaseLabel').textContent = lastSpurt ? '目標日・締切日' : 'CD発売日';
         $('adminReleaseField').classList.toggle('hidden', !enabled);
         $('adminRelease').disabled = !enabled;
         $('adminRelease').required = enabled;
-        $('adminEndLabel').textContent = enabled ? 'カード終了日（発売日以降）' : 'カード終了日';
+        $('adminEndLabel').textContent = enabled
+          ? (lastSpurt ? 'カード終了日（締切日以降）' : 'カード終了日（発売日以降）')
+          : 'カード終了日';
+        if ($('adminLead')) {
+          $('adminLead').textContent = lastSpurt
+            ? '曲名・追い込み期間・締切日・再生先を設定して、参加者に配る専用URLを作成します。'
+            : '曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のない通常期用カードも作れます。';
+        }
         $('adminRelease').min = $('adminStart').value;
         const minimum = enabled ? ($('adminRelease').value || $('adminStart').value) : $('adminStart').value;
         $('adminEnd').min = minimum;
@@ -2755,8 +2918,8 @@
         const release = releaseEnabled ? firstParam(source, 'r', 'release') : '';
         const end = firstParam(source, 'f', 'end') || release;
         const templateRaw = firstParam(source, 'v', 'template');
-        const templateAlias = { h: 'hotel', c: 'classic', j: 'journey', p: 'postcard' }[templateRaw] || templateRaw;
-        const template = ['classic', 'hotel', 'journey', 'postcard'].includes(templateAlias) ? templateAlias : 'hotel';
+        const templateAlias = { h: 'hotel', c: 'classic', j: 'journey', p: 'postcard', l: 'lastspurt' }[templateRaw] || templateRaw;
+        const template = ['classic', 'hotel', 'journey', 'postcard', 'lastspurt'].includes(templateAlias) ? templateAlias : 'hotel';
         const incomingStampRaw = firstParam(source, 'e', 'stamp') || '⛄️';
         const incomingStamp = incomingStampRaw === '🩵' ? '💙' : incomingStampRaw;
         const directStampSet = firstParam(source, 'g', 'stampSet');
@@ -2817,12 +2980,13 @@
         const stampSets = loadSavedStampSets();
         const color = '#4ea8de';
         let error = '';
+        const dateLabel = template === 'lastspurt' ? '締切日' : 'CD発売日';
         if (!title) error = 'カードタイトルを入力してください。';
         else if (!song) error = '1日1回聴く曲名を入力してください。';
-        else if (!start || !end || (releaseEnabled && !release)) error = releaseEnabled ? '開始日・CD発売日・カード終了日を入力してください。' : '開始日・カード終了日を入力してください。';
+        else if (!start || !end || (releaseEnabled && !release)) error = releaseEnabled ? `開始日・${dateLabel}・カード終了日を入力してください。` : '開始日・カード終了日を入力してください。';
         else if (end < start) error = 'カード終了日は開始日以降にしてください。';
-        else if (releaseEnabled && release < start) error = 'CD発売日は開始日以降にしてください。';
-        else if (releaseEnabled && end < release) error = 'カード終了日はCD発売日以降にしてください。';
+        else if (releaseEnabled && release < start) error = `${dateLabel}は開始日以降にしてください。`;
+        else if (releaseEnabled && end < release) error = `カード終了日は${dateLabel}以降にしてください。`;
         else if (dateRange(start, end).length > 366) error = '期間は366日以内にしてください。';
         else if ([rawLink && !link, rawApple && !apple, rawSpotify && !spotify, rawLine && !line, rawYoutube && !youtube, rawAmazon && !amazon, rawAwa && !awa].some(Boolean)) error = '再生先は https:// で始まるURLにしてください。';
         else if (!allowIncomplete && ![link, apple, spotify, line, youtube, amazon, awa].some(Boolean)) error = '曲を聴くためのURLを1つ以上入力してください。';
@@ -2860,7 +3024,7 @@
         url.searchParams.set('e', config.stamp);
         url.searchParams.set('x', encodeStampSet(config.stamps));
         url.searchParams.set('g', config.stamps.join(' '));
-        url.searchParams.set('v', { hotel: 'h', classic: 'c', journey: 'j', postcard: 'p' }[config.template] || 'h');
+        url.searchParams.set('v', { hotel: 'h', classic: 'c', journey: 'j', postcard: 'p', lastspurt: 'l' }[config.template] || 'h');
         url.searchParams.set('i', config.id);
         if (testMode) {
           url.searchParams.set('z', '1');
@@ -3064,8 +3228,9 @@
         $('adminShareTemplate').value = firstParam(params, 'm', 'message') || loadSavedShareTemplate() || DEFAULT_SHARE_TEMPLATE;
         $('adminApiUrl').value = safeSharedApiUrl(incomingSharedApiUrl) || loadSavedSharedApiUrl();
         const templateRaw = firstParam(params, 'v', 'template');
-        const template = { h: 'hotel', c: 'classic', j: 'journey', p: 'postcard' }[templateRaw] || templateRaw;
-        $('adminTemplate').value = ['classic', 'hotel', 'journey', 'postcard'].includes(template) ? template : 'hotel';
+        const template = { h: 'hotel', c: 'classic', j: 'journey', p: 'postcard', l: 'lastspurt' }[templateRaw] || templateRaw;
+        $('adminTemplate').value = ['classic', 'hotel', 'journey', 'postcard', 'lastspurt'].includes(template) ? template : 'hotel';
+        syncReleaseFields();
         const incomingStamp = firstParam(params, 'e', 'stamp') || '⛄️';
         const directStampSet = firstParam(params, 'g', 'stampSet');
         const incomingStamps = directStampSet
@@ -3343,7 +3508,7 @@
         currentConfig = { ...config, color: participantColor };
         config = currentConfig;
         applyTheme(participantColor);
-        $('participantView').classList.remove('template-classic', 'template-hotel', 'template-journey', 'template-postcard');
+        $('participantView').classList.remove('template-classic', 'template-hotel', 'template-journey', 'template-postcard', 'template-lastspurt');
         $('participantView').classList.add(`template-${config.template}`);
         $('adminView').classList.add('hidden');
         $('participantView').classList.remove('hidden');
@@ -3386,6 +3551,7 @@
         $('adminAwa').value = config.awa || '';
         $('adminShareTemplate').value = config.shareTemplate || DEFAULT_SHARE_TEMPLATE;
         $('adminTemplate').value = config.template || 'hotel';
+        syncReleaseFields();
         $('adminApiUrl').value = config.apiUrl || loadSavedSharedApiUrl();
         if (!workspaceEditKey) importSharedStampSets(config.stampSets);
         const savedSets = loadSavedStampSets();
@@ -3557,6 +3723,7 @@
         $('campaignTitle').textContent = config.title;
         $('releaseLine').classList.toggle('hidden', !hasRelease(config));
         $('releaseDateText').textContent = hasRelease(config) ? formatDate(config.release) : '';
+        $('releaseLabel').textContent = config.template === 'lastspurt' ? 'GOAL / 締切' : 'CD RELEASE';
         $('periodText').textContent = `${formatDate(config.start, false)} — ${formatDate(config.end, false)}`;
         $('testBadge').classList.toggle('hidden', !isTestMode);
         $('testTodayText').textContent = isTestMode ? formatDate(today, false) : '';
@@ -3584,9 +3751,13 @@
         const perfect = count === days.length && days.length > 0;
         const eventFinished = today > config.end;
         $('completion').classList.toggle('show', perfect || eventFinished);
-        $('completion').innerHTML = perfect
-          ? `PERFECT！<br>期間中毎日ありがとう ${config.stamp}✨`
-          : eventFinished ? `FINISH！<br>${count ? `${count}日間の参加、` : ''}ありがとう ${config.stamp}` : '';
+        $('completion').innerHTML = config.template === 'lastspurt'
+          ? (perfect
+              ? `GOAL！<br>毎日の積み重ね、おつかれさま ${config.stamp}🔥`
+              : eventFinished ? `FINISH！<br>${count ? `${count}日間の追い込み、` : ''}おつかれさま ${config.stamp}` : '')
+          : (perfect
+              ? `PERFECT！<br>期間中毎日ありがとう ${config.stamp}✨`
+              : eventFinished ? `FINISH！<br>${count ? `${count}日間の参加、` : ''}ありがとう ${config.stamp}` : '');
 
         const canStampToday = days.includes(today);
         const todayStamped = validStamps.has(today);
@@ -3613,7 +3784,7 @@
           if (isToday && isStamped) element.type = 'button';
           element.className = `day${isToday ? ' today' : ''}${isRelease ? ' release-day' : ''}${isStamped ? ' stamped' : ''}${isFuture ? ' future' : ''}${isPrejoin ? ' prejoin' : ''}${needsAction ? ' day-action' : ''}`;
           const state = isPrejoin ? '参加前・開催済み' : isPastMissed ? '開催済み・未スタンプ' : isStamped ? 'スタンプ済み' : '未スタンプ';
-          element.setAttribute('aria-label', `${formatDate(day)} ${state}${isRelease ? ' CD発売日' : ''}${isToday ? ' 今日' : ''}${isTestMode ? ' テスト操作' : ''}`);
+          element.setAttribute('aria-label', `${formatDate(day)} ${state}${isRelease ? (config.template === 'lastspurt' ? ' 締切日' : ' CD発売日') : ''}${isToday ? ' 今日' : ''}${isTestMode ? ' テスト操作' : ''}`);
           if (isToday && isStamped) element.addEventListener('click', () => toggleToday(config));
           if (needsAction) {
             element.setAttribute('role', 'button');
@@ -3631,7 +3802,7 @@
             ? `<span class="day-inline-action${listenReady ? ' stamp-ready' : ''}" data-stamp="${activeStamp}">${listenReady ? `${activeStamp} スタンプ` : '▶ 曲を聴く'}</span>${listenReady && getListenLinks(config).length ? '<button class="listen-reset" type="button">↩ まだ聴いていない</button>' : ''}`
             : `<span class="day-stamp" aria-hidden="true">${dayStamp}</span>`;
           element.innerHTML = `
-            <span class="day-tag-slot">${isRelease ? '<span class="release-tag">RELEASE</span>' : isToday ? '<span class="today-tag">TODAY</span>' : ''}</span>
+            <span class="day-tag-slot">${isRelease ? `<span class="release-tag">${config.template === 'lastspurt' ? 'GOAL' : 'RELEASE'}</span>` : isToday ? '<span class="today-tag">TODAY</span>' : ''}</span>
             <span class="day-date">${date.getMonth() + 1}/${date.getDate()}</span>
             <span class="day-week">${WEEKDAYS[date.getDay()]}</span>
             ${isPrejoin ? '<span class="day-state">開催済み</span>' : dayAction}
@@ -3990,10 +4161,11 @@
         const themeText = contrastText(config.color);
         const isHotel = config.template === 'hotel';
         const isJourney = config.template === 'journey';
-        const paper = isHotel ? '#f8ead2' : isJourney ? '#fffdf8' : '#ffffff';
-        const sectionPaper = isHotel ? '#7a0826' : paper;
-        const ink = isHotel ? '#35171d' : '#24364a';
-        const muted = isHotel ? '#85565a' : '#718096';
+        const isLastSpurt = config.template === 'lastspurt';
+        const paper = isHotel ? '#f8ead2' : isJourney ? '#fffdf8' : isLastSpurt ? '#fff8ed' : '#ffffff';
+        const sectionPaper = isHotel ? '#7a0826' : isLastSpurt ? '#fff7e9' : paper;
+        const ink = isHotel ? '#35171d' : isLastSpurt ? '#3b2028' : '#24364a';
+        const muted = isHotel ? '#85565a' : isLastSpurt ? '#8c6265' : '#718096';
         const today = currentDay();
 
         ctx.fillStyle = '#eaf2f8';
@@ -4021,27 +4193,50 @@
             }
           }
           ctx.restore();
+        } else if (isLastSpurt) {
+          ctx.save();
+          roundRect(ctx, cardX, 38, cardWidth, height - 76, 36);
+          ctx.clip();
+          const gradient = ctx.createLinearGradient(cardX, 38, cardX + cardWidth, 290);
+          gradient.addColorStop(0, '#cf2829');
+          gradient.addColorStop(.5, '#ef4c25');
+          gradient.addColorStop(1, '#ff8b24');
+          ctx.fillStyle = gradient;
+          ctx.fillRect(cardX, 38, cardWidth, 255);
+          ctx.globalAlpha = .10;
+          ctx.fillStyle = '#ffffff';
+          for (let px = cardX - 80; px < cardX + cardWidth + 80; px += 52) {
+            ctx.save();
+            ctx.translate(px, 150);
+            ctx.rotate(-0.36);
+            ctx.fillRect(-4, -120, 8, 260);
+            ctx.restore();
+          }
+          ctx.restore();
         }
 
-        ctx.fillStyle = isHotel ? '#cba957' : config.color;
+        ctx.fillStyle = isHotel ? '#cba957' : isLastSpurt ? '#ef4a2d' : config.color;
         roundRect(ctx, cardX, 38, cardWidth, 16, 8);
         ctx.fill();
         if (isHotel) {
           ctx.fillStyle = config.color;
           ctx.fillRect(width / 2 - 48, 38, 96, 16);
+        } else if (isLastSpurt) {
+          ctx.fillStyle = config.color;
+          ctx.fillRect(width / 2 - 44, 38, 88, 16);
         }
 
         ctx.textAlign = 'center';
-        ctx.fillStyle = isHotel ? '#fff4d5' : ink;
+        ctx.fillStyle = isHotel ? '#fff4d5' : isLastSpurt ? '#fffaf0' : ink;
         ctx.font = '700 50px -apple-system, BlinkMacSystemFont, sans-serif';
         drawCenteredText(ctx, config.title, width / 2, 145, width - 190, 56);
-        ctx.fillStyle = isHotel ? '#f3d58d' : muted;
+        ctx.fillStyle = isHotel ? '#f3d58d' : isLastSpurt ? '#fff1b8' : muted;
         ctx.font = '500 26px -apple-system, BlinkMacSystemFont, sans-serif';
-        if (hasRelease(config)) ctx.fillText(`${formatDate(config.release)} CD RELEASE`, width / 2, 210);
+        if (hasRelease(config)) ctx.fillText(`${formatDate(config.release)} ${isLastSpurt ? 'GOAL / 締切' : 'CD RELEASE'}`, width / 2, 210);
         const participantName = loadParticipantName(config);
         if (participantName) {
           ctx.textAlign = 'right';
-          ctx.fillStyle = isHotel ? '#f3d58d' : muted;
+          ctx.fillStyle = isHotel ? '#f3d58d' : isLastSpurt ? '#ffe7c2' : muted;
           ctx.font = '700 20px -apple-system, BlinkMacSystemFont, sans-serif';
           ctx.fillText(participantName, width - margin, 275);
         }
@@ -4068,15 +4263,21 @@
             progressGradient.addColorStop(.62, config.color);
             progressGradient.addColorStop(1, '#d0aa54');
             ctx.fillStyle = progressGradient;
+          } else if (isLastSpurt) {
+            const progressGradient = ctx.createLinearGradient(margin, 0, width - margin, 0);
+            progressGradient.addColorStop(0, '#d62d2d');
+            progressGradient.addColorStop(.58, '#ff8128');
+            progressGradient.addColorStop(1, config.color);
+            ctx.fillStyle = progressGradient;
           } else ctx.fillStyle = config.color;
           ctx.fill();
-          if (isHotel) {
+          if (isHotel || isLastSpurt) {
             const progressX = margin + (width - margin * 2) * milestone.progress / 100;
             ctx.beginPath();
             ctx.arc(progressX, 387, 7, 0, Math.PI * 2);
             ctx.fillStyle = config.color;
             ctx.fill();
-            ctx.strokeStyle = '#fff3cb';
+            ctx.strokeStyle = isLastSpurt ? '#fff8e4' : '#fff3cb';
             ctx.lineWidth = 3;
             ctx.stroke();
           }
@@ -4087,7 +4288,7 @@
           ctx.save();
           ctx.translate(x, 387);
           ctx.rotate(Math.PI / 4);
-          ctx.fillStyle = count >= mark ? (isHotel ? '#d0aa54' : config.color) : '#cbd6df';
+          ctx.fillStyle = count >= mark ? (isHotel ? '#d0aa54' : isLastSpurt ? '#ef6330' : config.color) : '#cbd6df';
           ctx.fillRect(-size / 2, -size / 2, size, size);
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 2;
@@ -4099,9 +4300,9 @@
         ctx.save();
         ctx.globalAlpha = stageAlpha;
         ctx.textAlign = 'center';
-        ctx.fillStyle = isHotel ? '#c79e45' : config.color;
-        ctx.font = '700 36px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText('✦　✦　✦', width / 2, 475);
+        ctx.fillStyle = isHotel ? '#c79e45' : isLastSpurt ? '#d8422e' : config.color;
+        ctx.font = `${isLastSpurt ? '900 27px' : '700 36px'} -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.fillText(isLastSpurt ? '🔥　あと少し！がんばれ！　🔥' : '✦　✦　✦', width / 2, 475);
         ctx.restore();
 
         ctx.save();
@@ -4121,14 +4322,24 @@
               ctx.restore();
             }
           }
+        } else if (isLastSpurt) {
+          ctx.globalAlpha = .045;
+          ctx.strokeStyle = '#ef5d25';
+          ctx.lineWidth = 5;
+          for (let px = cardX - 120; px < cardX + cardWidth + 120; px += 42) {
+            ctx.beginPath();
+            ctx.moveTo(px, 550);
+            ctx.lineTo(px + 180, height - 38);
+            ctx.stroke();
+          }
         }
         ctx.restore();
         ctx.textAlign = 'left';
-        ctx.fillStyle = isHotel ? '#f5dfaa' : ink;
+        ctx.fillStyle = isHotel ? '#f5dfaa' : isLastSpurt ? '#9b332a' : ink;
         ctx.font = '700 34px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText('LISTENING CARD', margin, 615);
+        ctx.fillText(isLastSpurt ? 'LAST SPURT CARD' : 'LISTENING CARD', margin, 615);
         ctx.textAlign = 'right';
-        ctx.fillStyle = isHotel ? '#dfbd6e' : muted;
+        ctx.fillStyle = isHotel ? '#dfbd6e' : isLastSpurt ? '#a97568' : muted;
         ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillText(`${formatDate(config.start, false)} — ${formatDate(config.end, false)}`, width - margin, 615);
 
@@ -4173,10 +4384,11 @@
           const isToday = day === today;
           const isRelease = hasRelease(config) && day === config.release;
           const dayStamp = stamped ? (stampIcons[day] || config.stamp) : (isToday ? activeStamp : config.stamp);
-          const radius = isJourney ? cell / 2 : isHotel ? 16 : 23;
+          const radius = isJourney ? cell / 2 : isHotel ? 16 : isLastSpurt ? 18 : 23;
           if (isHotel) archRect(ctx, x, y, cell, cellHeight);
           else roundRect(ctx, x, y, cell, cellHeight, radius);
           if (isHotel) ctx.fillStyle = stamped ? '#efd17e' : prejoin ? '#bd737c' : future ? '#733044' : '#7e0929';
+          else if (isLastSpurt) ctx.fillStyle = stamped ? `rgba(${r}, ${g}, ${b}, .14)` : prejoin ? '#f1e8df' : '#fffdf7';
           else ctx.fillStyle = stamped ? (isJourney ? `rgba(${r}, ${g}, ${b}, .13)` : config.color) : prejoin ? '#e1e6e9' : isJourney ? '#fffdf8' : '#f5f8fa';
           if (stamped && isHotel) {
             ctx.save();
@@ -4189,6 +4401,17 @@
             ctx.fill();
             ctx.restore();
           } else ctx.fill();
+          if (isLastSpurt) {
+            ctx.save();
+            roundRect(ctx, x, y, cell, 10, 5);
+            const stripe = ctx.createLinearGradient(x, 0, x + cell, 0);
+            stripe.addColorStop(0, '#e84732');
+            stripe.addColorStop(.62, '#ff8b26');
+            stripe.addColorStop(1, config.color);
+            ctx.fillStyle = stripe;
+            ctx.fill();
+            ctx.restore();
+          }
           if (isRelease) {
             ctx.save();
             ctx.shadowColor = 'rgba(255, 205, 72, .55)';
@@ -4202,6 +4425,7 @@
           else if (isRelease) ctx.strokeStyle = '#e4b743';
           else if (isToday) ctx.strokeStyle = config.color;
           else if (isHotel) ctx.strokeStyle = prejoin ? '#cdb78e' : '#cba957';
+          else if (isLastSpurt) ctx.strokeStyle = stamped || isToday ? config.color : prejoin ? '#dfd0c2' : '#f0c58d';
           else ctx.strokeStyle = stamped ? config.color : '#dce7f0';
           ctx.lineWidth = isToday || isRelease ? 9 : 5;
           ctx.stroke();
@@ -4214,12 +4438,14 @@
 
           const textColor = isHotel
             ? stamped ? '#571127' : prejoin ? '#703342' : future ? '#c9a3a7' : '#f4dca0'
-            : stamped ? (isJourney ? '#24364a' : themeText) : prejoin ? '#8d979e' : '#52677b';
+            : isLastSpurt
+              ? stamped ? '#4a2b30' : prejoin ? '#a58f89' : '#6d4b48'
+              : stamped ? (isJourney ? '#24364a' : themeText) : prejoin ? '#8d979e' : '#52677b';
           ctx.fillStyle = textColor;
           const date = parseLocalDate(day);
           ctx.textAlign = 'center';
           if (isToday || isRelease) {
-            const tagText = isRelease ? 'RELEASE' : 'TODAY';
+            const tagText = isRelease ? (isLastSpurt ? 'GOAL' : 'RELEASE') : 'TODAY';
             const tagWidth = Math.min(cell - 28, isRelease ? 94 : 82);
             roundRect(ctx, x + cell / 2 - tagWidth / 2, y + 14, tagWidth, 25, 13);
             ctx.fillStyle = '#fff4d5';
@@ -4255,9 +4481,9 @@
         });
 
         ctx.textAlign = 'center';
-        ctx.fillStyle = isHotel ? '#dfbd6e' : `rgba(${r}, ${g}, ${b}, .85)`;
+        ctx.fillStyle = isHotel ? '#dfbd6e' : isLastSpurt ? '#cf3c2d' : `rgba(${r}, ${g}, ${b}, .85)`;
         ctx.font = '700 22px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText('ONE LISTEN A DAY, KEEP THE MUSIC PLAYING', width / 2, height - 75);
+        ctx.fillText(isLastSpurt ? 'KEEP GOING — ONE LISTEN AT A TIME 🔥' : 'ONE LISTEN A DAY, KEEP THE MUSIC PLAYING', width / 2, height - 75);
         return canvas;
       }
 
@@ -5031,6 +5257,7 @@
         $('saveDraftButton').addEventListener('click', saveDraft);
         $('testGenerateButton').addEventListener('click', () => generate('test'));
         $('adminTemplate').addEventListener('change', () => {
+          syncReleaseFields();
           renderAdminStampChoices($('adminTemplate').value, adminSelectedStamps, adminSelectedStamps[0]);
         });
         const syncDateLimits = syncReleaseFields;
@@ -5105,3 +5332,5 @@
   </script>
 </body>
 </html>
+>
+
