@@ -1190,6 +1190,105 @@
       background: #f8e8c7;
     }
 
+    .participant-song-indicator {
+      margin: 0 24px 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(255,255,255,.55);
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.55;
+    }
+    .participant-song-indicator .song-source {
+      margin-left: 6px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .participant-song-override {
+      margin-top: 13px;
+      padding-top: 13px;
+      border-top: 1px solid rgba(120,130,145,.18);
+    }
+    .participant-song-override h3 {
+      margin: 0 0 4px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .participant-song-override-note {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.6;
+    }
+    .participant-song-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .participant-song-grid .wide { grid-column: 1 / -1; }
+    .participant-song-grid label {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .participant-song-grid input {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: rgba(255,255,255,.82);
+      color: var(--text);
+      font: inherit;
+      font-size: 11px;
+    }
+    .participant-song-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-top: 10px;
+    }
+    .participant-song-status {
+      margin-top: 8px;
+      min-height: 15px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.5;
+    }
+    .song-override-admin {
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(78,168,222,.06);
+    }
+    .song-override-admin label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 0;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .song-override-admin input {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
+      margin-top: 1px;
+    }
+    .song-override-admin p {
+      margin: 6px 0 0 30px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.6;
+    }
+
     .admin-stamp-choices {
       display: flex;
       flex-wrap: wrap;
@@ -1829,6 +1928,8 @@
       .day-stamp { font-size: 22px; height: 26px; }
       .form-grid { grid-template-columns: 1fr; }
       .test-controls { grid-template-columns: 1fr 1fr; }
+      .participant-song-grid { grid-template-columns: 1fr; }
+      .participant-song-grid .wide { grid-column: auto; }
       .field.wide { grid-column: auto; }
       .admin-card { padding-left: 17px; padding-right: 17px; }
     }
@@ -1902,7 +2003,7 @@
       </div>
 
       <details id="participantSettings" class="participant-settings">
-        <summary>参加設定を変更（名前・テーマカラー）</summary>
+        <summary id="participantSettingsSummary">参加設定を変更（名前・テーマカラー）</summary>
         <div class="participant-settings-content">
           <div class="participant-identity">
             <label for="participantName">NAME / @ACCOUNT</label>
@@ -1913,8 +2014,46 @@
             <p>テーマカラーを選ぶ</p>
             <div id="participantColorList" class="color-list" role="group" aria-label="テーマカラー"></div>
           </div>
+
+          <div id="participantSongOverride" class="participant-song-override hidden">
+            <h3>🎵 このカードで聴く曲を変更</h3>
+            <p class="participant-song-override-note">変更はこの端末・このカードだけに保存されます。ほかの参加者や管理者の設定には影響しません。</p>
+            <div class="participant-song-grid">
+              <label class="wide">曲名
+                <input id="participantSongName" type="text" maxlength="80" placeholder="例：グッタイム">
+              </label>
+              <label class="wide">共通の再生ページURL（任意）
+                <input id="participantSongLink" type="url" inputmode="url" placeholder="公式スマートリンクなど https://...">
+              </label>
+              <label>Apple Music
+                <input id="participantSongApple" type="url" inputmode="url" placeholder="https://music.apple.com/...">
+              </label>
+              <label>Spotify
+                <input id="participantSongSpotify" type="url" inputmode="url" placeholder="https://open.spotify.com/...">
+              </label>
+              <label>LINE MUSIC
+                <input id="participantSongLine" type="url" inputmode="url" placeholder="https://music.line.me/...">
+              </label>
+              <label>YouTube Music
+                <input id="participantSongYoutube" type="url" inputmode="url" placeholder="https://music.youtube.com/...">
+              </label>
+              <label>Amazon Music
+                <input id="participantSongAmazon" type="url" inputmode="url" placeholder="https://music.amazon.co.jp/...">
+              </label>
+              <label>AWA
+                <input id="participantSongAwa" type="url" inputmode="url" placeholder="https://s.awa.fm/...">
+              </label>
+            </div>
+            <div class="participant-song-actions">
+              <button id="participantSongSave" class="btn btn-primary" type="button">この曲を使う</button>
+              <button id="participantSongReset" class="btn btn-plain" type="button">標準曲に戻す</button>
+            </div>
+            <p id="participantSongStatus" class="participant-song-status"></p>
+          </div>
         </div>
       </details>
+
+      <p id="participantSongIndicator" class="participant-song-indicator web-only hidden"></p>
 
       <div id="stampPicker" class="stamp-picker">
         <p class="stamp-picker-label">今日のスタンプ（毎日変更できます）</p>
@@ -1955,7 +2094,7 @@
       <p class="eyebrow">CARD SETUP</p>
       <h1 id="adminHeading">スタンプカードを作る</h1>
       <p id="adminLead" class="admin-lead">曲名・期間・再生先を設定して、参加者に配る専用URLを作成します。発売日のない通常期用カードも作れます。</p>
-      <p class="build-version">更新版 2026.11.10｜LAST SPURT年間締切予定対応</p>
+      <p class="build-version">更新版 2026.11.12｜曲の個人上書き対応</p>
       <p id="adminSyncStatus" class="admin-sync-status" role="status" aria-live="polite"></p>
 
       <section id="workspaceSharePanel" class="workspace-share-panel hidden" aria-label="共同管理ページの共有">
@@ -1986,6 +2125,13 @@
         <div class="field wide">
           <label for="adminSong">1日1回聴く曲名</label>
           <input id="adminSong" type="text" maxlength="80" placeholder="例：ALL SUITE">
+        </div>
+        <div class="field wide song-override-admin">
+          <label>
+            <input id="adminAllowSongOverride" type="checkbox">
+            <span>利用者による曲の変更を許可する</span>
+          </label>
+          <p>ONのとき、参加者は自分の端末だけで曲名・再生先URLを変更できます。OFFにしても個人設定は消えず、再びONにすると以前の設定が戻ります。</p>
         </div>
         <div class="field">
           <label for="adminStart">開始日</label>
@@ -2532,6 +2678,7 @@
         return {
           title: config.title,
           song: config.song || config.title,
+          allowSongOverride: config.allowSongOverride === true,
           start: config.start,
           release: hasRelease(config) ? config.release : '',
           releaseEnabled: hasRelease(config),
@@ -3042,6 +3189,7 @@
       function configFromParams(source = params) {
         const title = firstParam(source, 't', 'title').trim();
         const song = (firstParam(source, 'q', 'song') || title).trim();
+        const allowSongOverride = firstParam(source, 'uo', 'allowSongOverride') === '1';
         const start = firstParam(source, 's', 'start');
         const releaseEnabled = firstParam(source, 're', 'releaseEnabled') !== '0';
         const release = releaseEnabled ? firstParam(source, 'r', 'release') : '';
@@ -3075,7 +3223,7 @@
         const seed = `${title}|${song}|${start}|${release}|${end}`;
         const id = (firstParam(source, 'i', 'cid') || hashText(seed)).replace(/[^a-z0-9_-]/gi, '').slice(0, 48);
         if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || end < start || (releaseEnabled && (!/^\d{4}-\d{2}-\d{2}$/.test(release) || release < start || end < release))) return null;
-        return { title, song, start, release, releaseEnabled, end, billboardDeadline, oriconDeadline, stamp, stamps, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id };
+        return { title, song, allowSongOverride, start, release, releaseEnabled, end, billboardDeadline, oriconDeadline, stamp, stamps, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id };
       }
 
       function configFromForm(options = {}) {
@@ -3085,6 +3233,7 @@
         const enteredSong = $('adminSong').value.trim();
         const title = enteredTitle || (allowIncomplete ? '作成途中のカード' : '');
         const song = enteredSong || (allowIncomplete ? '曲名未入力' : '');
+        const allowSongOverride = Boolean($('adminAllowSongOverride').checked);
         const start = $('adminStart').value || (allowIncomplete ? today : '');
         const releaseEnabled = $('adminReleaseEnabled').checked;
         const release = releaseEnabled ? ($('adminRelease').value || (allowIncomplete ? start : '')) : '';
@@ -3132,7 +3281,7 @@
           ? currentConfig.id
           : hashText(`${title}|${song}|${start}|${release}|${end}`);
         const stampSetName = $('adminSavedStampSet').value || editingStampSetOriginalName || 'AMENITY';
-        return { title, song, start, release, releaseEnabled, end, billboardDeadline, oriconDeadline, stamp, stamps, stampSets, stampSetName, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id, apiUrl };
+        return { title, song, allowSongOverride, start, release, releaseEnabled, end, billboardDeadline, oriconDeadline, stamp, stamps, stampSets, stampSetName, color, link, apple, spotify, line, youtube, amazon, awa, shareTemplate, template, id, apiUrl };
       }
 
       function configUrl(config, testMode = false) {
@@ -3144,6 +3293,7 @@
         url.hash = '';
         url.searchParams.set('t', config.title);
         if (config.song && config.song !== config.title) url.searchParams.set('q', config.song);
+        if (config.allowSongOverride === true) url.searchParams.set('uo', '1');
         url.searchParams.set('s', config.start);
         if (hasRelease(config)) url.searchParams.set('r', config.release);
         else url.searchParams.set('re', '0');
@@ -3237,6 +3387,147 @@
 
       function participantSettingsSeenKey(config) {
         return `${isTestMode ? 'daily_stamp_test_settings_seen_' : 'daily_stamp_settings_seen_'}${config.id}`;
+      }
+
+      function participantSongOverrideKey(config) {
+        return `${isTestMode ? 'daily_stamp_test_song_override_' : 'daily_stamp_song_override_'}${config.id}`;
+      }
+
+      function loadParticipantSongOverride(config) {
+        try {
+          const raw = JSON.parse(localStorage.getItem(participantSongOverrideKey(config)) || 'null');
+          if (!raw || typeof raw !== 'object') return null;
+          const song = String(raw.song || '').trim().slice(0, 80);
+          if (!song) return null;
+          const result = {
+            song,
+            link: safeUrl(raw.link || ''),
+            apple: safeUrl(raw.apple || ''),
+            spotify: safeUrl(raw.spotify || ''),
+            line: safeUrl(raw.line || ''),
+            youtube: safeUrl(raw.youtube || ''),
+            amazon: safeUrl(raw.amazon || ''),
+            awa: safeUrl(raw.awa || '')
+          };
+          return [result.link, result.apple, result.spotify, result.line, result.youtube, result.amazon, result.awa].some(Boolean)
+            ? result
+            : null;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function effectiveSongConfig(config) {
+        if (!config || config.allowSongOverride !== true) return config;
+        const override = loadParticipantSongOverride(config);
+        return override ? { ...config, ...override, userSongOverride: true } : config;
+      }
+
+      function fillParticipantSongOverride(config) {
+        const allowed = config && config.allowSongOverride === true;
+        const panel = $('participantSongOverride');
+        const summary = $('participantSettingsSummary');
+        panel.classList.toggle('hidden', !allowed);
+        summary.textContent = allowed
+          ? '参加設定を変更（名前・テーマカラー・曲）'
+          : '参加設定を変更（名前・テーマカラー）';
+
+        const effective = effectiveSongConfig(config);
+        const override = allowed ? loadParticipantSongOverride(config) : null;
+        const indicator = $('participantSongIndicator');
+        if (config) {
+          indicator.classList.remove('hidden');
+          indicator.textContent = `🎵 今日の曲：${effective.song || config.song || config.title} ${override ? '（個人設定）' : '（管理者設定）'}`;
+        } else {
+          indicator.classList.add('hidden');
+        }
+        if (!allowed) return;
+
+        const source = override || {
+          song: config.song || config.title,
+          link: config.link || '',
+          apple: config.apple || '',
+          spotify: config.spotify || '',
+          line: config.line || '',
+          youtube: config.youtube || '',
+          amazon: config.amazon || '',
+          awa: config.awa || ''
+        };
+        const mapping = [
+          ['participantSongName', 'song'],
+          ['participantSongLink', 'link'],
+          ['participantSongApple', 'apple'],
+          ['participantSongSpotify', 'spotify'],
+          ['participantSongLine', 'line'],
+          ['participantSongYoutube', 'youtube'],
+          ['participantSongAmazon', 'amazon'],
+          ['participantSongAwa', 'awa']
+        ];
+        mapping.forEach(([id, key]) => {
+          if (document.activeElement !== $(id)) $(id).value = source[key] || '';
+        });
+        $('participantSongReset').disabled = !override;
+        $('participantSongStatus').textContent = override
+          ? '現在はあなたが設定した曲を使っています。'
+          : `現在は管理者設定「${config.song || config.title}」を使っています。`;
+      }
+
+      function saveParticipantSongOverride(config) {
+        if (!config || config.allowSongOverride !== true) return;
+        const song = $('participantSongName').value.trim().slice(0, 80);
+        if (!song) {
+          $('participantSongStatus').textContent = '曲名を入力してください。';
+          return;
+        }
+        const raw = {
+          song,
+          link: $('participantSongLink').value.trim(),
+          apple: $('participantSongApple').value.trim(),
+          spotify: $('participantSongSpotify').value.trim(),
+          line: $('participantSongLine').value.trim(),
+          youtube: $('participantSongYoutube').value.trim(),
+          amazon: $('participantSongAmazon').value.trim(),
+          awa: $('participantSongAwa').value.trim()
+        };
+        const data = {
+          song,
+          link: safeUrl(raw.link),
+          apple: safeUrl(raw.apple),
+          spotify: safeUrl(raw.spotify),
+          line: safeUrl(raw.line),
+          youtube: safeUrl(raw.youtube),
+          amazon: safeUrl(raw.amazon),
+          awa: safeUrl(raw.awa)
+        };
+        const enteredUrls = [raw.link, raw.apple, raw.spotify, raw.line, raw.youtube, raw.amazon, raw.awa].filter(Boolean);
+        const validUrls = [data.link, data.apple, data.spotify, data.line, data.youtube, data.amazon, data.awa].filter(Boolean);
+        if (!enteredUrls.length) {
+          $('participantSongStatus').textContent = '再生先URLを1つ以上入力してください。';
+          return;
+        }
+        if (validUrls.length !== enteredUrls.length) {
+          $('participantSongStatus').textContent = 'https:// から始まる正しいURLを入力してください。';
+          return;
+        }
+        try {
+          localStorage.setItem(participantSongOverrideKey(config), JSON.stringify(data));
+          localStorage.removeItem(listenReadyKey(config, currentDay()));
+        } catch (_) {
+          $('participantSongStatus').textContent = 'この端末に設定を保存できませんでした。';
+          return;
+        }
+        renderParticipant();
+        toast(`今日の曲を「${song}」に変更しました`);
+      }
+
+      function resetParticipantSongOverride(config) {
+        if (!config) return;
+        try {
+          localStorage.removeItem(participantSongOverrideKey(config));
+          localStorage.removeItem(listenReadyKey(config, currentDay()));
+        } catch (_) {}
+        renderParticipant();
+        toast('管理者設定の曲に戻しました');
       }
 
       function setupParticipantSettings(config) {
@@ -3357,6 +3648,7 @@
         syncReleaseFields();
         $('adminTitle').value = firstParam(params, 't', 'title');
         $('adminSong').value = firstParam(params, 'q', 'song') || $('adminTitle').value;
+        $('adminAllowSongOverride').checked = firstParam(params, 'uo', 'allowSongOverride') === '1';
         $('adminLink').value = firstParam(params, 'u', 'link');
         $('adminApple').value = firstParam(params, 'a', 'apple');
         $('adminSpotify').value = firstParam(params, 'p', 'spotify');
@@ -3676,6 +3968,7 @@
       function fillForm(config) {
         $('adminTitle').value = config.title;
         $('adminSong').value = config.song || config.title;
+        $('adminAllowSongOverride').checked = config.allowSongOverride === true;
         $('adminStart').value = config.start;
         $('adminReleaseEnabled').checked = hasRelease(config);
         $('adminRelease').value = hasRelease(config) ? config.release : '';
@@ -3767,14 +4060,15 @@
       }
 
       function getListenLinks(config) {
+        const listenConfig = effectiveSongConfig(config);
         return [
-          ['まとめて選ぶ', config.link],
-          ['Apple Music', config.apple],
-          ['Spotify', config.spotify],
-          ['LINE MUSIC', config.line],
-          ['YouTube Music', config.youtube],
-          ['Amazon Music', config.amazon],
-          ['AWA', config.awa]
+          ['まとめて選ぶ', listenConfig.link],
+          ['Apple Music', listenConfig.apple],
+          ['Spotify', listenConfig.spotify],
+          ['LINE MUSIC', listenConfig.line],
+          ['YouTube Music', listenConfig.youtube],
+          ['Amazon Music', listenConfig.amazon],
+          ['AWA', listenConfig.awa]
         ].filter((item) => item[1]);
       }
 
@@ -3787,10 +4081,11 @@
       }
 
       function openListenModal(config, day) {
+        const listenConfig = effectiveSongConfig(config);
         const links = getListenLinks(config);
         const wrap = $('listenModalLinks');
         const closeButton = $('closeListenModalButton');
-        $('listenModalTitle').textContent = '曲を聴く';
+        $('listenModalTitle').textContent = `「${listenConfig.song || config.song || config.title}」を聴く`;
         $('listenModalCopy').innerHTML = '<strong>聴き終えたら、このカードへ戻ってください</strong>使うサービスを選んで曲を聴き、ブラウザのこの画面へ戻るとスタンプを押せます。';
         closeButton.textContent = '閉じる';
         closeButton.className = 'btn btn-plain btn-full';
@@ -3873,6 +4168,9 @@
         setupParticipantSettings(config);
         renderParticipantColorChoices(config);
         renderParticipantName(config);
+        fillParticipantSongOverride(config);
+        $('participantSongSave').onclick = () => saveParticipantSongOverride(config);
+        $('participantSongReset').onclick = () => resetParticipantSongOverride(config);
         const stampIcons = loadStampIcons(config);
 
         const count = validStamps.size;
@@ -5103,10 +5401,11 @@
         const days = dateRange(config.start, config.end);
         const count = [...loadStamps(config)].filter((day) => days.includes(day)).length;
         const participantUrl = participantShareUrl(config);
+        const listenConfig = effectiveSongConfig(config);
         const replacements = {
           '{スタンプ}': config.stamp,
           '{カードタイトル}': config.title,
-          '{曲名}': config.song || config.title,
+          '{曲名}': listenConfig.song || config.song || config.title,
           '{スタンプ数}': String(count),
           '{参加者用URL}': participantUrl
         };
@@ -5394,6 +5693,7 @@
           config = {
             title: '動作確認用テストカード',
             song: 'ALL SUITE',
+            allowSongOverride: true,
             start: '2026-10-01',
             release: '2026-10-14',
             end: '2026-10-20',
@@ -5509,5 +5809,3 @@
   </script>
 </body>
 </html>
->
-
